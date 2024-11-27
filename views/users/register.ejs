@@ -1,0 +1,189 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-account-login.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:33 GMT -->
+<head>
+    <meta charset="utf-8">
+    <title>Evara Dashboard</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="/imgs/theme/favicon.svg">
+    <!-- Template CSS -->
+    <link href="/css/main.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        .small-link {
+            text-decoration: underline;
+            color: #007bff; /* Bootstrap primary color */
+            cursor: pointer;
+        }
+         
+        .small-link:hover {
+            color: #0056b3; /* Darker shade on hover */
+        }
+    </style>
+</head>
+
+<body>
+
+<main>
+    <header class="main-header style-2 navbar">
+        <div class="col-brand">
+            <a href="home.ejs" class="brand-wrap">
+                <img src="/imgs/theme/logo.svg" class="logo" alt="Evara Dashboard">
+            </a>
+        </div>
+        <div class="col-nav">
+         
+        </div>
+    </header>
+    <section class="content-main mt-80 mb-80">
+        <div class="card mx-auto card-login">
+            <div class="card-body">
+                <h4 class="card-title mb-4">Create an account</h4>
+                 <form id="registerForm" method="POST" action='/register'>
+                    <div class="mb-3">
+                        Enter email
+                        <input class="form-control" name="email" id="email" placeholder="Email" type="name">
+                        <span id="emailError" style="color:red;display:none;">Email is required and must be valid</span>
+                    </div>
+                    <div class="mb-3">
+                        Enter name
+                        <input class="form-control" name="name" id="name" placeholder="Name" type="text">
+                        <span id="nameError" style="color:red;display:none;">Name is required and must be valid</span>
+                    </div>
+                    <div class="mb-3">
+                        Enter password
+                        <input class="form-control" name="password" id="password" placeholder="Password" type="password">
+                        <span id="passwordError" style="color:red;display:none;">Password should contain at least one special character, capital letter, one small letter, and one number</span>
+                        <span id="passwordStrength" style="display:none;"></span>
+                    </div> 
+                    <div class="mb-3">
+                        Re-enter password
+                        <input class="form-control" name="confirmPassword" id="confirmPassword" placeholder="Re-enter Password" type="password">
+                        <span id="confirmPasswordError" style="color:red;display:none;">Passwords do not match</span>
+                    </div>
+                    <div class="mb-3">
+                        Enter phone number
+                        <input class="form-control" name="phone" id="phone" placeholder="Phone Number" >
+                        <span id="phoneError" style="color:red;display:none;">Phone number is required and must be valid</span>
+                    </div>
+                    <div class="mb-3">
+                        Enter referral code
+                        <input class="form-control"  name ="reference" placeholder="Enter referral code" >
+                        
+                    </div>
+                    <% if (typeof message !== 'undefined') { %>
+                        <span style="color: red;"><%= message %></span>
+                    <% } %>
+                
+                    <div class="mb-4">
+                        <button type="submit" value="login" class="btn btn-primary w-100">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+<script src="/js/vendors/jquery-3.6.0.min.js"></script>
+<script src="/js/vendors/bootstrap.bundle.min.js"></script>
+<script src="/js/vendors/jquery.fullscreen.min.js"></script>
+<!-- Main Script -->
+<script src="/js/main.js" type="text/javascript"></script>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', function(event) {
+        var name = document.getElementById('name').value.trim();
+        var email = document.getElementById('email').value.trim();
+        var phone = document.getElementById('phone').value.trim();
+        var password = document.getElementById('password').value.trim();
+        var confirmPassword = document.getElementById('confirmPassword').value.trim();
+    
+        var nameError = document.getElementById('nameError');
+        var emailError = document.getElementById('emailError');
+        var phoneError = document.getElementById('phoneError');
+        var passwordError = document.getElementById('passwordError');
+        var passwordStrength = document.getElementById('passwordStrength');
+        var confirmPasswordError = document.getElementById('confirmPasswordError');
+    
+        var phonePattern = /^[1-9][0-9]{9}$/;
+        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+        var valid = true;
+    
+        if (name === "" || /\s/.test(name) || name.length < 3) {
+            nameError.style.display = 'block';
+            valid = false;
+        } else {
+            nameError.style.display = 'none';
+        }
+        if (email === "" || !emailPattern.test(email)) {
+            emailError.style.display = 'block';
+            valid = false;
+        } else {
+            emailError.style.display = 'none';
+        }
+        if (phone === "" || !phonePattern.test(phone)) {
+            phoneError.style.display = 'block';
+            valid = false;
+        } else {
+            phoneError.style.display = 'none';
+        }
+        if (!validatePassword(password)) {
+            passwordError.style.display = 'block';
+            passwordStrength.style.display = 'none';
+            valid = false;
+        } else {
+            passwordError.style.display = 'none';
+            passwordStrength.style.display = 'block';
+            passwordStrength.textContent = getPasswordStrengthMessage(password);
+        }
+        if (password !== confirmPassword) {
+            confirmPasswordError.style.display = 'block';
+            valid = false;
+        } else {
+            confirmPasswordError.style.display = 'none';
+        }
+        if (!valid) {
+            event.preventDefault();
+        }
+    });
+    
+    function validatePassword(password) {
+        const minLength = 6;
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasLowerCase = /[a-z]/.test(password);
+        const hasNumber = /[0-9]/.test(password);
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+        return password.length >= minLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
+    }
+     
+    function getPasswordStrengthMessage(password) {
+        const minLength = 6;
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasLowerCase = /[a-z]/.test(password);
+        const hasNumber = /[0-9]/.test(password);
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+        let strengthMessage = "Password is ";
+    
+        if (password.length >= minLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar) {
+            strengthMessage += "strong.";
+        } else if (password.length >= minLength && (hasUpperCase || hasLowerCase) && hasNumber && hasSpecialChar) {
+            strengthMessage += "moderate.";
+        } else {
+            strengthMessage += "weak.";
+        }
+      
+        return strengthMessage;
+    }
+    
+</script>
+</body>
+</html>

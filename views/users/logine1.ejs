@@ -1,0 +1,93 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Evara Dashboard</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+    <link rel="shortcut icon" type="image/x-icon" href="/imgs/theme/favicon.svg">
+    <link href="/css/main.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        .small-link {
+            text-decoration: underline;
+            color: #007bff;
+            cursor: pointer;
+        }
+        .small-link:hover {
+            color: #0056b3;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <header class="main-header style-2 navbar">
+        <div class="col-brand">
+            <a href="home.ejs" class="brand-wrap">
+                <img src="/imgs/theme/logo.svg" class="logo" alt="Evara Dashboard">
+            </a>
+        </div>
+        <div class="col-nav"></div>
+    </header>
+    <section class="content-main mt-80 mb-80">
+        <div class="card mx-auto card-login">
+            <div class="card-body">
+                <h4 class="card-title mb-4">User Login</h4>
+                <form method="POST" action="/login" id="loginForm">
+                    <div class="mb-3">
+                        <input class="form-control" id="email" name="email" placeholder="Enter email" >
+                    </div>
+                    <div class="mb-3">
+                        <input class="form-control" id="password" name="password" placeholder="Enter Password" type="password">
+                    </div>
+                    <% if (typeof message !== 'undefined') { %>
+                        <span class="error-message"><%= message %></span>
+                    <% } %>
+                    <div class="d-flex justify-content-between mb-2">
+                        <a href="/Loadregister" class="small-link">Create Account</a>
+                        <a href="/forgot" class="small-link">Forgot Password?</a>
+                    </div>
+                    <div class="mb-4">
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+<script src="/js/vendors/jquery-3.6.0.min.js"></script>
+<script src="/js/vendors/bootstrap.bundle.min.js"></script>
+<script src="/js/vendors/jquery.fullscreen.min.js"></script>
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+        var email = document.getElementById('email').value;
+        var password = document.getElementById('password').value;
+        console.log("dsfdsf",email);
+        if (!email || !password) {
+            event.preventDefault();
+            var message = 'Both email and password are required';
+            if (!email) message = 'Email is required';
+            if (!password) message = 'Password is required';
+            if (!password && !email) message = "Email and password is required"
+            var errorElement = document.querySelector('.error-message');
+            if (!errorElement) {
+                errorElement = document.createElement('span');
+                errorElement.classList.add('error-message');
+                this.appendChild(errorElement);
+            }
+            errorElement.textContent = message;
+        }
+    });
+</script>
+<script src="/js/main.js" type="text/javascript"></script>
+</body>
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+
+<!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-orders-1.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:21 GMT -->
+<head>
+    <meta charset="utf-8">
+    <title>Evara Dashboard</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="/imgs/theme/favicon.svg">
+    <!-- Template CSS -->
+    <link href="/css/main.css" rel="stylesheet" type="text/css" />
+     
+
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.datatables.net/2.0.2/css/dataTables.dataTables.css"
+    />
+    <!-- DataTables Buttons CSS -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.dataTables.css"
+    />
+
+    <!-- datatables time date -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.datatables.net/datetime/1.5.2/css/dataTables.dateTime.min.css"
+    />
+
+</head>
+
+<body>
+    <div class="screen-overlay"></div>
+    <aside class="navbar-aside" id="offcanvas_aside">
+       
+        <nav>
+          <ul class="menu-aside">
+            <li class="menu-item">
+                <a class="menu-link" href="/admin/home"> <i class="icon material-icons md-home"></i>
+                    <span class="text">Dashboard</span>
+                </a>
+            </li>
+<li class="menu-item has-submenu">
+<a class="menu-link" href="page-orders-1.html"> <i class="icon material-icons md-shopping_cart"></i>
+<span class="text">Users</span>
+                </a>
+                <div class="submenu">
+                    <a href="/admin/users ">Users list</a>
+                </div>
+            </li>
+            <li class="menu-item has-submenu">
+                <a class="menu-link" href="page-orders-2.html"> <i class="icon material-icons md-shopping_cart"></i>
+                    <span class="text">Categories</span>
+                </a>
+                <div class="submenu">
+                    <a href="/admin/categories">Category  list</a>
+                 </div>
+            </li>
+           <li class="menu-item has-submenu ">
+                <a class="menu-link" href="/admin/products"> <i class="icon material-icons md-shopping_bag"></i>
+                    <span class="text">Products</span>
+                </a>
+                <div class="submenu">
+                    <a href="/admin/products" >Product List</a>
+                </div>
+                <div class="submenu">
+                    <a href="/admin/add-products" >Add Product</a>
+                </div>
+            </li>
+            <li class="menu-item has-submenu">
+                <a class="menu-link" href="/admin/order"> <i class="icon material-icons md-shopping_bag"></i>
+                    <span class="text">Orders</span>
+                </a>
+                <div class="submenu">
+                    
+                    <a href="/admin/order">Order</a>
+                </div>
+            </li>
+            <li class="menu-item has-submenu">
+                <a class="menu-link" href='/admin/coupon'> <i class="icon material-icons md-shopping_bag"></i>
+                    <span class="text">Coupon</span>
+                </a>
+                <div class="submenu">
+                    <a href='/admin/coupon'>Coupon</a>
+                </div>
+            </li>
+            <li class="menu-item has-submenu">
+                <a class="menu-link" href='/admin/salesreport'> <i class="icon material-icons md-shopping_bag"></i>
+                    <span class="text">Sales report</span>
+                </a>
+                <div class="submenu">
+                    <a href='/admin/salesreport'>Sales Report</a>
+                </div>
+            </li>
+            <li class="menu-item has-submenu">
+                <a class="menu-link" href='/admin/offer'> <i class="icon material-icons md-shopping_bag"></i>
+                    <span class="text">offers</span>
+                </a>
+                <div class="submenu">
+                    <a href='/admin/offer'>offers</a>
+                </div>
+            </li>
+          </ul>
+        
+       
+            <br>
+            <br>
+        </nav>
+    </aside>
+    <main class="main-wrap">
+        <header class="main-header navbar">
+            <div class="col-search">
+                <form class="searchform">
+                    <div class="input-group">
+                       
+
+                    </div>
+                    <datalist id="search_terms">
+                        <option value="Products">
+                        <option value="New orders">
+                        <option value="Apple iphone">
+                        <option value="Ahmed Hassan">
+                    </datalist>
+                </form>
+            </div>
+         
+            <div class="col-nav">
+              <div>
+                  <a href="/admin/logout" class="btn btn-danger w-100 w-md-auto text-uppercase" id="logoutButton">Logout</a>
+              </div>
+          </div>
+        </header>
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Sales Report </h2>
+                    <!-- <p>Lorem ipsum dolor sit amet.</p> -->
+                </div>
+              
+            </div>
+            <div class="card mb-4">
+              <header class="card-header">
+                <div class="row gx-3">
+                  <div class="col-lg-4 col-md-6 me-auto">
+                    <p>Total Orders - <%= totalOrders %></p>
+                  </div>
+                  <div class="col-lg-2 col-6 col-md-3">
+                    <p>Overall Order Amount - Rs.<%= overallOrderAmount.toFixed(2) %></p>
+                  </div>
+                  <div class="col-lg-2 col-6 col-md-3">
+                    <p>Total Discount Amount - Rs.<%= totalDiscountAmount.toFixed(2) %></p>
+                  </div>
+                </div>
+                
+              </header>
+              
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table border="0" cellspacing="5" cellpadding="5">
+                    <tbody>
+                      <tr>
+                        <td>Minimum date:</td>
+                        <td><input type="text" id="min" name="min" /></td>
+                      </tr>
+                      <tr>
+                        <td>Maximum date:</td>
+                        <td><input type="text" id="max" name="max" /></td>
+                      </tr>
+                      <tr class="d-flex justify-content-between">
+                        <td><button id="week">Week</button></td>
+                        <td><button id="month">Month</button></td>
+                        <td><button id="year">Year</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <table class="table table-hover" id="myTable">
+                    <thead>
+                      <tr>
+                        <th>#USERID</th>
+                        <th scope="col">OrderId</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Payment</th>
+                        <th scope="col">Coupon</th>
+                        <th scope="col">Date</th>
+                        <th scope="col" class="text-end"> Action </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% orders.forEach(order => { %>
+                        <tr>
+                          <td><%= order.userId %></td>
+                          <td><b><%= order._id %></b></td>
+                          <td><%= order.totalAmount %></td>
+                          <td><span class="badge rounded-pill alert-warning"><%= order.status %></span></td>
+                          <td><span class="badge rounded-pill alert-warning"><%= order.addressid %></span></td>
+                          <td class="order_date">
+                            <%
+                              const orderDate = new Date(order.orderDate); // Parse the date
+                              const options = { day: 'numeric', month: 'long', year: 'numeric' }; // Define formatting options
+                              const formattedDate = orderDate.toLocaleDateString('en-US', options); // Format the date
+                            %>
+                            <%= formattedDate %>
+                          </td>
+                          <td class="text-end">
+                            <a href="/admin/order-view?orderId=<%= order._id %>" class="btn btn-sm font-sm rounded btn-brand">
+                              <i class="material-icons"></i> View Details
+                            </a>
+                          </td>
+                        </tr>
+                      <% }); %>
+                    </tbody>
+                  </table>
+                </div> <!-- table-responsive //end -->
+              </div> <!-- card-body end// -->
+            </div>
+            
+            <!-- card end// -->
+            <!-- <div class="pagination-area mt-15 mb-50">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-start">
+                        <li class="page-item active"><a class="page-link" href="#">01</a></li>
+                        <li class="page-item"><a class="page-link" href="#">02</a></li>
+                        <li class="page-item"><a class="page-link" href="#">03</a></li>
+                        <li class="page-item"><a class="page-link dot" href="#">...</a></li>
+                        <li class="page-item"><a class="page-link" href="#">16</a></li>
+                        <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+                    </ul>
+                </nav>
+            </div> -->
+        </section> <!-- content-main end// -->
+        <footer class="main-footer font-xs">
+          
+        </footer>
+    </main>
+    <script src="/js/vendors/jquery-3.6.0.min.js"></script>
+    <script src="/js/vendors/bootstrap.bundle.min.js"></script>
+    <script src="/js/vendors/select2.min.js"></script>
+    <script src="/js/vendors/perfect-scrollbar.js"></script>
+    <script src="/js/vendors/jquery.fullscreen.min.js"></script>
+    <!-- Main Script -->
+    <script src="/js/main.js" type="text/javascript"></script>
+   
+
+<!-- jQuery -->
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> -->
+
+<script src="https://cdn.datatables.net/2.0.2/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/dataTables.buttons.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.dataTables.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.0.1/js/buttons.print.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.2/moment.min.js"></script>
+<script src="https://cdn.datatables.net/datetime/1.5.2/js/dataTables.dateTime.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.2/moment.min.js"></script>
+
+ <script>
+  let minDate, maxDate;
+
+  // Custom filtering function which will search data in column four between two values
+  DataTable.ext.search.push(function (settings, data, dataIndex) {
+    let min = minDate.val();
+    let max = maxDate.val();
+    let date = new Date(data[5]);
+
+    if (
+      (min === null && max === null) ||
+      (min === null && date <= max) ||
+      (min <= date && max === null) ||
+      (min <= date && date <= max)  ||
+      (moment(min).isSameOrBefore(date) && moment(max).isSameOrAfter(date))
+    ) {
+      return true;
+    }
+    return false;
+  });
+
+  // Create date inputs
+  minDate = new DateTime("#min", {
+    format: "MMMM Do YYYY",
+  });
+  maxDate = new DateTime("#max", {
+    format: "MMMM Do YYYY",
+  });
+
+  let table = new DataTable("#myTable", {
+    layout: {
+      topStart: {
+        buttons: [
+          "copy",
+          "csv",
+          {
+            extend: "excel",
+            text: "Download Excel",
+            customize: function (xlsx) {
+              console.log(xlsx);
+              // Handle Excel customization
+              if (xlsx && xlsx[0] && xlsx[0].body && xlsx[0].body.length > 0) {
+                var body = xlsx[0].body;
+
+                // Remove last column from each row
+                body.forEach(function (row) {
+                  row.splice(-1, 1);
+                });
+
+                // Calculate total of the third column for filtered rows
+                var filteredRows = table.rows({ search: "applied" }).data();
+                var total = filteredRows
+                  .pluck(3, "data")
+                  .reduce(function (acc, val) {
+                    return acc + parseFloat(val);
+                  }, 0);
+
+            
+                body.push(["Total amount (INR):", "", "", total]);
+              }
+            },
+          },
+          "print",
+          {
+            extend: "pdf",
+            text: "Download PDF",
+            customize: function (doc) {
+              // Remove last column from the table
+              doc.content[1].table.body.forEach(function (col) {
+                col.pop(); // Remove content of last column
+              });
+
+              // Calculate total of the third column for filtered rows
+              var filteredRows = table.rows({ search: "applied" }).data();
+              var total = filteredRows
+                .pluck(3, "data")
+                .reduce(function (acc, val) {
+                  return acc + parseFloat(val);
+                }, 0);
+
+              var totalText = {
+                text: "Total amount (INR):        ", 
+                alignment: "right",
+              };
+
+              var marginBeforeTotal = {
+                text: "",
+                margin: [0, 10], // Margin before the total section
+              };
+              // Add the text elements to the PDF document
+              doc.content.push(marginBeforeTotal, totalText);
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  // Refilter the table
+  document.querySelectorAll("#min, #max").forEach((el) => {
+    el.addEventListener("change", () => {
+      var total = table
+         .column(3) // Change 3 to the index of the column you want to calculate the total for
+         .data()
+        .reduce(function (acc, val) {
+          return acc + parseFloat(val);
+         }, 0);
+      console.log(total);
+
+      table.row.add(["Total", "", "", total, "", "", "", ""]);
+      table.draw();
+    });
+  });
+
+  document.querySelector("#week").addEventListener("click", (e) => {
+    var startOfWeek = moment().startOf("week");
+    var endOfWeek = moment().endOf("week");
+    var startOfWeekFormatted = startOfWeek.format("MMMM Do YYYY");
+    var endOfWeekFormatted = endOfWeek.format("MMMM Do YYYY");
+    minDate.val(startOfWeekFormatted); // this is the mistake i did in previous code
+    maxDate.val(endOfWeekFormatted);
+    table.draw();
+  });
+
+  document.querySelector("#month").addEventListener("click", (e) => {
+    var startOfMonth = moment().startOf("month");
+    var endOfMonth = moment().endOf("month");
+    var startOfMonthFormatted = startOfMonth.format("MMMM Do YYYY");
+    var endOfMonthFormatted = endOfMonth.format("MMMM Do YYYY");
+    minDate.val(startOfMonthFormatted);
+    maxDate.val(endOfMonthFormatted);
+    table.draw();
+  });
+
+  document.querySelector("#year").addEventListener("click", (e) => {
+    var startOfYear = moment().startOf("year");
+    var endOfYear = moment().endOf("year");
+    var startOfYearFormatted = startOfYear.format("MMMM Do YYYY");
+    var endOfYearFormatted = endOfYear.format("MMMM Do YYYY");
+    minDate.val(startOfYearFormatted);
+    maxDate.val(endOfYearFormatted);
+    table.draw();
+  });
+
+
+
+//to show delivered products only 
+
+const dropdown = document.getElementById('navigation-dropdown');
+
+dropdown.addEventListener('change', function() {
+  const selectedOption = this.selectedOptions[0];  // Get the selected option element
+  const selectedRoute = selectedOption.dataset.route;  // Access the data-route attribute
+  // Redirect to the selected route
+  window.location.href = selectedRoute;
+});
+
+</script> 
+
+
+
+</body>
+
+
+<!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-orders-1.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:22 GMT -->
+</html>
