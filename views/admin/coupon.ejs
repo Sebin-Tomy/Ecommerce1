@@ -5,7 +5,7 @@
 <!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-orders-1.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:21 GMT -->
 <head>
     <meta charset="utf-8">
-    <title>Evara Dashboard</title>
+    <title>Kerela Blasters</title>
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -153,8 +153,8 @@
                                             <tr>
                                                 <th scope="col">Coupon Code</th>
                                                 <th scope="col">Discount Amount</th>
-                                                <th scope="col">Valid From</th>
-                                                <th scope="col">Valid To</th>
+                                                <th scope="col">Min. amount</th>
+                                                <!-- <th scope="col">Valid To</th> -->
                                                 <th scope="col">Action</th>
                                             </tr>
                                         </thead>
@@ -163,8 +163,8 @@
                                                 <tr>
                                                     <td><%= coupon.couponCode %></td>
                                                     <td><%= coupon.discount_amount %></td>
-                                                    <td><%= coupon.valid_from %></td>
-                                                    <td><%= coupon.valid_to %></td>
+                                                    <td><%= coupon.min_amount %></td>
+                                             
                                                     <td>
                                                         <button class="btn btn-danger" onclick="deleteCoupon('<%= coupon._id %>')">Delete</button>
                                                     </td>

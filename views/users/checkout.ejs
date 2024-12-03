@@ -531,23 +531,22 @@
                                         <button type="button" class="btn btn-success w-100 w-md-auto" id="applyCoupon">Apply</button>
                                     </div>
                                 <% } else { %>
-                                <div class="hstack gap-3 px-3 mx-n3">
-                                    <input class="form-control me-auto" id="couponCode" type="text" placeholder="Enter coupon code" aria-label="Add Promo Code here...">
-                                    <button type="button" class="btn btn-danger w-xs" id="removeCouponBtn" style="width: 120px;">Remove</button>
-
-                                </div>
+                                    <div class="hstack gap-3 px-3 mx-n3">
+                                        <input class="form-control me-auto" id="couponCode" type="text" placeholder="Enter coupon code" aria-label="Add Promo Code here...">
+                                        <button type="button" class="btn btn-danger w-xs" id="removeCouponBtn" style="width: 120px;">Remove</button>
+                                    </div>
                                 <% } %>
+                        
                                 <div class="text-center mt-4">
-                                  
-                                    <% if (total < 1000) { %>
-                                    <p>No coupons available</p>
+                                    <% if (coup.length === 0) { %>
+                                        <p>No coupons available</p>
                                     <% } else { %>
                                         <h6 class="mb-3 fs-15">Available Coupons:</h6>
                                         <select name="coupon" class="form-control">
                                             <option value="" selected disabled>Select Coupon</option>
                                             <% coup.forEach(coupon => { %>
                                                 <option value="<%= coupon._id %>" data-code="<%= coupon.couponCode %>">
-                                                    <%= coupon.couponCode %>
+                                                    <%= coupon.couponCode %> 
                                                 </option>
                                             <% }); %>
                                         </select>
@@ -558,6 +557,7 @@
                                 </div>
                             </div>
                         </div>
+                        
                         
                         <div class="card overflow-hidden">
                             <div class="card-header border-bottom-dashed">

@@ -871,38 +871,46 @@ const deleteCart = async (req, res) => {
 
 
 const checkout = async (req, res) => {
-    try {if (req.session.user_id) {
-        const userData = await User.findById(req.session.user_id);
-        if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+    try {
+        if (req.session.user_id) {
+            const userData = await User.findById(req.session.user_id);
+            if (userData && userData.is_blocked) {
+                return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+            }
+        } else {
+            return res.redirect('/login');
         }
-    } else {
-        return res.redirect('/login');
-    }
-    const userid = req.session.user_id;
-    console.log("User ID:", userid);
-    const Address = await address.find({userId:userid});
-    const userData = await User.findOne({_id:userid})
 
-    const coupon1 = await Coupon.find();
-    const saveData = await Cart.find({ userId: userid });
-        let couponStatus = saveData[0].coupon;
-        const coupondata = userData.coupon;
-        let totalArray = [];
-        if (saveData.length > 0) {
-            totalArray = saveData.map(cart => cart.total);
-        }
+        const userId = req.session.user_id;
+        console.log("User ID:", userId);
+
+    
+        const Address = await address.find({ userId: userId });
+        const userData = await User.findOne({ _id: userId });
+
+        const coupon1 = await Coupon.find();
+
+   
+        const saveData = await Cart.find({ userId: userId });
+        let couponStatus = saveData[0]?.coupon || "Not Applied";
+
+        
+        const total = saveData.reduce((acc, cart) => acc + (cart.total || 0), 0);
+
+        const availableCoupons = coupon1.filter(coupon => total >= coupon.min_amount);
+
         res.render('checkout', {
             address: Address,
-            coup: coupon1,
-            total: totalArray,
-            saveData: saveData.length > 0 ? saveData : [{ coupon: "Not Applied" }] 
+            coup: availableCoupons, 
+            total: total,
+            saveData: saveData.length > 0 ? saveData : [{ coupon: "Not Applied" }]
         });
     } catch (error) {
         console.log(error.message);
         res.status(500).send('Internal Server Error');
     }
 };
+
 
 
 const checkaddressedit = async(req, res) => {
@@ -1436,15 +1444,18 @@ const applycoupon = async(req, res) => {
         return res.redirect('/login');
     }
         const Address = await address.find();
-        const couponCode = req.body.couponCode;
+        const couponCode = req.body.couponCode; 
         const userId = req.session.user_id;
         const couponFind = await Coupon.findOne({couponCode:couponCode})
+        console.log(couponFind,"cou")
         const user = await User.findById(userId)
-        console.log("user",user);
+        console.log("user,adsf",user);
         if (user.coupon.includes(couponFind._id)) {
             return res.status(400).json({ success: false, message: 'Coupon already used' });
         }
+        console.log('ji')
         const saveData = await Cart.find({userId: userId});
+        console.log('ji')
         const totalSum = saveData.reduce((acc, cart) => acc + cart.total, 0);
         console.log("total",totalSum); 
         const coupon = await Coupon.findOne({ 

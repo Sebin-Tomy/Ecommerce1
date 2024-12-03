@@ -645,13 +645,14 @@ const addcoupon = async (req, res) => {
 };
 
 const insertcoupon = async (req, res) => {
-    try { const { valid_from,  valid_to,couponCode, discount_amount } = req.body;
+    try { const {   couponCode, discount_amount, min_amount } = req.body;
     const coupon = new coupon1({
-                valid_from: valid_from,
-                valid_to: valid_to,
+                min_amount: min_amount,
+              
                 couponCode: couponCode,
                 discount_amount: discount_amount,
                });
+               console.log(coupon,"asdf")
       await coupon.save();
             res.redirect('/admin/coupon');
          } catch (error) {
