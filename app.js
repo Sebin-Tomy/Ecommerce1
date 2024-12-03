@@ -1,16 +1,15 @@
-const mongoose = require('mongoose');
 require('dotenv').config()
-const mongoURL =  "mongodb://localhost:27017/e-commerce";
-mongoose.connect(mongoURL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true 
-})
+const mongoose = require('mongoose');
+
+
+mongoose.connect(process.env.MONGO_URL)
 .then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:',err))
+
 const express = require("express");
 const app = express();
 const morgan = require('morgan');
 const path = require('path');
+const PORT = 3000 || process.env.PORT;
 app.use("/css", express.static(path.resolve(__dirname, "assets/css")));
 app.use("/imgs", express.static(path.resolve(__dirname, "assets/imgs")));
 app.use("/js", express.static(path.resolve(__dirname, "assets/js")));
@@ -26,6 +25,6 @@ app.use('/',userRoute);
 const adminRoute =  require('./routes/adminroute');
 app.use('/admin',adminRoute);
 app.use(morgan("tiny"));
-app.listen(3000,function(){
+app.listen(PORT,function(){
     console.log("Server is running");
 });

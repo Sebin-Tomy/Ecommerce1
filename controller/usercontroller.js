@@ -55,7 +55,7 @@ const loginregister = async(req,res)=>{
         }
     }
 
-    const loginHome = async (req, res) => {
+const loginHome = async (req, res) => {
         try {
             if (req.session.user_id) {
                 const userData = await User.findById(req.session.user_id);
@@ -1530,6 +1530,7 @@ const removecoupon = async(req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
+
 const orderfailure = async (req, res) => {
     try {if (req.session.user_id) {
         const userData = await User.findById(req.session.user_id);
