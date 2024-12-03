@@ -354,7 +354,7 @@
                             <div class="card" id="track-order">
                                 <div class="card-header d-flex align-items-center gap-3">
                                     <h5 class="card-title flex-grow-1 mb-0"></h5>
-                                    <% if(order.status == "Processing" || order.status == "Pending" || order.status == "Shipped" || order.status == "Processing"){ %>
+                                    <% if(order.status == "Processing" || order.status == "Pending" || order.status == "Shipped" || order.status == "Processing" || order.status == "Paid"){ %>
                                         <form action="/order/cancel/<%= order._id %>" method="POST">
                                             <button type="submit" class="btn btn-danger">Cancel Order</button>
                                         </form>

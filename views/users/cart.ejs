@@ -379,7 +379,8 @@
                                     </ul>
                                     <div class="input-step">
                                         <button type="button" class="minus">–</button>
-                                        <input type="number" class="product-quantity" value="<%= item.quantity %>"  min="1" max="10" readonly>
+                                        <% const max = (item.stock<10)? item.stock:10%>
+                                        <input type="number" class="product-quantity" value="<%= item.quantity %>"  min="1" max="<%= max %>" readonly>
                                         <button type="button" class="plus">+</button>
                                     </div>  
                                 </div>
@@ -511,24 +512,35 @@
             const plus = card.querySelector(".plus");
             console.log(plus);
             const minus = card.querySelector('.minus');
-
+            const stock = Number(card.querySelector('.product-quantity').getAttribute('max'))
             const price = Number(card.getAttribute('data-price'));
+
+           
 
             plus.addEventListener("click",async (event)=>{
                 try{
                     const quantity= Number(card.querySelector('.product-quantity').value);
-
+                   
                     let totalPrice = Number(document.getElementById("totalPrice").innerHTML);
                     console.log('total == ', totalPrice , price);
                     totalPrice = totalPrice+price;
                     document.getElementById("totalPrice").innerHTML = totalPrice;
                
                     const pid = card.getAttribute('data-pid');
+                   
+
+                    if(stock == quantity){
+                        console.log("equal ")
+                        plus.setAttribute("disabled",true);
+                    }
+                    console.log('stock ',stock,quantity); 
                     console.log('product id ',price); 
                     const subtotal = card.querySelector('.subtotal');
                     subtotal.innerHTML = price*quantity;
+                    
                     const response = await fetch(`/update-quantity?pid=${pid}&quantity=${quantity}`,{method:'post'});
                     location.reload();
+                 
                 }catch(error){
                     console.log(error)
                 }
@@ -537,6 +549,11 @@
                 try{
                     const quantity= Number(card.querySelector('.product-quantity').value);
                     console.log(quantity,'outside if')
+
+                    if(stock > quantity){
+                        console.log("greater ")
+                        plus.removeAttribute("disabled");
+                    }
                
                     if(quantity>=1){
                         console.log(quantity,'inside if')
@@ -550,6 +567,7 @@
                     const subtotal = card.querySelector('.subtotal');
                     subtotal.innerHTML =(quantity === 1)?price: price*quantity; 
                     const response = await fetch(`/update-quantity?pid=${pid}&quantity=${quantity}`,{method:"post"});
+                    console.log(response)
                     location.reload();
 
                     }

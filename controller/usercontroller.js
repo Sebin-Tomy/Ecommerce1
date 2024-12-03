@@ -26,7 +26,7 @@ const securePassword = async(password)=>{
 
 const loginLoad = async(req,res)=>{
         try{
-            res.render('landing');
+            res.render('logine1');
         }
         catch(error){
             console.log(error.message);   
@@ -767,6 +767,7 @@ const getCartItems = async (req, res) => {
                                     else: null 
                                 }
                             },
+                            stock: "$productDetails.stock",
                             quantity: "$products.quantity",
                             size: "$products.size" ,
                             total: "$products.total"
@@ -1226,7 +1227,7 @@ const cancelOrder = async (req, res) => {
                     if (!order) {
                       return res.status(404).send("Order not found");
                     }
-                    if (order.status !== "Pending"  && order.status !== "Processing") {
+                    if (order.status !== "Pending"  && order.status !== "Processing" ) {
                       return res.status(400).send("Order cannot be cancelled");
                     }
                    order.status = "Cancelled";

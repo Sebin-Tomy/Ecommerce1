@@ -31,7 +31,7 @@ const storage = multer.diskStorage({
 const upload = multer({storage:storage});
 user_route.get('/Loadregister',userController.loginregister);
 user_route.post('/register',userController.insertUser);
-user_route.get('/',userController.loginLoad);
+user_route.get('/',auth.isLogout,userController.loginLoadin);
 user_route.get('/login',auth.isLogout,userController.loginLoadin);
 user_route.post('/login',userController.verifyLogin);
 user_route.get('/index1',auth.isLogin,userController.loginHome);
