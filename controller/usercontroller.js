@@ -1235,7 +1235,7 @@ const cancelOrder = async (req, res) => {
                     if (!order) {
                       return res.status(404).send("Order not found");
                     }
-                    if (order.status !== "Pending"  && order.status !== "Processing" ) {
+                    if (order.status !== "Pending"  && order.status !== "Processing"  && order.status !== "Paid") {
                       return res.status(400).send("Order cannot be cancelled");
                     }
                    order.status = "Cancelled";
