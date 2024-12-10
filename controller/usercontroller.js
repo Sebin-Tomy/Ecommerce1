@@ -1235,9 +1235,11 @@ const cancelOrder = async (req, res) => {
                     if (!order) {
                       return res.status(404).send("Order not found");
                     }
-                    if (order.status !== "Pending"  && order.status !== "Processing"  && order.status !== "Paid") {
+                    const cancellableStatuses = ["Pending", "Processing", "Paid"];
+                    if (!cancellableStatuses.includes(order.status)) {
                       return res.status(400).send("Order cannot be cancelled");
                     }
+                    
                    order.status = "Cancelled";
                    await order.save();
                    let wallet2 = await wallet.findOne({ userId: order.userId });
