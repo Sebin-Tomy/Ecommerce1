@@ -141,7 +141,7 @@
                             </div> -->
                             <div>
                                 <label for ="product_Description" class="form-label">Description</label>
-                                <textarea placeholder="Type here" name="description" class="form-control" rows="4"><%= Products.description %></textarea>
+                                <textarea placeholder="Type here" name="description" class="form-control" id="description"  rows="4"><%= Products.description %></textarea>
                             </div>
                             <div>
                                
@@ -159,10 +159,12 @@
                                     <% if(Products.image[i]) { %>
                                 <div class="m-2 " id="imgdiv<%= i %>" class="">
                                     <input type="text" id="oldimage<%= i %>" name="oldimage" value="<%= Products.image[i] %>" style="display: none;" >
+                                    <input type="hidden" name="imageIndex" value="<%= i %>">
+                                    <input type="file" name="images" id="input<%= i %>" style="display: none;">
                                     <button id="button<%= i %>"  class="btn btn-primary" type="button" >Change</button>
                                     <button id="deletebutton<%= i %>"  class="btn btn-dabger" type="button" >Delete</button>
-                                    <input type="file"  value="<%= Products.image[i] %>" style="display: none;" id="input<%= i %>">
-                                
+                               
+                                 
                                 </div>
                                  <img class="uploadedimg" alt="Upload new image" id="image<%= i %>" style="width: 300px; height: 300px;" src="/userImages/<%= Products.image[i] %>"> 
                                  <% } 
@@ -180,11 +182,11 @@
                         <input id="productImageCount" type="number" hidden value="<%= Products.image.length  %>">
                              <div class="mb-4">
                                 <label for ="product_Price" class="form-label">Price</label>
-                                <input type="number" name="productprice"  id="product_price_input" placeholder="Type here" class="form-control"  value="<%= Products.price %>" />
+                                <input type="number" name="productprice"  id="product_price" placeholder="Type here" class="form-control"  value="<%= Products.price %>" />
                             </div>
                             <div class="mb-4">
                                 <label for ="product_Price" class="form-label">Stock</label>
-                                <input type="number" name="stock"  id="product_price_input" placeholder="Type here" class="form-control"  value="<%= Products.stock %>" />
+                                <input type="number" name="stock"  id="product_stock" placeholder="Type here" class="form-control"  value="<%= Products.stock %>" />
                             </div>
                             <div class="mb-4">
                                 <select name="category" class="form-control">
@@ -228,77 +230,78 @@
 
     <!-- Main Script -->
     <script src="/js/main.js" type="text/javascript"></script>
+ 
     <script>
-        // Get the input element
-        console.log('hi');
-        const productPriceInput = document.getElementById('product_price_input');
-    
-        // Add event listener to listen for changes in the input field
-        productPriceInput.addEventListener('change', function() {
-            // Get the entered value
-            let price = parseInt(productPriceInput.value);
-    
-            // Check if the value is negative
-            if (price < 0) {
-                // If negative, set it to zero
-                productPriceInput.value = 0;
-                // Or display a message to the user
-                // alert('Price cannot be negative. Setting it to zero.');
-                // You can uncomment the line above to display an alert message
+        document.getElementById('editproduct').addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevent form submission
+        
+            // Clear previous errors
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+        
+            let errors = 0;
+        
+            // Helper function to show errors
+            function showError(inputId, message) {
+                const inputField = document.getElementById(inputId);
+                const errorElement = document.createElement('p');
+                errorElement.className = 'error-message';
+                errorElement.style.color = 'red';
+                errorElement.innerText = message;
+                inputField.parentElement.appendChild(errorElement);
+                errors++;
+            }
+        
+            // Validate fields
+            const productName = document.getElementById('product_title').value.trim();
+            if (!productName) {
+                showError('product_title', 'Product title is required.');
+            }
+        
+            const color = document.getElementById('product_color').value.trim();
+            if (!color) {
+                showError('product_color', 'Color is required.');
+            }
+        
+            const description = document.getElementById('description').value.trim();
+            if (!description) {
+                showError('description', 'Description is required.');
+            }
+        
+            const category = document.querySelector('[name="category"]').value;
+            if (!category) {
+                const categoryField = document.querySelector('[name="category"]');
+                const errorElement = document.createElement('p');
+                errorElement.className = 'error-message';
+                errorElement.style.color = 'red';
+                errorElement.innerText = 'A category must be selected.';
+                categoryField.parentElement.appendChild(errorElement);
+                errors++;
+            }
+        
+            const price = document.querySelector('[name="productprice"]').value.trim();
+            if (!price) {
+                showError('product_price', 'Price is required.');
+            } else if (isNaN(price)) {
+                showError('product_price', 'Price must be a number.');
+             } else if (parseFloat(price) <= 0) {
+                showError('product_price', 'Price must be a positive value.');
+            }
+        
+            const stock = document.querySelector('[name="stock"]').value.trim();
+            if (!stock) {
+                showError('product_stock', 'Stock is required.');
+            } else if (isNaN(stock)) {
+                showError('product_stock', 'Stock must be a number.');
+             } else if (parseInt(stock) <= 0) {
+                showError('product_stock', 'Stock must be a positive value.');
+            } 
+        
+            // Submit the form if no errors
+            if (errors === 0) {
+                this.submit();
             }
         });
-    </script>
-    <script>
-        document.getElementById('editproduct').onsubmit = function (e) {
-            let errors = [];
-            const productTitle = document.getElementById('product_title').value.trim();
-            const color = document.getElementById('product_color').value.trim();
-            const description = document.querySelector('textarea[name="description"]').value.trim();
-            const price = document.getElementById('product_price_input').value.trim();
-            const stock = document.getElementById('product_price_input').value.trim();
-            const images = document.querySelectorAll('input[type="file"]').length;
-    
-            // Validate Product Title
-            if (!productTitle) {
-                errors.push('Product title is required.');
-            }
-    
-            // Validate Color
-            if (!color) {
-                errors.push('Color is required.');
-            }
-    
-            // Validate Description
-            if (!description) {
-                errors.push('Description is required.');
-            }
-    
-            // Validate Price
-            if (!price) {
-                errors.push('Price is required.');
-            } else if (isNaN(price) || price <= 0) {
-                errors.push('Price should be a valid number.');
-            }
-    
-            // Validate Stock
-            if (!stock) {
-                errors.push('Stock is required.');
-            } else if (isNaN(stock) || stock < 0) {
-                errors.push('Stock should be a valid number.');
-            }
-    
-            // Validate Images
-            if (!images) {
-                errors.push('At least one image is required.');
-            }
-    
-            // Display errors or allow form submission
-            if (errors.length > 0) {
-                e.preventDefault(); // Prevent form submission
-                const errorContainer = document.getElementById('err15');
-                errorContainer.textContent = errors.join(' ');
-            }
-        };
+        
     </script>
     
 </body>

@@ -368,3 +368,106 @@ if (window.location.pathname.includes("/admin/edit-product"))  {
     
       reader.readAsDataURL(file);
     }}
+if (window.location.pathname.includes("/user-edit"))  {
+      const form = document.getElementById("editProfileForm")
+    
+      for (let i = 0; i < 5; i++) {
+        const button = document.getElementById(`button${i}`);
+        const input = document.getElementById(`input${i}`);
+        const image = document.getElementById(`image${i}`);
+        const oldimage = document.getElementById(`oldimage${i}`)
+      
+        const deletebtn = document.getElementById(`deletebutton${i}`);
+      if(deletebtn){
+        deletebtn.addEventListener("click", () => {
+          image.src = "";
+          image.style.display = "none";
+          deletebtn.style.display = "none";
+          button.textContent = "Add";
+          oldimage.disabled = true
+        });}
+        if(button){
+        button.addEventListener("click", function () {
+          
+          input.click();
+        });
+        input.dataset.index = i;
+        input.addEventListener("change", uploaded);
+      }}
+    
+    
+      function uploaded(event) {
+        const file = event.target.files[0];
+        const button = document.getElementById(`button${event.target.dataset.index}`);
+        const oldimage = document.getElementById(`oldimage${event.target.dataset.index}`)
+        const image = document.getElementById(`image${event.target.dataset.index}`);
+        const imgdiv = document.getElementById(`imgdiv${event.target.dataset.index}`);
+        const deletebtn = document.getElementById(`deletebutton${event.target.dataset.index}`);
+    
+        if(oldimage){
+        oldimage.disabled = true
+        }
+    
+        image.style.display = "flex";
+        button.textContent = "Change";
+        deletebtn.style.display = "flex";
+        const reader = new FileReader();
+    
+          reader.onload = function(event) {
+              image.src = event.target.result;
+              const cropperdiv = document.createElement('div');
+              cropperdiv.classList.add('cropper-container');
+              cropperdiv.appendChild(image);
+        
+              imgdiv.appendChild(cropperdiv);
+        
+              const cropper = new Cropper(image, {
+                dragMode: 'move',
+                aspectRatio: 1,
+                autoCropArea: .80,
+                restore: false,
+                guides: false,
+                center: false,
+                highlight: false,
+                cropBoxMovable: false,
+                cropBoxResizable: false,
+                toggleDragModeOnDblclick: false,
+              });
+        
+              const cropbtn = document.createElement('button');
+              cropbtn.classList.add('btn', 'btn-primary', 'm-2');
+              cropbtn.textContent = 'Crop';
+              cropbtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                const croppedCanvas = cropper.getCroppedCanvas();
+    
+                image.src = croppedCanvas.toDataURL()
+      
+                croppedCanvas.toBlob((blob) => {
+                  const fileName = Date.now();
+                  const file = new File([blob], `${fileName}.jpg`, { type: 'image/jpeg' });
+      
+                  if (window.FileList && window.DataTransfer) {
+                      const dataTransfer = new DataTransfer();
+                      dataTransfer.items.add(file);
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.name = `image${event.target.dataset.index}`;
+                      input.files = dataTransfer.files;
+                     form.appendChild(input)
+                     input.style.display = 'none'
+                     
+                  } else {
+                      console.error('FileList and DataTransfer are not supported in this browser.');
+                  }
+              })
+                cropper.destroy();
+                cropbtn.remove();
+          
+              });
+        
+              imgdiv.appendChild(cropbtn);
+          };
+        
+          reader.readAsDataURL(file);
+        }}

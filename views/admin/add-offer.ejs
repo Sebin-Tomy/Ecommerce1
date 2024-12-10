@@ -120,7 +120,7 @@
                 <div class="col-lg-6">
                     <div class="card mb-4">
                         <div class="card-body">
-                            <form action="/admin/offer" method="POST">
+                            <form id ="editproduct" action="/admin/offer" method="POST">
                                 <div class="mb-4">
                                     <label for="product_title" class="form-label">Offer</label>
                                     <input type="text" name="offer" placeholder="Type here" class="form-control" id="product_title">
@@ -157,6 +157,12 @@
                                     <button class="btn btn-md rounded font-sm hover-up">Publish</button>
                                 </div>
                             </form>
+                            <% if(typeof message !== 'undefined'){
+                                %>
+                                <p style = "color: red;"><%= message %></p>
+                                <%
+                            }
+                             %>
                         </div>
                     </div>
                 </div>
@@ -191,6 +197,54 @@
             document.getElementById('category').disabled = this.value !== "";
         });
     </script>
+    <script>
+        document.getElementById('editproduct').addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevent form submission
+    
+            // Clear previous errors
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+    
+            let errors = 0;
+    
+            // Helper function to show errors
+            function showError(inputId, message) {
+                const inputField = document.getElementById(inputId);
+                const errorElement = document.createElement('p');
+                errorElement.className = 'error-message';
+                errorElement.style.color = 'red';
+                errorElement.innerText = message;
+    
+                // Append error message to the nearest form group or parent element
+                inputField.parentElement.appendChild(errorElement);
+                errors++;
+            }
+    
+            // Validate Offer field
+            const offer = document.getElementById('product_title').value.trim();
+            if (!offer) {
+                showError('product_title', 'Offer is required.');
+            } else if (isNaN(offer)) {
+                showError('product_title', 'Offer must be a number.');
+            } else if (parseFloat(offer) <= 0) {
+                showError('product_title', 'Offer must be a positive value.');
+            }
+    
+            // Validate Category or Product selection
+            const category = document.getElementById('category').value.trim();
+            const productname = document.getElementById('productname').value.trim();
+    
+            if (!category && !productname) {
+                // Show error on the Offer field or a general location
+                showError('productname', 'Please select either category or product.');
+            }
+    
+            // Submit the form if no errors
+            if (errors === 0) {
+                this.submit();
+            }
+        });
+    </script>
+    
 </body>
 
 

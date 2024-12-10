@@ -103,6 +103,11 @@ admin_route.get("/salesreport", auth.isLogin, adminController.salesreport);
 admin_route.get("/offer", auth.isLogin, adminController.offer2);
 admin_route.get("/add-offer", auth.isLogin, adminController.addoffer);
 admin_route.post("/offer", auth.isLogin, adminController.insertoffer);
+admin_route.get(
+  "/offer-delete/:id",
+  auth.isLogin,
+  adminController.deleteoffer
+);
 admin_route.get("*", function (req, res) {
   res.redirect("/admin");
 });

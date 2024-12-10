@@ -171,8 +171,18 @@
                     <h2 class="content-title card-title">Products List</h2>
                   
                 </div>
-               
+                
             </div>
+            <div class="d-flex align-items-center mb-4">
+                <% if (Products.length === 0) { %>
+                  <h5 class="mb-0 flex-grow-1 fw-medium">Product list is empty</h5>
+                <% } else if (Products.length === 1) { %>
+                  <h5 class="mb-0 flex-grow-1 fw-medium">There is one product</h5>
+                <% } else { %>
+                  <h5 class="mb-0 flex-grow-1 fw-medium">There are <%= Products.length %> products</h5>
+                <% } %>
+              </div>
+              
             <div class="card mb-4">
                <!-- card-header end// -->
                 <div class="card-body">

@@ -8,6 +8,8 @@ const address = require('../models/address');
 const coupon1 = require('../models/coupon');
 const wallet = require('../models/Wallet')
 const offer12 = require('../models/offer')
+const Cart  = require('../models/cart');
+const wishlist1  = require('../models/wishlist');
 const securePasword = async(password)=>{
     try{
         const passwordHash = await bycrypt.hash(password,10);
@@ -258,11 +260,11 @@ const insertCategory = async (req, res) => {
         const { name, description } = req.body;
 
        
-        if (!name || !description) {
-            const errorMessage = !name ? "Name is required." : "Description is required.";
-            const categories = await Category.find();
-            return res.render('categories', { message: errorMessage, categories });
-        }
+        // if (!name || !description) {
+        //     const errorMessage = !name ? "Name is required." : "Description is required.";
+        //     const categories = await Category.find();
+        //     return res.render('categories', { message: errorMessage, categories });
+        // }
 
         const category = new Category({
             name: name,
@@ -310,15 +312,32 @@ catch(error){
     res.status(500).render('error').send('Internal Server Error');
 }}
 
-const updateUsers = async(req,res)=>{
-    try{
-    const id = req.params.id
-        console.log(req.body)
-       const catte = await Category.findByIdAndUpdate(id,{$set:{name:req.body.name,description:req.body.description}})
-   res.redirect('/admin/categories')  
+const updateUsers = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { name, description } = req.body;
+
+        // Check if the new category name is already used by another category
+        const existingCategory = await Category.findOne({  name: name.toUpperCase(), _id: { $ne: id } });
+     
+        if (existingCategory) {
+            const category = await Category.findById(id); // Fetch current category details
+            return res.render('categories-edit', { 
+                categories: category, 
+                message: 'Category name already exists. Please use a different name.' 
+            });
+        }
+
+        // Update the category if no conflict
+        await Category.findByIdAndUpdate(id, { $set: { name, description } });
+        res.redirect('/admin/categories');
+    } catch (error) {
+        console.log(error.message);
+      
+        res.status(500).send('Internal Server Error');
     }
-    catch(error)
-{console.log(error.message)}}
+};
+
 
 const deleteCategory = async (req, res) => {
     try {
@@ -368,50 +387,6 @@ const insertProducts = async (req, res) => {
         const { category, productname, productprice, brand, color, description, stock } = req.body;
         const files = req.files;
 
-       
-        const errors = [];
-
-        if (!productname || productname.trim() === '') {
-            errors.push("Product title is required.");
-        }
-
-    
-        if (!color || color.trim() === '') {
-            errors.push("Color is required.");
-        }
-
- 
-        if (!description || description.trim() === '') {
-            errors.push("Description is required.");
-        }
-
-      
-        if (!category || category.trim() === '') {
-            errors.push("A category must be selected.");
-        }
-
-      
-        if (!productprice || productprice.trim() === '') {
-            errors.push("Price is required.");
-        } else if (isNaN(productprice)) {
-            errors.push("Price must be a number.");
-        }
-
-        if (!stock || stock.trim() === '') {
-            errors.push("Stock is required.");
-        } else if (isNaN(stock)) {
-            errors.push("Stock must be a number.");
-        }
-
-       
-        if (errors.length > 0) {
-            const categories = await Category.find(); 
-            return res.render('add-products', { 
-                category: categories, 
-                message: errors.join(' ') 
-            });
-        }
-
    
         const existingProduct = await Products.findOne({ productname: { $regex: `^${productname}$`, $options: "i" } });
         if (existingProduct) {
@@ -424,13 +399,7 @@ const insertProducts = async (req, res) => {
 
         // Validate images
         const imageNames = [...new Set(files.map(file => file.filename))];
-        if (!imageNames.length) {
-            const categories = await Category.find();
-            return res.render('add-products', { 
-                category: categories, 
-                message: 'Images are required.' 
-            });
-        }
+      
         if (imageNames.length%2 == 0) {
             let k = imageNames.length;
             let no = k/2;
@@ -498,15 +467,32 @@ const updateproducts = async (req, res) => {
         }
 
         const imageNames = [];
+       
         const oldimage = [req.body.oldimage].flat();
+    
         console.log("Old Images:", oldimage);
-        if (oldimage) {
+        if (!(oldimage.includes(undefined))) {
             oldimage.forEach((image) => imageNames.push(image));
+            console.log("Old Images:", oldimage);
+            console.log("Old Images:", imageNames);
+       
         }
 
         const files = req.files;
-        files.forEach((file) => imageNames.push(file.filename));
-
+        console.log(files,"filess")
+          const imageIndices = req.body.imageIndex ? [req.body.imageIndex].flat().map(Number) : [];
+        console.log("Image Indices:", imageIndices);
+        files.forEach((file) => 
+        imageNames.push(file.filename));
+        if(imageNames.length == 0){
+            const products = await Products.findById(id)
+const category = await Category.find();
+            return res.render('edit-product', { 
+                Products:await Products.findById(id),category:category,
+                message: 'Please insert an image.' 
+            });
+        }
+ console.log("Image Indices:", imageIndices);
         await Products.findByIdAndUpdate(id, {
             $set: {
                 productname,
@@ -539,13 +525,42 @@ const updateproducts = async (req, res) => {
 
 const deleteProduct = async (req, res) => {
     try {
-        const id = req.params.id;
-        await Products.deleteOne({ _id: id });
+        const id = req.params.id; 
+
+        const deletedProduct = await Products.deleteOne({ _id: id });
+
+        if (deletedProduct.deletedCount === 0) {
+            return res.status(404).json({ success: false, message: 'Product not found.' });
+        }
+
+       
+        await Cart.updateMany(
+            { "products.productId": id },
+            { $pull: { products: { productId: id } } } 
+        );
+
+  
+        const affectedCarts = await Cart.find({ "products.productId": id });
+        for (const cart of affectedCarts) {
+            let totalAmount = 0;
+            for (const product of cart.products) {
+                const pr = await Products.findOne({ _id: product.productId });
+                if (pr) {
+                    totalAmount += pr.price * product.quantity;
+                }
+            }
+            cart.total = totalAmount;
+            await cart.save();
+        }
+        await wishlist1.deleteMany({ productId: id });
+       
         res.sendStatus(200);
     } catch (error) {
         console.log(error.message);
-        }
+        res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
 };
+
 
 const order = async (req, res) => {
     try {
@@ -645,21 +660,34 @@ const addcoupon = async (req, res) => {
 };
 
 const insertcoupon = async (req, res) => {
-    try { const {   couponCode, discount_amount, min_amount } = req.body;
-    const coupon = new coupon1({
-                min_amount: min_amount,
-              
-                couponCode: couponCode,
-                discount_amount: discount_amount,
-               });
-               console.log(coupon,"asdf")
-      await coupon.save();
-            res.redirect('/admin/coupon');
-         } catch (error) {
-           console.log("hi");
-    console.log(error.message);
-    res.render('add-coupon', { message: 'Failed to add coupon' });}
-    };
+    try {
+        const { couponCode, discount_amount, min_amount } = req.body;
+
+      
+        const existingCoupon = await coupon1.findOne({ couponCode: couponCode });
+
+        if (existingCoupon) {
+     
+            return res.render('add-coupon', { message: 'Please use a different coupon code. This one already exists.' });
+        }
+
+       
+        const coupon = new coupon1({
+            min_amount: min_amount,
+            couponCode: couponCode,
+            discount_amount: discount_amount,
+        });
+
+        await coupon.save();
+        console.log(coupon, "Coupon added successfully");
+        res.redirect('/admin/coupon');
+
+    } catch (error) {
+        console.error(error.message);
+        res.render('add-coupon', { message: 'Failed to add coupon' });
+    }
+};
+
 
 const deleteCoupon = async (req, res) => {
         try {
@@ -728,7 +756,9 @@ const insertoffer = async (req, res) => {
         }
 
         if (existingOffer) {
-            return res.send('<script>alert("Offer for this category/product already exists"); window.history.back();</script>');
+             const category = await Category.find();
+            const product = await Products.find()
+           return res.render('add-offer', { category,product,message:"Offer for this category/products exists" });  
         }
 
         const offer1 = new offer12({
@@ -741,6 +771,9 @@ const insertoffer = async (req, res) => {
         if (category) {
             const products = await Products.find({ category });
             for (const product of products) {
+                if (!product.originalPrice) {
+                    product.originalPrice = product.price; 
+                }
                 product.offer = true;
                 product.price = Math.round(product.price * (1 - offerPercentage / 100));
                 product.offerPercentage = offerPercentage;
@@ -750,6 +783,9 @@ const insertoffer = async (req, res) => {
         } else if (productname) {
             const product = await Products.findOne({ productname });
             if (product) {
+                if (!product.originalPrice) {
+                    product.originalPrice = product.price; 
+                }
                 product.offer = true;
                 product.price = Math.round(product.price * (1 - offerPercentage / 100));
                 product.offerPercentage = offerPercentage;
@@ -757,6 +793,7 @@ const insertoffer = async (req, res) => {
                 console.log("Modified product:", product);
             }
         }
+        
 
         res.redirect("/admin/offer");
 
@@ -765,5 +802,48 @@ const insertoffer = async (req, res) => {
         res.render('add-offer', { message: 'Failed to add offer' });
     }
 };
+const deleteoffer = async (req, res) => {
+    try {
+        const id = req.params.id;
 
-module.exports = {loadLogin,verifyLogin,securePasword,loadDashboard,logout,userlist,deleteUser,blockUser,unblockUser,categorylist,insertCategory,categorylist,categoriesedit,updateUsers,deleteCategory,products,addproducts,insertProducts,productsedit,updateproducts,deleteProduct,order,orderview1,updateOrderStatus,orderReturn1,coupon,addcoupon,insertcoupon,deleteCoupon,salesreport,offer2,insertoffer,addoffer}
+      
+        const offer = await offer12.findById(id);
+        if (!offer) {
+            return res.status(404).send('Offer not found');
+        }
+
+       
+        await offer12.deleteOne({ _id: id });
+
+        if (offer.category) {
+          
+            const products = await Products.find({ category: offer.category });
+            for (const product of products) {
+                if (product.originalPrice) {
+                    product.price = product.originalPrice; 
+                    product.originalPrice = null; 
+                }
+                product.offer = false;
+                product.offerPercentage = 0;
+                await product.save();
+            }
+        } else if (offer.productname) {
+           
+            const product = await Products.findOne({ productname: offer.productname });
+            if (product && product.originalPrice) {
+                product.price = product.originalPrice;
+                product.originalPrice = null; 
+                product.offer = false;
+                product.offerPercentage = 0;
+                await product.save();
+            }
+        }
+
+        res.sendStatus(200);
+    } catch (error) {
+        console.error("Error deleting offer:", error);
+        res.status(500).send('Failed to delete offer');
+    }
+};
+
+module.exports = {loadLogin,verifyLogin,securePasword,loadDashboard,logout,userlist,deleteUser,blockUser,unblockUser,categorylist,insertCategory,categorylist,categoriesedit,updateUsers,deleteCategory,products,addproducts,insertProducts,productsedit,updateproducts,deleteProduct,order,orderview1,updateOrderStatus,orderReturn1,coupon,addcoupon,insertcoupon,deleteCoupon,salesreport,offer2,insertoffer,addoffer,deleteoffer}

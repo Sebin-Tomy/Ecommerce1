@@ -116,11 +116,13 @@
                                 <div class="mb-4">
                                     <label for="edit_category_name" class="form-label">Name</label>
                                     <input name="name" type="text" placeholder="Type here" class="form-control" id="edit_category_name" value="<%= categories.name %>" />
+                                    <p id="nameError" style="color: red; margin-top: 5px;"></p> 
                                 </div>
                                 
                                 <div class="mb-4">
                                     <label class="form-label">Description</label>
                                     <textarea name="description" placeholder="Type here" class="form-control" id="edit_category_description"><%= categories.description %></textarea>
+                                    <p id="descriptionError" style="color: red; margin-top: 5px;"></p> 
                                 </div>
                                 
                                 <input type="hidden" name="id" value="<%= categories._id %>">
@@ -161,15 +163,35 @@
             const form = document.getElementById(formId);
             const name = form.querySelector('input[name="name"]').value.trim();
             const description = form.querySelector('textarea[name="description"]').value.trim();
-            const errorElement = document.getElementById(formId + 'Error');
-        
-            if (!name || !description) {
-                errorElement.textContent = "Both Name and Description are required.";
-            } else {
+    
+            // Error message elements
+            const nameErrorElement = document.getElementById('nameError');
+            const descriptionErrorElement = document.getElementById('descriptionError');
+    
+            // Clear previous errors
+            nameErrorElement.textContent = "";
+            descriptionErrorElement.textContent = "";
+    
+            let hasError = false;
+    
+            // Validate category name
+            if (!name) {
+                hasError = true;
+                nameErrorElement.textContent = "Category name is required.";
+            }
+    
+            // Validate description
+            if (!description) {
+                hasError = true;
+                descriptionErrorElement.textContent = "Description is required.";
+            }
+    
+            // Submit form if no errors
+            if (!hasError) {
                 form.submit();
             }
         }
-        </script>
+    </script>
         
 </body>
 

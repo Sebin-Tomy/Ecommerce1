@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema({
   offerPercentage:{
   type:String,
   default:"nil"
-}
+},   originalPrice: { type: Number }
   });
 const products = mongoose.model("products", productSchema);
 module.exports = products;

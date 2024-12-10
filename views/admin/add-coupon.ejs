@@ -121,11 +121,11 @@
                         <h2 class="content-title">Add New Coupon</h2>
                         
                     </div>
-                </div>
+                </div>m
                 <div class="col-lg-6">
                     <div class="card mb-4">
                         <div class="card-body">
-                            <form  action="/admin/add-coupon" method="POST">
+                            <form id = "addproduct" action="/admin/add-coupon" method="POST">
                             <div class="mb-4">
                                 <label for="product_title" class="form-label">Coupon Code</label>
                                 <input type="text" name="couponCode" placeholder="Type here" class="form-control" id="product_title">
@@ -177,6 +177,62 @@
 
     <!-- Main Script -->
     <script src="/js/main.js" type="text/javascript"></script>
+    <script>
+        document.getElementById('addproduct').addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevent form submission
+    
+            // Clear previous errors
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+    
+            let errors = 0;
+    
+            // Helper function to show errors
+            function showError(inputId, message) {
+                const inputField = document.getElementById(inputId);
+                const errorElement = document.createElement('p');
+                errorElement.className = 'error-message';
+                errorElement.style.color = 'red';
+                errorElement.innerText = message;
+    
+                if (inputField.parentElement.classList.contains('mb-4')) {
+                    inputField.parentElement.appendChild(errorElement);
+                } else {
+                    inputField.closest('.mb-3').appendChild(errorElement);
+                }
+                errors++;
+            }
+    
+            // Validate fields
+            const couponCode = document.getElementById('product_title').value.trim();
+            if (!couponCode) {
+                showError('product_title', 'Coupon code is required.');
+            }
+    
+            const discountAmount = document.querySelector('[name="discount_amount"]').value.trim();
+            if (!discountAmount) {
+                showError('product_color', 'Discount amount is required.');
+            } else if (isNaN(discountAmount)) {
+                showError('product_color', 'Discount amount must be a number.');
+            } else if (parseFloat(discountAmount) <= 0) {
+                showError('product_color', 'Discount amount must be a positive value.');
+            }
+    
+            const minAmount = document.querySelector('[name="min_amount"]').value.trim();
+            if (!minAmount) {
+                showError('product_brand', 'Minimum amount is required.');
+            } else if (isNaN(minAmount)) {
+                showError('product_brand', 'Minimum amount must be a number.');
+            } else if (parseFloat(minAmount) <= 0) {
+                showError('product_brand', 'Minimum amount must be a positive value.');
+            }
+    
+            // Submit the form if no errors
+            if (errors === 0) {
+                this.submit();
+            }
+        });
+    </script>
+    
 </body>
 
 
