@@ -193,20 +193,22 @@ Swal.fire({
                                                         <% if(users.length > 0) { %>
                                     <!-- Add these buttons inside your table's <tbody> section -->
 <% for (let i = 0; i < users.length; i++) { %>
-    <tr>
+    <tr id="userRow-<%= users[i]._id %>">
         <td><%= i + 1 %></td>
         <td><b><%= users[i].name %></b></td>
         <td><%= users[i].email %></td>
         <td>
-            <span class="badge rounded-pill alert-warning">Delete</span>
-            <div class="dropdown">
+            <div class="col-lg-1 col-sm-2 col-4 text-start">
+                <a href="#" onclick="deleteUser('<%= users[i]._id %>')" class="btn btn-sm btn-danger w-10 w-md-auto">Delete</a>
+            </div>
+            <!-- <div class="dropdown">
                 <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm">
                     <i class="material-icons md-more_horiz"></i>
                 </a>
                 <div class="dropdown-menu">
-                    <a class="dropdown-item text-danger" href="/admin/delete-user?id=<%= users[i]._id %>">Delete</a>
+                    <a class="dropdown-item text-danger" href="#"  onclick="deleteProduct('<%= users._id %>')" class="btn btn-sm btn-danger w-10 w-md-auto">Delete</a>
                 </div>
-            </div>
+            </div> -->
         </td>
         <td>
         <!-- Add a condition to show "Block" or "Unblock" button based on is_blocked field -->
@@ -282,6 +284,39 @@ Swal.fire({
     <script src="/js/main.js" type="text/javascript"></script>
 <!-- At the bottom of the EJS file -->
 <!-- At the bottom of the EJS file -->
+<script>
+    // Function to delete user without reloading the page
+    function deleteUser(userId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'This user will be deleted!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Send DELETE request to the backend
+                fetch(`/admin/delete-user/${userId}`, { method: 'DELETE' })
+                    .then(response => {
+                        if (response.ok) {
+                            // Remove the user row from the table
+                            const row = document.getElementById(`userRow-${userId}`);
+                            if (row) row.remove();
+
+                            Swal.fire('Deleted!', 'The user has been deleted.', 'success');
+                        } else {
+                            throw new Error('Failed to delete user.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        Swal.fire('Error!', 'Failed to delete user.', 'error');
+                    });
+            }
+        });
+    }
+</script>
 </body>
 
 

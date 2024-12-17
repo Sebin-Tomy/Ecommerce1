@@ -1,4 +1,5 @@
 const bycrypt = require('bcrypt');
+const { STATUS_CODES,MESSAGES } = require('../constants/constants');
 const User = require('../models/userModel');
 const Category = require('../models/categories');
 const Products = require('../models/productdata');
@@ -27,7 +28,7 @@ res.render('login');
 }
 catch(error){
     console.log(error.message);
-    res.status(500).render('error').send('Internal Server Error');
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
 }
 }
 
@@ -175,7 +176,7 @@ const yearlySales = filledYearlySalesData.map(item => item.totalSales);
         });
     } catch (error) {
         console.log(error.message);
-        res.status(500).render("error").send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render("error").send(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -215,21 +216,22 @@ const userlist = async (req, res) => {
         });
     } catch (error) {
         console.log(error.message);
-        res.status(500).render('error').send('Internal Server Error');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
 
 const deleteUser = async(req,res)=>{
     try{
-        const id = req.query.id;
-        await User.deleteOne({_id:id})
-        res.redirect('/admin/users')
+        console.log('hi')
+        const id = req.params.id;
+        await User.findByIdAndDelete(id);
+        res.status(200).json({ success: true });
     }
     catch(error)
 {
     console.log(error.message)
-    res.status(500).render('error').send('Internal Server Error');
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
 }}
 const blockUser = async (req, res) => {
     try {  
@@ -237,10 +239,10 @@ const blockUser = async (req, res) => {
         console.log(id)
         await User.findByIdAndUpdate(id, {is_blocked: true });
         console.log(id);
-        res.sendStatus(200);
+        res.sendStatus(STATUS_CODES.SUCCESS);
     } catch (error) {
         console.log(error.message);
-        res.sendStatus(500);
+        res.sendStatus(STATUS_CODES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -248,23 +250,16 @@ const unblockUser = async (req, res) => {
     try {
         const id = req.params.id;
         await User.findByIdAndUpdate(id, { is_blocked: false });
-        res.sendStatus(200);
+        res.sendStatus(STATUS_CODES.SUCCESS);
     } catch (error) {
         console.log(error.message);
-        res.sendStatus(500);
+        res.sendStatus(STATUS_CODES.INTERNAL_SERVER_ERROR);
     }
 };
 
 const insertCategory = async (req, res) => {
     try {
         const { name, description } = req.body;
-
-       
-        // if (!name || !description) {
-        //     const errorMessage = !name ? "Name is required." : "Description is required.";
-        //     const categories = await Category.find();
-        //     return res.render('categories', { message: errorMessage, categories });
-        // }
 
         const category = new Category({
             name: name,
@@ -297,7 +292,7 @@ try { const categories = await Category.find();
             res.render('categories', { categories: categories }); 
         } catch (error) {
             console.log(error.message);
-            res.status(500).send('Internal Server Error');
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
         } };
 
 const categoriesedit = async(req,res)=>
@@ -309,7 +304,7 @@ res.render('categories-edit',{categories:categories});
 }
 catch(error){
     console.log(error.message);
-    res.status(500).render('error').send('Internal Server Error');
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
 }}
 
 const updateUsers = async (req, res) => {
@@ -317,11 +312,11 @@ const updateUsers = async (req, res) => {
         const id = req.params.id;
         const { name, description } = req.body;
 
-        // Check if the new category name is already used by another category
+      
         const existingCategory = await Category.findOne({  name: name.toUpperCase(), _id: { $ne: id } });
      
         if (existingCategory) {
-            const category = await Category.findById(id); // Fetch current category details
+            const category = await Category.findById(id);
             return res.render('categories-edit', { 
                 categories: category, 
                 message: 'Category name already exists. Please use a different name.' 
@@ -334,7 +329,7 @@ const updateUsers = async (req, res) => {
     } catch (error) {
         console.log(error.message);
       
-        res.status(500).send('Internal Server Error');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -342,11 +337,15 @@ const updateUsers = async (req, res) => {
 const deleteCategory = async (req, res) => {
     try {
         const id = req.params.id;
-        await Category.deleteOne({ _id: id });
-        res.sendStatus(200);
+        console.log('the deleted category');
+    
+        //  await Products.deleteMany({categoryId:id})
+ 
+        await Category.findByIdAndDelete(id);
+        res.sendStatus(STATUS_CODES.SUCCESS);
     } catch (error) {
         console.log(error.message);
-        res.status(500).render('error').send('Internal Server Error');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
         
     }
 };
@@ -355,7 +354,7 @@ const products = async (req, res) => {
 const page = parseInt(req.query.page) || 1;
 const perPage = 6; 
  try {
-        const products1 = await Products.find()
+        const products1 = await Products.find().populate('categoryId')
             .skip((page - 1) * perPage)
             .limit(perPage)
             .exec();
@@ -369,7 +368,7 @@ const perPage = 6;
         });
     } catch (error) {
         console.log(error.message);
-        res.status(500).send('Internal Server Error'); 
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR); 
     }
 };
 
@@ -386,7 +385,7 @@ const insertProducts = async (req, res) => {
     try {
         const { category, productname, productprice, brand, color, description, stock } = req.body;
         const files = req.files;
-
+console.log(req.body,"req")
    
         const existingProduct = await Products.findOne({ productname: { $regex: `^${productname}$`, $options: "i" } });
         if (existingProduct) {
@@ -396,7 +395,8 @@ const insertProducts = async (req, res) => {
                 message: 'Product name already exists. Please use a different name.' 
             });
         }
-
+        const categoryDoc = await Category.findById(category);
+        console.log(categoryDoc,"cae")
         // Validate images
         const imageNames = [...new Set(files.map(file => file.filename))];
       
@@ -415,9 +415,9 @@ const insertProducts = async (req, res) => {
             image: imageNames,
             brand,
             stock,
-            category
+            categoryId: categoryDoc._id 
         });
-
+console.log(prod,"roducts")
         await prod.save();
         console.log("Product added successfully");
         res.redirect('/admin/products');
@@ -436,7 +436,7 @@ const insertProducts = async (req, res) => {
 
 const productsedit = async(req,res)=>
 {try{const id = req.params.id
-const products = await Products.findById(id)
+const products = await Products.findById(id).populate('categoryId')
 const category = await Category.find();
 res.render('edit-product',{Products:products,category:category});
 }
@@ -452,7 +452,7 @@ const updateproducts = async (req, res) => {
         const id = req.params.id;
         const { productname, productprice, brand, material, color, description, dimensions, stock,category } = req.body;
 
-       
+       console.log(category,"Adsfsdf");
         const existingProduct = await Products.findOne({ 
             productname: { $regex: `^${productname}$`, $options: "i" }, 
             _id: { $ne: id } 
@@ -465,7 +465,8 @@ const updateproducts = async (req, res) => {
                 Products: await Products.findById(id) 
             });
         }
-
+        const categoryDoc = await Category.findById(category);
+        console.log(categoryDoc,"Adsgdsgs");
         const imageNames = [];
        
         const oldimage = [req.body.oldimage].flat();
@@ -473,22 +474,28 @@ const updateproducts = async (req, res) => {
         console.log("Old Images:", oldimage);
         if (!(oldimage.includes(undefined))) {
             oldimage.forEach((image) => imageNames.push(image));
-            console.log("Old Images:", oldimage);
-            console.log("Old Images:", imageNames);
+          
        
         }
-
+console.log('iamg',imageNames);
         const files = req.files;
         console.log(files,"filess")
           const imageIndices = req.body.imageIndex ? [req.body.imageIndex].flat().map(Number) : [];
         console.log("Image Indices:", imageIndices);
-        files.forEach((file) => 
-        imageNames.push(file.filename));
+        files.forEach((file) => {
+            if (file.fieldname === 'imageundefined') {
+              imageNames.push(file.filename);
+            }
+          });
+        console.log('iamg',imageNames);
         if(imageNames.length == 0){
-            const products = await Products.findById(id)
+            const products =   await Products.findByIdAndUpdate(id, {
+                $set: {image: []  
+                },
+            });
 const category = await Category.find();
             return res.render('edit-product', { 
-                Products:await Products.findById(id),category:category,
+                Products:await Products.findById(id).populate('categoryId'),category:category,
                 message: 'Please insert an image.' 
             });
         }
@@ -504,11 +511,12 @@ const category = await Category.find();
                 brand,
                 image: imageNames,
                 stock,
-                category
+                categoryId:categoryDoc._id
             },
+       
         });
     
-
+        console.log(Products,'products');
         res.redirect('/admin/products');
     } catch (error) {
         console.log(error.message);
@@ -529,9 +537,6 @@ const deleteProduct = async (req, res) => {
 
         const deletedProduct = await Products.deleteOne({ _id: id });
 
-        if (deletedProduct.deletedCount === 0) {
-            return res.status(404).json({ success: false, message: 'Product not found.' });
-        }
 
        
         await Cart.updateMany(
@@ -554,10 +559,10 @@ const deleteProduct = async (req, res) => {
         }
         await wishlist1.deleteMany({ productId: id });
        
-        res.sendStatus(200);
+        res.sendStatus(STATUS_CODES.SUCCESS);
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ success: false, message: 'Internal Server Error' });
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.INTERNAL_SERVER_ERROR });
     }
 };
 
@@ -565,7 +570,7 @@ const deleteProduct = async (req, res) => {
 const order = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1; 
-        const limit = parseInt(req.query.limit) || 10; 
+        const limit = parseInt(req.query.limit) || 5; 
         const skip = (page - 1) * limit; 
         const totalOrders = await orderModel.countDocuments();
         const orders = await orderModel.find().sort({ orderDate: -1 }) .skip(skip).limit(limit);
@@ -581,7 +586,7 @@ const order = async (req, res) => {
         });
     } catch (error) {
         console.log(error.message);
-        res.status(500).render('error').send('Internal Server Error');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -596,7 +601,7 @@ const orderview1 = async (req, res) => {
         res.render('orderview1', { order,user,Address });  
     } catch (error) {
         console.log(error.message);
-        res.status(500).render('error').send('Internal Server Error');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -609,7 +614,7 @@ console.log(orderId);
         res.redirect(`/admin/order?orderId=${orderId}`); 
     } catch (error) {
         console.log(error.message);
-        res.status(500).render('error').send('Internal Server Error');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -635,18 +640,31 @@ const orderReturn1 = async (req, res) => {
         res.json({ success: true, message: "Approval request sent." });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ success: false, message: "Internal server error." });
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.INTERNAL_SERVER_ERROR});
     }
 };
 
 const coupon = async (req, res) => {
-    try { const couponcode = await coupon1.find();
-res.render('coupon',{coup: couponcode});
- } catch (error) {
+    try {
+        const page = parseInt(req.query.page) || 1; 
+        const limit = parseInt(req.query.limit) || 5; 
+        const skip = (page - 1) * limit;
+
+        const totalCoupons = await coupon1.countDocuments();
+        const couponcode = await coupon1.find().skip(skip).limit(limit);
+
+        res.render('coupon', {
+            coup: couponcode,
+            currentPage: page,
+            totalPages: Math.ceil(totalCoupons / limit),
+            totalCoupons,
+        });
+    } catch (error) {
         console.log(error.message);
-        res.status(500).render('error').send('Internal Server Error');
+        res.status(500).render('error', { message: "Internal Server Error" });
     }
 };
+
 
 const addcoupon = async (req, res) => {
     try {
@@ -655,7 +673,7 @@ const addcoupon = async (req, res) => {
 
   } catch (error) {
         console.log(error.message);
-        res.status(500).render('error').send('Internal Server Error');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send('Internal Server Error');
     }
 };
 
@@ -692,11 +710,11 @@ const insertcoupon = async (req, res) => {
 const deleteCoupon = async (req, res) => {
         try {
             const id = req.params.id;
-            await coupon1.deleteOne({ _id: id });
-            res.sendStatus(200);
+            await coupon1.findByIdAndDelete(id);
+            res.sendStatus(STATUS_CODES.SUCCESS);
         } catch (error) {
             console.log(error.message);
-            res.status(500).render('error').send('Internal Server Error');
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send('Internal Server Error');
             }
     };
 
@@ -716,7 +734,7 @@ const salesreport = async (req, res) => {
             });
         } catch (error) {
             console.log(error.message);
-            res.status(500).render('error').send('Internal Server Error');   
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);   
         }
     };
     
@@ -727,20 +745,31 @@ const addoffer = async (req, res) => {
             res.render('add-offer', { category,product });  
         } catch (error) {
             console.log(error.message);
-            res.status(500).render('error').send('Internal Server Error');
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
         }
     };
     
-const offer2 = async (req, res) => {
-try { console.log("sfd");
-        const  offers = await offer12.find();
-console.log(offers);
-res.render('offer',{offers});
- } catch (error) {
-        console.log(error.message);
-        res.status(500).render('error').send('Internal Server Error');
-    }
-};
+    const offer2 = async (req, res) => {
+        try {
+            const page = parseInt(req.query.page) || 1; 
+            const limit = parseInt(req.query.limit) || 5; 
+            const skip = (page - 1) * limit;
+    
+            const totalOffers = await offer12.countDocuments(); 
+            const offers = await offer12.find().skip(skip).limit(limit);
+    
+            res.render('offer', {
+                offers,
+                currentPage: page,
+                totalPages: Math.ceil(totalOffers / limit),
+                totalOffers,
+            });
+        } catch (error) {
+            console.log(error.message);
+            res.status(500).render('error', { message: "Internal Server Error" });
+        }
+    };
+    
 const insertoffer = async (req, res) => {
     try { 
         const { category, productname, offer } = req.body;
@@ -809,7 +838,7 @@ const deleteoffer = async (req, res) => {
       
         const offer = await offer12.findById(id);
         if (!offer) {
-            return res.status(404).send('Offer not found');
+            return res.status(STATUS_CODES.NOT_FOUND).send('Offer not found');
         }
 
        
@@ -839,10 +868,10 @@ const deleteoffer = async (req, res) => {
             }
         }
 
-        res.sendStatus(200);
+        res.sendStatus(STATUS_CODES.SUCCESS);
     } catch (error) {
         console.error("Error deleting offer:", error);
-        res.status(500).send('Failed to delete offer');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send('Failed to delete offer');
     }
 };
 

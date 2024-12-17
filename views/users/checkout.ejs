@@ -532,7 +532,12 @@
                                     </div>
                                 <% } else { %>
                                     <div class="hstack gap-3 px-3 mx-n3">
-                                        <input class="form-control me-auto" id="couponCode" type="text" placeholder="Enter coupon code" aria-label="Add Promo Code here...">
+                                        <input class="form-control me-auto" 
+                                               id="couponCode" 
+                                               type="text" 
+                                               placeholder="<%= appliedCouponCode || 'Enter coupon code' %>" 
+                                               value="<%= appliedCouponCode %>" 
+                                               aria-label="Add Promo Code here...">
                                         <button type="button" class="btn btn-danger w-xs" id="removeCouponBtn" style="width: 120px;">Remove</button>
                                     </div>
                                 <% } %>
@@ -541,18 +546,21 @@
                                     <% if (coup.length === 0) { %>
                                         <p>No coupons available</p>
                                     <% } else { %>
+
+                                        <% if (saveData[0].coupon !== "Not Applied") { %>
+                                            <%}    else{%>
                                         <h6 class="mb-3 fs-15">Available Coupons:</h6>
                                         <select name="coupon" class="form-control">
                                             <option value="" selected disabled>Select Coupon</option>
                                             <% coup.forEach(coupon => { %>
                                                 <option value="<%= coupon._id %>" data-code="<%= coupon.couponCode %>">
                                                     <%= coupon.couponCode %> 
-                                                </option>
+                                                </option>  
                                             <% }); %>
                                         </select>
                                         <% coup.forEach(coupon => { %>
                                             <input type="hidden" id="productId" value="<%= coupon._id %>">
-                                        <% }); %>
+                                        <% }); %><% } %>
                                     <% } %>
                                 </div>
                             </div>
@@ -646,61 +654,68 @@ function getSelectedAddressId() {
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-document.getElementById('applyCoupon').addEventListener('click', function() {
-console.log('dfsdf')
-var couponCode = document.getElementById('couponCode').value;
-var productId = document.querySelector('input[type="hidden"]').value;
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('applyCoupon').addEventListener('click', function () {
+            console.log('dfsdf');
+            var couponCode = document.getElementById('couponCode').value;
+            var productId = document.querySelector('input[type="hidden"]').value;
     
-console.log(couponCode);
-console.log(productId);
-    // Display confirmation message using SweetAlert
-    Swal.fire({
-        title: 'Are you sure?',
-        text: 'This coupon will be applied!',
-        icon: 'warning',
-        showCancelButton: false,
-        confirmButtonText: 'Yes, list it!',
-        cancelButtonText: 'Cancel'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            console.log("hi")
-            // Send a fetch request to your server with couponCode and productId in the body
-            fetch('/applyCoupon', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ couponCode: couponCode, productId: productId })
-
-            }) .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Display success message using SweetAlert
-                    Swal.fire('Listed!', 'The coupon has been applied.', 'success');
-                    // Reload the page after successful listing
-                    window.location.reload(true);
-                } else {
-                    throw new Error('Already use this coupon .');
+            console.log(couponCode);
+            console.log(productId);
+    
+            // Display confirmation message using SweetAlert
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This coupon will be applied!',
+                icon: 'warning',
+                showCancelButton: false,
+                confirmButtonText: 'Yes, list it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log("hi");
+              
+                    fetch('/applyCoupon', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ couponCode: couponCode, productId: productId })
+                    })
+                    .then(async response => {
+                
+                        if (!response.ok) {
+                            const errorData = await response.json(); 
+                            throw new Error(errorData.message || 'Unknown error occurred');
+                        }
+                        return response.json(); 
+                    })
+                    .then(data => {
+                        if (data.success) {
+                    
+                            Swal.fire('Listed!', 'The coupon has been applied.', 'success');
+                       
+                            window.location.reload(true);
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        
+                        Swal.fire("Error", error.message, 'error');
+                    });
                 }
-            })
-            .catch(error => {
-                console.error(error);
-                // Display error message using SweetAlert
-                Swal.fire('Error!', 'Failed to use this coupon.', 'error');
             });
-        }
+        });
     });
-});})
+    
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Attach event listener to the "Remove" button
+  
         document.getElementById('removeCouponBtn').addEventListener('click', function() {
         var couponCode = document.getElementById('couponCode').value;
         console.log(couponCode)
         console.log("hello remove");
-        // Send a fetch request to remove the coupon
         Swal.fire({
             title: 'Are you sure?',
             text: 'This coupon will be removed!',

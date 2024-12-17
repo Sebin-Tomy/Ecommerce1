@@ -47,21 +47,18 @@
         function deleteProduct(ProductId) {
             Swal.fire({
                 title: 'Are you sure?',
-                text: 'This category will be deleted!',
+                text: 'This product will be deleted!',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, delete it!',
                 cancelButtonText: 'Cancel',
-                
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let request = { method: 'GET' };
-                    // Send AJAX request to delete category
-                    fetch(`/admin/products-delete/${ProductId}`, request)
+                    fetch(`/admin/products-delete/${ProductId}`, { method: 'DELETE' })
                         .then(response => {
                             if (response.ok) {
-                                Swal.fire('Deleted!', 'The product has been deleted.', "success");
-                                // Reload the page after deletion
+                                Swal.fire('Deleted!', 'The product has been deleted.', 'success');
+                                document.querySelector(`[data-product-id="${ProductId}"]`).remove();
                                 location.reload();
                             } else {
                                 throw new Error('Failed to delete product.');
@@ -74,6 +71,7 @@
                 }
             });
         }
+        
     </script>
 </head>
 
@@ -190,7 +188,7 @@
                         <!-- Add these buttons inside your table's <tbody> section -->
                         <% for (let i = 0; i < Products.length; i++) { %>
                             <article class="itemlist">
-                                <div class="row align-items-center">
+                                <div class="row align-items-center" data-product-id="<%= Products[i]._id %>">
                                     <div class="col-lg-4 col-sm-2 col-6">
                                         <a class="itemside" href="#">
                                             <div class="left">
@@ -219,8 +217,8 @@
                                         <span><%= Products[i].stock %></span>
                                     </div>
                                     <div class="col-lg-1 col-sm-4 col-8">
-                                        <% if (Products && Products[i]) { %>
-                                            <span><%= Products[i].category %></span>
+                                        <% if (Products && Products[i] && Products[i].categoryId) { %>
+                                            <span><%= Products[i].categoryId.name %></span>
                                         <% } else { %>
                                             <span>No category</span>
                                         <% } %>

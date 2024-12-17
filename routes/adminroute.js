@@ -33,7 +33,7 @@ admin_route.post("/logi", adminController.verifyLogin);
 admin_route.get("/home", auth.isLogin, adminController.loadDashboard);
 admin_route.get("/logout", auth.isLogin, adminController.logout);
 admin_route.get("/users", auth.isLogin, adminController.userlist);
-admin_route.get("/delete-user", auth.isLogin, adminController.deleteUser);
+admin_route.delete("/delete-user/:id", auth.isLogin, adminController.deleteUser);
 // Route to block user
 admin_route.patch("/block-user/:id", auth.isLogin, adminController.blockUser);
 // Route to unblock user
@@ -54,7 +54,7 @@ admin_route.post(
   auth.isLogin,
   adminController.updateUsers
 );
-admin_route.get(
+admin_route.delete(
   "/categories-delete/:id",
   auth.isLogin,
   adminController.deleteCategory
@@ -79,7 +79,7 @@ admin_route.post(
   upload.any("image"),
   adminController.updateproducts
 );
-admin_route.get(
+admin_route.delete(
   "/products-delete/:id",
   auth.isLogin,
   adminController.deleteProduct
@@ -94,7 +94,7 @@ admin_route.patch("/submitReturn1", auth.isLogin, adminController.orderReturn1);
 admin_route.get("/coupon", auth.isLogin, adminController.coupon);
 admin_route.get("/add-coupon", auth.isLogin, adminController.addcoupon);
 admin_route.post("/add-coupon", auth.isLogin, adminController.insertcoupon);
-admin_route.get(
+admin_route.delete(
   "/coupon-delete/:id",
   auth.isLogin,
   adminController.deleteCoupon
@@ -103,7 +103,7 @@ admin_route.get("/salesreport", auth.isLogin, adminController.salesreport);
 admin_route.get("/offer", auth.isLogin, adminController.offer2);
 admin_route.get("/add-offer", auth.isLogin, adminController.addoffer);
 admin_route.post("/offer", auth.isLogin, adminController.insertoffer);
-admin_route.get(
+admin_route.delete(
   "/offer-delete/:id",
   auth.isLogin,
   adminController.deleteoffer

@@ -412,7 +412,7 @@
                                                 <table class="table fs-15 align-middle">
                                                     <thead>
                                                         <tr>
-                                                            <th scope="col">Product ID</th>
+                                                            <!-- <th scope="col">Product ID</th> -->
                                                             <th scope="col">Product Name</th>
                                                             <th scope="col">Amount</th>
                                                             <th scope="col">Quantity</th>
@@ -422,9 +422,9 @@
                                                     <tbody>
                                                         <% order.products.forEach(product => { %>
                                                             <tr>
-                                                                <td>
+                                                                <!-- <td>
                                                                     <a href="#!" class="fw-medium link-primary"><%= product.productId._id %></a>
-                                                                </td>
+                                                                </td> -->
                                                                 <td>
                                                                     <div class="d-flex align-items-center">
                                                                         <div class="flex-shrink-0 me-2">
@@ -434,10 +434,10 @@
                                                                     </div>
                                                                 </td>
                                                                 <td>
-                                                                    <span class="text-secondary">$<%= product.price %></span>
+                                                                    <span class="text-secondary">Rs<%= product.price %></span>
                                                                 </td>
                                                                 <td><%= product.quantity %> PCS</td>
-                                                                <td class="text-end">$<%= product.price * product.quantity %></td>
+                                                                <td class="text-end">Rs<%= product.price * product.quantity %></td>
                                                             </tr>
                                                         <% }) %>
                                                         <tr>
@@ -447,7 +447,7 @@
                                                                     <tbody>
                                                                         <tr>
                                                                             <td>Sub Total:</td>
-                                                                            <td class="text-end">$<%= order.totalAmount %></td>
+                                                                            <td class="text-end">Rs<%= order.totalAmount %></td>
                                                                         </tr>
       
                                                                     </tbody>

@@ -167,7 +167,7 @@
                                     <select name="category" class="form-control">
                                         <option value="" selected disabled>Select Category</option>
                                         <% category.forEach(cat => { %>
-                                            <option value="<%= cat.name %>"><%= cat.name %></option>
+                                            <option value="<%= cat._id %>"><%= cat.name %></option>
                                         <% }); %>
                                     </select>
                                   

@@ -309,16 +309,15 @@
             extend: "excel",
             text: "Download Excel",
             customize: function (xlsx) {
-              console.log(xlsx);
-              // Handle Excel customization
+              console.log("xlsx structure:", xlsx);
               if (xlsx && xlsx[0] && xlsx[0].body && xlsx[0].body.length > 0) {
                 var body = xlsx[0].body;
-
+  
                 // Remove last column from each row
                 body.forEach(function (row) {
                   row.splice(-1, 1);
                 });
-
+  
                 // Calculate total of the third column for filtered rows
                 var filteredRows = table.rows({ search: "applied" }).data();
                 var total = filteredRows
@@ -326,8 +325,7 @@
                   .reduce(function (acc, val) {
                     return acc + parseFloat(val);
                   }, 0);
-
-            
+  
                 body.push(["Total amount (INR):", "", "", total]);
               }
             },
@@ -337,11 +335,23 @@
             extend: "pdf",
             text: "Download PDF",
             customize: function (doc) {
-              // Remove last column from the table
-              doc.content[1].table.body.forEach(function (col) {
-                col.pop(); // Remove content of last column
-              });
-
+              // Log structure of doc.content
+              console.log(doc.content);
+  
+              // Ensure table exists in doc.content
+              if (doc.content[1] && doc.content[1].table) {
+                // Remove last column from the table
+                doc.content[1].table.body.forEach(function (col) {
+                  col.pop(); // Remove content of last column
+                });
+  
+                // Adjust margins to move the table closer to the left
+                doc.content[1].margin = [-30, 0, 200, 10]; // Left, Top, Right, Bottom margins
+                // Adjust the left margin value (e.g., 20) as needed to align the table further left
+              } else {
+                console.error("Table not found in doc.content[1]");
+              }
+  
               // Calculate total of the third column for filtered rows
               var filteredRows = table.rows({ search: "applied" }).data();
               var total = filteredRows
@@ -349,17 +359,21 @@
                 .reduce(function (acc, val) {
                   return acc + parseFloat(val);
                 }, 0);
-
+  
+              // Add total text to the document
               var totalText = {
-                text: "Total amount (INR):        ", 
+                text: "Total amount (INR):  <%= overallOrderAmount.toFixed(2) %>Rs  ",
                 alignment: "right",
+                margin: [0, 10, 0, 0], // Adjust margin for the total text
               };
-
+  
+              // Add a spacer before the total section
               var marginBeforeTotal = {
                 text: "",
-                margin: [0, 10], // Margin before the total section
+                margin: [0, 10], // Add spacing before the total
               };
-              // Add the text elements to the PDF document
+  
+              // Push the elements to the PDF document
               doc.content.push(marginBeforeTotal, totalText);
             },
           },
@@ -367,6 +381,8 @@
       },
     },
   });
+  
+  
 
   // Refilter the table
   document.querySelectorAll("#min, #max").forEach((el) => {

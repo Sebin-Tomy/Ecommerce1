@@ -916,6 +916,9 @@
                                         <input type="hidden" value="<%= coupon._id  %>">
                                     <% }); %>
                                 </div>
+                                 <% if (typeof message !== 'undefined') { %>
+                                <p style="color: red;"><%= message %></p>
+                            <% } %>
                             </div>
                         </div>
                         <div class="card overflow-hidden">

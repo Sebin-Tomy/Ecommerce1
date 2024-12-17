@@ -159,20 +159,19 @@
                                         </thead>
                                         <tbody>
                                             <% offers.forEach(offer => { %>
-                                                <tr>
+                                                <tr id="categoryRow-<%= offer._id %>">
                                                     <td><%= offer.offer %></td>
-                                                    <td><%=  offer.category %></td>
+                                                    <td><%= offer.category %></td>
                                                     <td><%= offer.productname %></td>
-                                              
                                                     <td>
                                                         <div class="col-lg-1 col-sm-2 col-4 text-start">
                                                             <a href="#" onclick="deleteProduct('<%= offer._id %>')" class="btn btn-sm btn-danger w-10 w-md-auto">Delete</a>
                                                         </div>
-                                                       
                                                     </td>
                                                 </tr>
-                                                <% }) %>
+                                            <% }) %>
                                         </tbody>
+                                        
                                     </table>
                                     
                                 </div>
@@ -184,18 +183,28 @@
                     <!--end col-->
                 </div>
             </div>
- <div class="pagination-area mt-15 mb-50">
-     <nav aria-label="Page navigation example">
+            <div class="pagination-area mt-15 mb-50">
+                <nav aria-label="Page navigation example">
                     <ul class="pagination justify-content-start">
-                        <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                        <li class="page-item"><a class="page-link" href="#">02</a></li>
-                        <li class="page-item"><a class="page-link" href="#">03</a></li>
-                        <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                        <li class="page-item"><a class="page-link" href="#">16</a></li>
-                        <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+                        <% if (currentPage > 1) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<%= currentPage - 1 %>">&laquo;</a>
+                            </li>
+                        <% } %>
+                        <% for (let i = 1; i <= totalPages; i++) { %>
+                            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                            </li>
+                        <% } %>
+                        <% if (currentPage < totalPages) { %>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=<%= currentPage + 1 %>">&raquo;</a>
+                            </li>
+                        <% } %>
                     </ul>
                 </nav>
             </div>
+            
 </section> <!-- content-main end// -->
 <footer class="main-footer font-xs">
          
@@ -227,14 +236,16 @@
             
         }).then((result) => {
             if (result.isConfirmed) {
-                let request = { method: 'GET' };
+                let request = { method: 'DELETE' };
                 // Send AJAX request to delete category
                 fetch(`/admin/offer-delete/${ProductId}`, request)
                     .then(response => {
                         if (response.ok) {
-                            Swal.fire('Deleted!', 'The product has been deleted.', "success");
+                            const row = document.getElementById(`categoryRow-${ProductId}`);
+                            if (row) row.remove();
+                            Swal.fire('Deleted!', 'The offer has been deleted.', "success");
                             // Reload the page after deletion
-                            location.reload();
+                        
                         } else {
                             throw new Error('Failed to delete product.');
                         }

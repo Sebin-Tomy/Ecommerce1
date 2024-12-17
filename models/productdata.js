@@ -10,7 +10,10 @@ const productSchema = new mongoose.Schema({
   brand: { type: String },
   image: [{ type: String }],
   description:{ type: String },
-  category:{type: String},
+  categoryId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category"
+   },
   offer:{
    type:Boolean,
     default:false

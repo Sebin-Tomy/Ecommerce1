@@ -324,15 +324,16 @@
                                                             <tr>
                                                                 <!-- Skip Product ID -->
                                                                 <td><%= product.productname %></td>
-                                                                <td>$<%= product.price %></td>
+                                                                <td>Rs<%= product.price %></td>
                                                                 <td><%= product.quantity %> PCS</td>
-                                                                <td class="text-end">$<%= product.price * product.quantity %></td>
+                                                                <td class="text-end">Rs<%= product.price * product.quantity %></td>
                                                             </tr>
                                                         <% }) %>
+                                                        
                                                         <tr>
                                                             <td colspan="2"></td>
                                                             <td>Subtotal:</td>
-                                                            <td class="text-end">$<%= order.totalAmount %></td>
+                                                            <td class="text-end">RS<%= order.totalAmount %></td>
                                                         </tr>
                                                     </tbody>
                                                 </table>

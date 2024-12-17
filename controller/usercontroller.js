@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../models/userModel');
 const nodemailer = require('nodemailer');
+const { STATUS_CODES ,MESSAGES} = require('../constants/constants');
 const Products = require('../models/productdata');
 const address = require('../models/address');
 const Category = require('../models/categories');
@@ -30,7 +31,7 @@ const loginLoad = async(req,res)=>{
         }
         catch(error){
             console.log(error.message);   
-            res.status(500).render('error').send('Internal Server Error');
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -41,7 +42,7 @@ const loginLoadin = async(req,res)=>{
         }
         catch(error){
             console.log(error.message);   
-            res.status(500).render('error').send('Internal Server Error');
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -51,7 +52,7 @@ const loginregister = async(req,res)=>{
         }
         catch(error){
             console.log(error.message); 
-            res.status(500).render('error').send('Internal Server Error');  
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);  
         }
     }
 
@@ -60,7 +61,7 @@ const loginHome = async (req, res) => {
             if (req.session.user_id) {
                 const userData = await User.findById(req.session.user_id);
                 if (userData && userData.is_blocked) {
-                    return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+                    return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
                 }
             } else {
                 return res.redirect('/login');
@@ -88,7 +89,7 @@ const loginHome = async (req, res) => {
         } catch (error) {
             console.log(error.message);
             res.redirect('/login');
-            res.status(500).render('error').send('Internal Server Error');
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
         }
     };
     
@@ -133,7 +134,7 @@ const forgotspass = async(req,res)=>{
         }
         catch(error){
             console.log(error.message); 
-            res.status(500).render('error').send('Internal Server Error');  
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);  
         }
     }
 
@@ -145,7 +146,7 @@ const changepass = async(req,res)=>{
         }
         catch(error){
             console.log(error.message); 
-            res.status(500).render('error').send('Internal Server Error');  
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);  
         }
     }
 
@@ -173,7 +174,7 @@ const updatePassword = async (req, res) => {
             res.redirect('/login?message=Password changed successfully');
         } catch (error) {
             console.log(error.message);
-            res.status(500).render('error', { errorMessage: 'Internal Server Error' });
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error', { errorMessage: 'Internal Server Error' });
         }
     };function validatePassword(password) {
         const minLength = 8;
@@ -198,7 +199,7 @@ const handleForgotPass = async (req, res) => {
             res.redirect('/forgot/otp');
         } catch (error) {
             console.log(error.message);
-            res.status(500).render('error', { errorMessage: 'Internal Server Error' });
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error', { errorMessage: 'Internal Server Error' });
         }
     };
 
@@ -230,8 +231,7 @@ const insertUser = async (req, res) => {
     
                     console.log("Looking for user's wallet");
                     let userWallet = await wallet.findOne({ userId });
-    
-                    if (userWallet) {
+                   if (userWallet) {
                         console.log("Updating existing wallet");
                         const walletId = userWallet._id;
                         const newRefundAmount = 500;
@@ -249,7 +249,7 @@ const insertUser = async (req, res) => {
                         await newWallet.save();
                     }
                 } else {
-                    return res.status(200).render('register', { message: "Referral code does not exist" });
+                    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('register', { message: "Referral code does not exist" });
                 }
             }
     
@@ -322,7 +322,7 @@ const resendOtp = async (req, res) => {
         console.log("sdfsd")
         const email = req.session.email; 
         if (!email) {
-            return res.status(400).send('Email not found in session');
+            return res.status(STATUS_CODES.BAD_REQUEST).send('Email not found in session');
         }
             const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
             console.log(otpCode);
@@ -371,7 +371,7 @@ const forgotpassotp = async (req, res) => {
       const email = req.session.email; 
     
         if (!email) {
-            return res.status(400).send('Email not found in session');
+            return res.status(STATUS_CODES.BAD_REQUEST).send('Email not found in session');
         }
             const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
             console.log(otpCode);
@@ -468,7 +468,7 @@ const verifyRegister = async (req, res) => {
             }
             console.log(error);
             const errorMessage = "Internal Server Error";
-            return res.status(500).render('error', { statusCode: 500, errorMessage });
+            return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error', { statusCode: 500, errorMessage });
         }
     };
 
@@ -496,7 +496,7 @@ const verifyRegister1 = async (req, res) => {
             }
             console.log(error);
             const errorMessage = "Internal Server Error";
-            return res.status(500).render('error', { statusCode: 500, errorMessage });
+            return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error', { statusCode: 500, errorMessage });
         }
     };
 
@@ -510,7 +510,7 @@ const forgotregisterOtp = async (req, res) => {
             console.log("adsfasdfadsfafsadadfasfddsa")
         } catch (error) {
             console.log(error.message);
-            res.status(500).render('error', { statusCode: 500, errorMessage: 'Internal Server Error' });
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error', { statusCode: STATUS_CODES.INTERNAL_SERVER_ERROR, errorMessage: MESSAGES.INTERNAL_SERVER_ERROR });
         }
     };
     
@@ -525,7 +525,7 @@ const registerOtp = async (req, res) => {
             console.log("adsfasdfadsfafsadadfasfddsa")
         } catch (error) {
             console.log(error.message);
-            res.status(500).render('error', { statusCode: 500, errorMessage: 'Internal Server Error' });
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error', { statusCode: STATUS_CODES.INTERNAL_SERVER_ERROR, errorMessage: MESSAGES.INTERNAL_SERVER_ERROR });
         }
     };
     
@@ -545,7 +545,7 @@ const userdetails = async(req,res)=>{
 try{     if (req.session.user_id) {
     const userData = await User.findById(req.session.user_id);
     if (userData && userData.is_blocked) {
-        return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+        return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
     }
 } else {
     return res.redirect('/login');
@@ -557,14 +557,14 @@ const userData = await User.findById({_id:req.session.user_id});
         }
 catch(error){
  console.log(error.message);  
- res.status(500).render('error').send('Internal Server Error'); 
+ res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR); 
  }}
 
 const useredit = async(req,res)=>   
 {try{if (req.session.user_id) {
     const userData = await User.findById(req.session.user_id);
     if (userData && userData.is_blocked) {
-        return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+        return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
     }
 } else {
     return res.redirect('/login');
@@ -575,7 +575,7 @@ res.render('editprofile',{user});
 }
 catch(error){
 console.log(error.message);
-res.status(500).render('error').send('Internal Server Error');
+res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
 }
 }
 
@@ -583,7 +583,7 @@ const updateUsers = async(req,res)=>{
 try{if (req.session.user_id) {
     const userData = await User.findById(req.session.user_id);
     if (userData && userData.is_blocked) {
-        return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+        return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
     }
 } else {
     return res.redirect('/login');
@@ -595,14 +595,14 @@ res.redirect('/user')
 }
 catch(error)
 {console.log(error.message)
-    res.status(500).render('error').send('Internal Server Error');
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
 }}
 
 const addaddress = async (req, res) => {
 try {if (req.session.user_id) {
     const userData = await User.findById(req.session.user_id);
     if (userData && userData.is_blocked) {
-        return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+        return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
     }
 } else {
     return res.redirect('/login');
@@ -610,7 +610,7 @@ try {if (req.session.user_id) {
     res.render('add-address'); 
     } catch (error) {
         console.log(error.message);
-        res.status(500).send('Internal Server Error');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -618,7 +618,7 @@ const insertaddress = async(req, res) => {
     try {if (req.session.user_id) {
         const userData = await User.findById(req.session.user_id);
         if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
         }
     } else {
         return res.redirect('/login');
@@ -641,14 +641,14 @@ const insertaddress = async(req, res) => {
       res.redirect('/address');
     } catch (error) {
       console.log(error.message);
-      res.status(500).render('error').send('Internal Server Error'); }
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR); }
   };
 
 const addresslist = async(req, res) => {
         try {  if (req.session.user_id) {
             const userData = await User.findById(req.session.user_id);
             if (userData && userData.is_blocked) {
-                return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
             }
         } else {
             return res.redirect('/login');
@@ -659,7 +659,7 @@ const addresslist = async(req, res) => {
             res.render('address',{address:Address});; 
         } catch (error) {
             console.log(error.message);
-            res.status(500).render('error');
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error');
         }
     };
 
@@ -668,10 +668,10 @@ const deleteAddress = async (req, res) => {
             const id = req.params.id;
             await address.deleteOne({ _id: id });
             res.redirect('/address');
-            res.sendStatus(200);
+            res.sendStatus(STATUS_CODES.SUCCESS);
         } catch (error) {
             console.log(error.message);
-            res.status(500).render('error')
+            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error')
         }
     };
 
@@ -679,7 +679,7 @@ const addressedit = async(req,res)=>
 {try{if (req.session.user_id) {
     const userData = await User.findById(req.session.user_id);
     if (userData && userData.is_blocked) {
-        return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+        return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
     }
 } else {
     return res.redirect('/login');
@@ -690,14 +690,14 @@ res.render('edit-address',{address:address12});
 }
 catch(error){
     console.log(error.message);
-    res.status(500).render('error').send('Internal Server Error');
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
 }}
 
 const updateaddress = async(req,res)=>{
 try{if (req.session.user_id) {
     const userData = await User.findById(req.session.user_id);
     if (userData && userData.is_blocked) {
-        return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+        return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
     }
 } else {
     return res.redirect('/login');
@@ -710,14 +710,14 @@ try{if (req.session.user_id) {
     }
 catch(error)
     {console.log(error.message)
-        res.status(500).render('error').send('Internal Server Error');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
     }}
 
 const productdetails = async(req,res)=>{
 try{ if (req.session.user_id) {
     const userData = await User.findById(req.session.user_id);
     if (userData && userData.is_blocked) {
-        return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+        return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
     }
 } else {
     return res.redirect('/login');
@@ -727,14 +727,14 @@ try{ if (req.session.user_id) {
                 }
         catch(error){
          console.log(error.message);  
-         res.status(500).render('error').send('Internal Server Error'); 
+         res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR); 
          }}
 
 const getCartItems = async (req, res) => {
  try {  if (req.session.user_id) {
     const userData = await User.findById(req.session.user_id);
     if (userData && userData.is_blocked) {
-        return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+        return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
     }
 } else {
     return res.redirect('/login');
@@ -782,7 +782,7 @@ const getCartItems = async (req, res) => {
 
  } catch (error) {
                 console.log(error.message);
-                res.status(500).render('error');
+                res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error');
               }
         };
 
@@ -790,7 +790,7 @@ const addToCart = async (req, res) => {
         try {if (req.session.user_id) {
                 const userData = await User.findById(req.session.user_id);
                 if (userData && userData.is_blocked) {
-                    return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+                    return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
                 }
             } else {
                 return res.redirect('/login');
@@ -808,7 +808,7 @@ const addToCart = async (req, res) => {
      if (!saveData) {console.log("ome")
                  const pr = await products.findOne({ _id: productId });
                  if (!pr) {
-                    return res.status(404).json({ success: false, message: 'Product not found.' });
+                    return res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: 'Product not found.' });
                 }
                     console.log("Product details:", pr);
                     let sub = pr.price * quantity;
@@ -848,7 +848,7 @@ const addToCart = async (req, res) => {
                res.json({ success: true, message: 'Item added to cart successfully.' });
             } catch (error) {
                 console.log(error);
-                res.status(500).json({ success: false, message: 'Internal Server Error' });
+                res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: MESSAGES.INTERNAL_SERVER_ERROR });
             }
         };
         
@@ -862,10 +862,10 @@ const deleteCart = async (req, res) => {
             { $pull: { products: { _id: itemId } } }
         );
 
-        res.sendStatus(200);
+        res.sendStatus(STATUS_CODES.SUCCESS);
     } catch (error) {
         console.log(error.message);
-        res.status(500).send('Internal Server Error');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -875,7 +875,7 @@ const checkout = async (req, res) => {
         if (req.session.user_id) {
             const userData = await User.findById(req.session.user_id);
             if (userData && userData.is_blocked) {
-                return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
             }
         } else {
             return res.redirect('/login');
@@ -897,17 +897,21 @@ const checkout = async (req, res) => {
         
         const total = saveData.reduce((acc, cart) => acc + (cart.total || 0), 0);
 
-        const availableCoupons = coupon1.filter(coupon => total >= coupon.min_amount);
-
+        const availableCoupons = coupon1.filter(coupon => total >= coupon.min_amount && total > coupon.discount_amount);
+        let appliedCouponCode = saveData[0]?.couponId 
+            ? (await Coupon.findById(saveData[0].couponId))?.couponCode 
+            : "";
+       
         res.render('checkout', {
             address: Address,
             coup: availableCoupons, 
             total: total,
-            saveData: saveData.length > 0 ? saveData : [{ coupon: "Not Applied" }]
+            saveData: saveData.length > 0 ? saveData : [{ coupon: "Not Applied" }],
+           appliedCouponCode
         });
     } catch (error) {
         console.log(error.message);
-        res.status(500).send('Internal Server Error');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -917,7 +921,7 @@ const checkaddressedit = async(req, res) => {
             try{if (req.session.user_id) {
                 const userData = await User.findById(req.session.user_id);
                 if (userData && userData.is_blocked) {
-                    return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+                    return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
                 }
             } else {
                 return res.redirect('/login');
@@ -935,7 +939,7 @@ const updatecheckedaddress = async(req,res)=>{
             try{if (req.session.user_id) {
                 const userData = await User.findById(req.session.user_id);
                 if (userData && userData.is_blocked) {
-                    return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+                    return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
                 }
             } else {
                 return res.redirect('/login');
@@ -955,7 +959,7 @@ const updatecheckedaddress = async(req,res)=>{
                 try {if (req.session.user_id) {
                     const userData = await User.findById(req.session.user_id);
                     if (userData && userData.is_blocked) {
-                        return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+                        return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
                     }
                 } else {
                     return res.redirect('/login');
@@ -970,7 +974,7 @@ const updatecheckedaddress = async(req,res)=>{
                     res.render('payment', { total: totalSum, cartItems, isCodAvailable });
                 } catch (error) {
                     console.log(error.message);
-                    res.status(500).render('error').send('Internal Server Error');
+                    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
                 }
             };
             
@@ -978,7 +982,7 @@ const updatecheckedaddress = async(req,res)=>{
                     try {if (req.session.user_id) {
                         const userData = await User.findById(req.session.user_id);
                         if (userData && userData.is_blocked) {
-                            return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+                            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
                         }
                     } else {
                         return res.redirect('/login');
@@ -1051,7 +1055,7 @@ const updatecheckedaddress = async(req,res)=>{
                       res.redirect('/order-successfull');
                     } catch (error) {
                       console.error('Error placing order:', error);
-                      res.status(500).json({ success: false, error: error.message });
+                      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, error: error.message });
                     }
                   };
                   
@@ -1061,7 +1065,7 @@ const updatecheckedaddress = async(req,res)=>{
                         if (req.session.user_id) {
                             const userData = await User.findById(req.session.user_id);
                             if (userData && userData.is_blocked) {
-                                return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+                                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
                             }
                         } else {
                             return res.redirect('/login');
@@ -1069,13 +1073,13 @@ const updatecheckedaddress = async(req,res)=>{
                 
                         const userId = req.session.user_id;
                         const page = parseInt(req.query.page) || 1;
-                        const limit = 10; // Number of orders per page
+                        const limit = 5; 
                         const skip = (page - 1) * limit;
                 
-                        // Fetch total orders and sort by creation date in descending order
+                      
                         const totalOrders = await orderModel.countDocuments({ userId: userId });
                         const orders = await orderModel.find({ userId: userId })
-                            .sort({ orderDate: -1 }) // Sort by creation date (latest first)
+                            .sort({ orderDate: -1 }) 
                             .skip(skip)
                             .limit(limit);
                 
@@ -1088,7 +1092,7 @@ const updatecheckedaddress = async(req,res)=>{
                         });
                     } catch (error) {
                         console.log(error.message);
-                        res.status(500).render('error').send('Internal Server Error');
+                        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
                     }
                 };
                 
@@ -1097,7 +1101,7 @@ const orderview = async (req, res) => {
                     try {if (req.session.user_id) {
                         const userData = await User.findById(req.session.user_id);
                         if (userData && userData.is_blocked) {
-                            return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+                            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
                         }
                     } else {
                         return res.redirect('/login');
@@ -1109,7 +1113,7 @@ const orderview = async (req, res) => {
                         res.render('order-view', { order,user,Address }); 
                     } catch (error) {
                         console.log(error.message);
-                        res.status(500).render('error').send('Internal Server Error');
+                        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
                     }
                 };
 
@@ -1117,7 +1121,7 @@ const checkedaddaddress = async (req, res) => {
                     try {if (req.session.user_id) {
                         const userData = await User.findById(req.session.user_id);
                         if (userData && userData.is_blocked) {
-                            return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+                            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
                         }
                     } else {
                         return res.redirect('/login');
@@ -1125,7 +1129,7 @@ const checkedaddaddress = async (req, res) => {
                         res.render('add-checkoutadress'); 
                         } catch (error) {
                             console.log(error.message);
-                            res.status(500).send('Internal Server Error');
+                            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
                         }
                     };
 
@@ -1133,7 +1137,7 @@ const checkaddressinsert = async(req, res) => {
                     try{if (req.session.user_id) {
                         const userData = await User.findById(req.session.user_id);
                         if (userData && userData.is_blocked) {
-                            return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+                            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
                         }
                     } else {
                         return res.redirect('/login');
@@ -1155,7 +1159,7 @@ const checkaddressinsert = async(req, res) => {
                     }
                     catch(error){
                         console.log(error.message);
-                        res.status(500).render('error').send('Internal Server Error');
+                        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
                     }
                 };
 
@@ -1163,7 +1167,7 @@ const checkaddressinsert = async(req, res) => {
                     try {if (req.session.user_id) {
                         const userData = await User.findById(req.session.user_id);
                         if (userData && userData.is_blocked) {
-                            return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+                            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
                         }
                     } else {
                         return res.redirect('/login');
@@ -1216,7 +1220,7 @@ const checkaddressinsert = async(req, res) => {
                         });
                     } catch (error) {
                         console.log("Error:", error);
-                        res.status(500).json({ error: "An error occurred while searching for products." });
+                        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "An error occurred while searching for products." });
                     }
                 };
                 
@@ -1225,7 +1229,7 @@ const cancelOrder = async (req, res) => {
                   try {if (req.session.user_id) {
                     const userData = await User.findById(req.session.user_id);
                     if (userData && userData.is_blocked) {
-                        return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+                        return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
                     }
                 } else {
                     return res.redirect('/login');
@@ -1233,11 +1237,11 @@ const cancelOrder = async (req, res) => {
                     const orderId = req.params.orderId;
                     const order = await orderModel.findById(orderId);
                     if (!order) {
-                      return res.status(404).send("Order not found");
+                      return res.status(STATUS_CODES.NOT_FOUND).send("Order not found");
                     }
                     const cancellableStatuses = ["Pending", "Processing", "Paid"];
                     if (!cancellableStatuses.includes(order.status)) {
-                      return res.status(400).send("Order cannot be cancelled");
+                      return res.status(STATUS_CODES.BAD_REQUEST).send("Order cannot be cancelled");
                     }
                     
                    order.status = "Cancelled";
@@ -1253,7 +1257,7 @@ const cancelOrder = async (req, res) => {
                     res.redirect('/order');
                   } catch (error) {
                     console.log(error.message);
-                    res.status(500).send("Internal Server Error");
+                    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
                   }
                 };
 
@@ -1262,7 +1266,7 @@ const wishlist = async(req,res) => {
         if (req.session.user_id) {
             const userData = await User.findById(req.session.user_id);
             if (userData && userData.is_blocked) {
-                return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
             }
         } else {
             return res.redirect('/login');
@@ -1282,7 +1286,7 @@ const wishlist = async(req,res) => {
          
        } catch (error) {
         console.log(error.message);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
     }}
 
 const wishlistpage = async(req,res) => {
@@ -1290,7 +1294,7 @@ console.log('hi')
 if (req.session.user_id) {
     const userData = await User.findById(req.session.user_id);
     if (userData && userData.is_blocked) {
-        return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+        return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
     }
 } else {
     return res.redirect('/login');
@@ -1299,21 +1303,21 @@ const userId = req.session.user_id;
 
 const wish12 = await wishlist1.find({ userId }).populate('productId');
 
-res.render('wishlist', { wish12 });
+res.render('wishlist', { weish12 });
 } 
 
 const deleteWish = async (req, res) => {
     try {if (req.session.user_id) {
         const userData = await User.findById(req.session.user_id);
         if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
         }
     } else {
         return res.redirect('/login');
     }
         const id = req.params.id;
         await wishlist1.deleteOne({ _id: id });
-        res.sendStatus(200);
+        res.sendStatus(STATUS_CODES.SUCCESS);
     } catch (error) {
         console.log(error.message);  
 
@@ -1324,7 +1328,7 @@ const orderReturn=async(req,res)=>{
     try {if (req.session.user_id) {
         const userData = await User.findById(req.session.user_id);
         if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
         }
     } else {
         return res.redirect('/login');
@@ -1338,7 +1342,7 @@ const orderReturn=async(req,res)=>{
 res.json({ success: true, message: "Order has been canceled." });
     } catch (error) {
         console.log(error);
-        res.status(500).render('error').send('Internal Server Error');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -1346,14 +1350,14 @@ const wallet1 = async (req, res) => {
     try {if (req.session.user_id) {
         const userData = await User.findById(req.session.user_id);
         if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
         }
     } else {
         return res.redirect('/login');
     }
         const userId = req.session.user_id;
         if (!userId) {
-            return res.status(400).send("User ID is required");
+            return res.status(STATUS_CODES.BAD_REQUEST).send("User ID is required");
         }
 
         const wallet2 = await wallet.findOne({ userId: userId }).populate({
@@ -1392,7 +1396,7 @@ const wallet1 = async (req, res) => {
         res.render('wallet', { wallet: wallet2, refund: refunds });
     } catch (error) {
         console.error("Error fetching wallet details:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -1400,7 +1404,7 @@ const updateQuantity = async(req,res)=>{
     try {if (req.session.user_id) {
         const userData = await User.findById(req.session.user_id);
         if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+            return res.render('logine1', { message:MESSAGES.ACCOUNT_BLOCKED });
         }
     } else {
         return res.redirect('/login');
@@ -1432,7 +1436,7 @@ const updateQuantity = async(req,res)=>{
             console.log("Saved cart wie total:", saveData.total);
    } catch (error) {
         console.log(error);
-        res.status(500).render('error').send('Internal Server Error');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -1440,12 +1444,14 @@ const applycoupon = async(req, res) => {
     try {if (req.session.user_id) {
         const userData = await User.findById(req.session.user_id);
         if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
         }
     } else {
         return res.redirect('/login');
     }
         const Address = await address.find();
+        let k = await Coupon.find();
+
         const couponCode = req.body.couponCode; 
         const userId = req.session.user_id;
         const couponFind = await Coupon.findOne({couponCode:couponCode})
@@ -1460,10 +1466,18 @@ const applycoupon = async(req, res) => {
         console.log('ji')
         const totalSum = saveData.reduce((acc, cart) => acc + cart.total, 0);
         console.log("total",totalSum); 
+        console.log("d",couponFind.discount_amount)
+        if (Number(couponFind.discount_amount) > totalSum) {
+            console.log('hi');
+            return res.status(400).json({ success: false, message: 'Coupon discount amount exceeds the total value.' });
+        }
+
         const coupon = await Coupon.findOne({ 
         couponCode:couponCode });
         console.log("discount amount",coupon);
         console.log(totalSum);
+        console.log(coupon.discount_amount);
+       
   let minus = Number(totalSum) - Number(coupon.discount_amount)
   console.log("sdfsf",minus);
   const updateCart=await Cart.findOneAndUpdate(
@@ -1481,7 +1495,7 @@ const applycoupon = async(req, res) => {
 }  }
     catch (error) {
         console.log(error.message);
-        res.status(500).send('Internal Server Error');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -1489,7 +1503,7 @@ const removecoupon = async(req, res) => {
     try {if (req.session.user_id) {
         const userData = await User.findById(req.session.user_id);
         if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
         }
     } else {
         return res.redirect('/login');
@@ -1507,7 +1521,7 @@ const removecoupon = async(req, res) => {
         const coupon = await Coupon.findOne({ couponCode: couponCode });
 
         if (!coupon) {
-            return res.status(404).json({ success: false, message: 'Coupon not found' });
+            return res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: 'Coupon not found' });
         }
 
         console.log("discount amount", coupon);
@@ -1535,13 +1549,13 @@ const removecoupon = async(req, res) => {
             console.log("this is the user", user);
             res.json({ success: true, message: 'Coupon removed successfully' });
         } else {
-            res.status(400).json({ success: false, message: 'Failed to update cart' });
+            res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: 'Failed to update cart' });
         }
 
          console.log('dsfsdf');
     } catch (error) {
         console.log(error.message);
-        res.status(500).send('Internal Server Error');
+        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
     }
 };
 
@@ -1549,7 +1563,8 @@ const orderfailure = async (req, res) => {
     try {if (req.session.user_id) {
         const userData = await User.findById(req.session.user_id);
         if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: "Your account has been blocked. Please contact support for assistance." });
+            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED
+             });
         }
     } else {
         return res.redirect('/login');
@@ -1599,9 +1614,7 @@ const orderfailure = async (req, res) => {
           }
         }
       }
-  
-      
-      const order = new orderModel({
+     const order = new orderModel({
         userId,
         addressid: addressId,
         products: orderProducts,
@@ -1622,7 +1635,7 @@ const orderfailure = async (req, res) => {
       res.redirect('/order');
     } catch (error) {
       console.error('Error placing order:', error);
-      res.status(500).json({ success: false, error: error.message });
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, error: error.message });
     }
   };
   
