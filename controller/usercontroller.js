@@ -428,7 +428,7 @@ const verifyRegister = async (req, res) => {
            
             if (Date.now() > req.session.otpGeneratedAt + req.session.otpExpiration * 1000) {
                 
-                return res.render('registerOtp', { message: "OTP has expired", otpExpiration: req.session.otpExpiration,  otpGeneratedAt :req.session.otpGeneratedAt });
+                return res.render('registerotp', { message: "OTP has expired", otpExpiration: req.session.otpExpiration,  otpGeneratedAt :req.session.otpGeneratedAt });
             }
     
             if (loadOtp === OTPs) {
@@ -460,7 +460,7 @@ const verifyRegister = async (req, res) => {
                     res.render('logine1', { message: "Registration is successful" });
                 }
             } else {
-                res.render('registerOtp', { message: "OTP is not correct", otpExpiration: req.session.otpExpiration,  otpGeneratedAt :req.session.otpGeneratedAt });
+                res.render('registerotp', { message: "OTP is not correct", otpExpiration: req.session.otpExpiration,  otpGeneratedAt :req.session.otpGeneratedAt });
             }
         } catch (error) {
             if (error.code === 11000 && error.keyPattern && error.keyPattern.email) {
@@ -483,7 +483,7 @@ const verifyRegister1 = async (req, res) => {
             console.log(k);
             if (Date.now() > req.session.otpGeneratedAt + req.session.otpExpiration * 1000) {
                 console.log("hi");
-                return res.render('registerOtp', { message: "OTP has expired", otpExpiration: req.session.otpExpiration,  otpGeneratedAt :req.session.otpGeneratedAt });
+                return res.render('registerotp', { message: "OTP has expired", otpExpiration: req.session.otpExpiration,  otpGeneratedAt :req.session.otpGeneratedAt });
             }
             if (loadOtp === OTPs) {
             res.redirect('/changepassword')
