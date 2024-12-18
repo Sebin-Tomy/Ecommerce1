@@ -521,7 +521,7 @@ const registerOtp = async (req, res) => {
             const otpExpiration = req.session.otpExpiration;
             const otpGeneratedAt = req.session.otpGeneratedAt;
             console.log("hi")
-            res.render('registerOtp', { otpExpiration, otpGeneratedAt });
+            res.render('registerotp', { otpExpiration, otpGeneratedAt });
             console.log("adsfasdfadsfafsadadfasfddsa")
         } catch (error) {
             console.log(error.message);

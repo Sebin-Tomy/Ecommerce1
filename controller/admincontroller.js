@@ -339,7 +339,7 @@ const deleteCategory = async (req, res) => {
         const id = req.params.id;
         console.log('the deleted category');
     
-        //  await Products.deleteMany({categoryId:id})
+       
  
         await Category.findByIdAndDelete(id);
         res.sendStatus(STATUS_CODES.SUCCESS);
