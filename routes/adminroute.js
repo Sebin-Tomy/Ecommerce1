@@ -2,7 +2,13 @@ const express = require("express");
 const admin_route = express();
 const session = require("express-session");
 const config = require("../config/config");
-admin_route.use(session({ secret: config.sessionSecret }));
+admin_route.use(session({
+  secret:  "admin_secret_key",
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 3600000 } // 1 hour
+}));
+
 const bodyParser = require("body-parser");
 admin_route.use(bodyParser.json());
 admin_route.use(bodyParser.urlencoded({ extended: true }));
@@ -31,12 +37,11 @@ const adminController = require("../controller/admincontroller");
 admin_route.get("/", auth.isLogout, adminController.loadLogin);
 admin_route.post("/logi", adminController.verifyLogin);
 admin_route.get("/home", auth.isLogin, adminController.loadDashboard);
-admin_route.get("/logout", auth.isLogin, adminController.logout);
+admin_route.get("/logout", adminController.logout);
 admin_route.get("/users", auth.isLogin, adminController.userlist);
 admin_route.delete("/delete-user/:id", auth.isLogin, adminController.deleteUser);
-// Route to block user
+
 admin_route.patch("/block-user/:id", auth.isLogin, adminController.blockUser);
-// Route to unblock user
 admin_route.patch(
   "/unblock-user/:id",
   auth.isLogin,
@@ -59,7 +64,7 @@ admin_route.delete(
   auth.isLogin,
   adminController.deleteCategory
 );
-// products
+
 admin_route.get("/products", auth.isLogin, adminController.products);
 admin_route.get("/add-products", auth.isLogin, adminController.addproducts);
 admin_route.post(

@@ -332,7 +332,7 @@
                                             <h6 class="fs-18 mb-3">Customers Info</h6>
                                             <p class="mb-0 fw-medium"><%= user.name %></p>
                                             <p class="mb-1"><%= user.email %></p>
-                                            <p class="mb-0">013-789-9876rewq</p>
+                                            <p class="mb-0">013-789-9876</p>
                                         </div>
                                         <div class="avatar-sm flex-shrink-0">
                                             <div class="avatar-title bg-success-subtle text-success rounded fs-3">
@@ -350,9 +350,9 @@
                                     <div class="d-flex gap-3">
                                         <div class="flex-grow-1">
                                             <h6 class="fs-18 mb-3">Shipping Address</h6>
-                                            <p class="mb-0"><%= Address.city %>, <%= Address.fullName %>, Floor 2</p>
-                                            <p class="mb-1">Tashkent, Uzbekistan</p>
-                                            <p class="mb-0">013-789-9876</p>
+                                            <p class="mb-0"><%= Address.fullName %>, <%= Address.postalCode  %>, Floor 2</p>
+                                            <p class="mb-1"><%= Address.city %>, <%= Address.state %></p>
+                                            <p class="mb-0"><%= Address.phoneNumber%></p>
                                         </div>
                                         <div class="avatar-sm flex-shrink-0">
                                             <div class="avatar-title bg-primary-subtle text-primary rounded fs-3">
@@ -413,6 +413,7 @@
                                                     <thead>
                                                         <tr>
                                                             <!-- <th scope="col">Product ID</th> -->
+                                                            <th scope="col">Order Id</th>
                                                             <th scope="col">Product Name</th>
                                                             <th scope="col">Amount</th>
                                                             <th scope="col">Quantity</th>
@@ -422,9 +423,7 @@
                                                     <tbody>
                                                         <% order.products.forEach(product => { %>
                                                             <tr>
-                                                                <!-- <td>
-                                                                    <a href="#!" class="fw-medium link-primary"><%= product.productId._id %></a>
-                                                                </td> -->
+                                                                <td><%= Math.floor(Math.random() * 1000000) %> </td>
                                                                 <td>
                                                                     <div class="d-flex align-items-center">
                                                                         <div class="flex-shrink-0 me-2">
@@ -445,6 +444,11 @@
                                                             <td colspan="2" class="p-0">
                                                                 <table class="table table-borderless mb-0">
                                                                     <tbody>
+                                                                        <tr>
+                                                                          
+                                                                            <td>Discount Amount:</td>
+                                                                            <td class="text-end">RS - <%= discountAmount %></td>
+                                                                        </tr>
                                                                         <tr>
                                                                             <td>Sub Total:</td>
                                                                             <td class="text-end">Rs<%= order.totalAmount %></td>

@@ -26,6 +26,12 @@
             color: red;
             margin-top: 10px;
         }
+        #google-login-btn {
+            background-color: darkblue;
+            border-color: lightblue;
+            color: white; /* Optional: To ensure the text is readable */
+        }
+        
     </style>
 </head>
 <body>
@@ -60,6 +66,12 @@
                         <button type="submit" class="btn btn-primary w-100">Login</button>
                     </div>
                 </form>
+                <div class="mb-4">
+                    <button id="google-login-btn" class="btn btn-primary w-100">
+                        <i class="fab fa-google"></i> Login with Google
+                    </button>
+                </div>
+                
             </div>
         </div>
     </section>
@@ -89,5 +101,49 @@
     });
 </script>
 <script src="/js/main.js" type="text/javascript"></script>
+<script type="module">
+   
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider,signInWithPopup } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+ 
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzCPmFZhh0FFc1gzmxCBkS4_Xnc8U25dc",
+      authDomain: "authentication-33a52.firebaseapp.com",
+      projectId: "authentication-33a52",
+      storageBucket: "authentication-33a52.firebasestorage.app",
+      messagingSenderId: "56739148431",
+      appId: "1:56739148431:web:08495145ef607d7dc376fa",
+      measurementId: "G-XE0Q9PT3QV"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+auth.languageCode = 'en';
+const provider = new GoogleAuthProvider();
+const googlelogin = document.getElementById("google-login-btn");
+googlelogin.addEventListener("click", async function () {
+    try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        console.log(user);
+
+        const response = await fetch('/google-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: user.email ,name:user.displayName})
+        });
+
+     
+            window.location.href = "/index1"; // Redirect to index page
+      
+    } catch (error) {
+        console.error("Error during Google sign-in:", error);
+        alert("An error occurred during Google sign-in. Please try again.");
+    }
+});
+
+  </script>
 </body>
 </html>

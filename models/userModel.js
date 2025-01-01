@@ -1,34 +1,57 @@
 const mongoose = require("mongoose");
+
 const userSchema = new mongoose.Schema({
- name:{
-        type:String,
-        required:true
+    name: {
+        type: String,
+        required: true,
+        
     },
-    email:{
-        type:String,
-        required:true,
-        unique:true,
+    email: {
+        type: String,
+        required: true,
+        unique: true
     },
-    password:{
-        type:String,
-        required:true
+    password: {
+        type: String,
+        required: function () {
+            return !this.isGoogleUser; 
+        },
     },
-    is_admin:{type:Number,required:true},
+    is_admin: {
+        type: Number,
+        required: true,
+        
+    },
     phone: {
-        type:Number,  required:true
+        type: Number,
+        required: function () {
+            return !this.isGoogleUser; 
+        },
+   
     },
     coupon: {
-        type: [String] 
-     },
-    is_blocked:{
-        type:Boolean,
-        default:0  },
-        referral:{
-            type : String
-        },
- reference:{
-    type: String
- },image: [{ type: String }],
+        type: [String]
+    },
+    is_blocked: {
+        type: Boolean,
+        default: false
+    },
+    referral: {
+        type: String
+    },
+    reference: {
+        type: String
+    },
+    image: [
+        {
+            type: String
+        }
+    ],
+    isGoogleUser: {
+        type: Boolean,
+        default: false 
+    }
 });
-const user = mongoose.model('user',userSchema);
-module.exports = user;
+
+const User = mongoose.model("user", userSchema);
+module.exports = User;

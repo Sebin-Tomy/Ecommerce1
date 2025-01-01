@@ -342,6 +342,8 @@
                                             </button>
                                         </div>
                                     </div>
+                                    <div id="errorMessage" style="display: none; color: red;"></div>
+
                                 </div>
                             </div>
                       
@@ -473,6 +475,11 @@
                                     window.location.href = '/cart';
                                 } else {
                                     console.error(data.message);
+                                    const errorMessageElement = document.getElementById('errorMessage');
+                                    if (errorMessageElement) {
+                                        errorMessageElement.textContent = data.message;
+                                        errorMessageElement.style.display = 'block';
+                                    }
                                     // Handle error
                                 }
                             } catch (error) {

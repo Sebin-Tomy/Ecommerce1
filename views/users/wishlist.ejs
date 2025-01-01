@@ -567,6 +567,7 @@
                                 <% }) %> 
                             </table>
                         </div>
+                        <div id="errorMessage" style="display: none; color: red;"></div>
                         <div class="hstack gap-2 justify-content-end mt-2">
                             <!-- <a href="product-list.html" class="btn btn-hover btn-secondary">Continue Shopping <i class="ri-arrow-right-line align-bottom"></i></a>
                             <a href="checkout.html" class="btn btn-hover btn-primary">Check Out <i class="ri-arrow-right-line align-bottom"></i></a> -->
@@ -610,7 +611,13 @@
                              window.location.href = '/cart';
                            
                             } else {
-                                alert(data.message || "Error adding product to cart.");
+                                const errorMessageElement = document.getElementById('errorMessage');
+                                if (errorMessageElement) {
+                                    errorMessageElement.textContent = data.message;
+                                    errorMessageElement.style.display = 'block';
+                                }
+                                // Handle erro
+                             
                             }
                         } catch (error) {
                             console.error('Error:', error);

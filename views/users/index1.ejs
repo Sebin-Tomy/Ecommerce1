@@ -149,7 +149,14 @@
                     </button>
                 </div> -->
 
-          
+                <div class="topbar-head-dropdown ms-1 header-item">
+                    <a href="/cart">
+                    <button type="button" class="btn btn-icon btn-topbar btn-ghost-dark rounded-circle text-muted"  >
+                        <i class="ph-shopping-cart fs-18"></i>
+                        <span class="position-absolute topbar-badge cartitem-badge fs-10 translate-middle badge rounded-pill bg-danger"></span>
+                    </button>
+                    </a>
+                </div>
        
                     <div class="dropdown header-item dropdown-hover-end">
 
@@ -161,6 +168,7 @@
                         <!-- <button type="button" class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="ph-user-circle fs-22"></i>
                         </button>    -->
+                     
                         <div class="dropdown-menu dropdown-menu-end">
                             <!-- item-->
                             <h6 class="dropdown-header">Welcome </h6>
@@ -171,6 +179,8 @@
                             <a class="dropdown-item" href="/logout"><i class="bi bi-box-arrow-right text-muted fs-16 align-middle me-1"></i> <span class="align-middle" data-key="t-logout">Logout</span></a>
                         </div>
                     </div>
+                
+    
                 </div>
             </div>
         </nav>
@@ -594,14 +604,14 @@
                                 <div class="sort-by-container">
                                     <h5 class="fs-16">Sort By:</h5>
                                     <select id="sort-dropdown" name="sort" class="form-select">
-                                        <option value="option">Select</option>
-                                        <option value="lowtohigh">Low to High</option>
-                                        <option value="hightolow">High to Low</option>
-                                        <option value="alphabeticallyAZ">Alphabetically A-Z</option>
-                                        <option value="alphabeticallyZA">Alphabetically Z-A</option>
-                                
+                                        <option value="option" <%= sortOption === "option" ? "selected" : "" %>>Select</option>
+                                        <option value="lowtohigh" <%= sortOption === "lowtohigh" ? "selected" : "" %>>Low to High</option>
+                                        <option value="hightolow" <%= sortOption === "hightolow" ? "selected" : "" %>>High to Low</option>
+                                        <option value="alphabeticallyAZ" <%= sortOption === "alphabeticallyAZ" ? "selected" : "" %>>Alphabetically A-Z</option>
+                                        <option value="alphabeticallyZA" <%= sortOption === "alphabeticallyZA" ? "selected" : "" %>>Alphabetically Z-A</option>
                                     </select>
                                 </div>
+                                
                            
                                 <input type="hidden" name="inputStatus" id="inputStatus" value="">
                                 <input type="hidden" name="sortOption" id="sortOption" value="">
@@ -615,11 +625,12 @@
 
                                 <div class="card-body border-bottom">
                                     <div>
-                                        <h5 class="fs-16">Category: <%= selectedCategory || '' %></h5> 
+                                        <h5 class="fs-16">Category: <%= selectedCategory || 'All' %></h5> 
                                         <ul class="list-unstyled mb-0 filter-list">
                                             <% categories.forEach(category => { %>
                                                 <li>
-                                                    <a href="/search?category=<%= category.name %>" class="d-flex py-1 align-items-center category-link">
+                                                    <a href="/search?category=<%= category.name %>&page=1&limit=<%= limit %>&search=<%= inputLetter %>&sort=<%= sortOption %>" 
+                                                       class="d-flex py-1 align-items-center category-link">
                                                         <div class="flex-grow-1">
                                                             <h5 class="fs-14 mb-0 listname"><%= category.name %></h5>
                                                         </div>
@@ -627,10 +638,9 @@
                                                 </li>
                                             <% }) %>
                                         </ul>
-                                        
                                     </div>
-                                    
                                 </div>
+                                
 
                 
 
@@ -718,6 +728,7 @@
                                                         
                                                         
                                                     </div>
+                                                    <div id="errorMessage" style="display: none; color: red;"></div>
                                                 </div>
                                             </div>
                                             
@@ -727,31 +738,41 @@
                         
                                     <div class="d-flex justify-content-center mt-4">
                                         <nav aria-label="Product pagination">
-                                            <ul class="pagination">
-                                                <% if (currentPage > 1) { %>
-                                                    <li class="page-item">
-                                                        <a class="page-link" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>&category=<%= selectedCategory %>&search=<%= inputLetter %>" aria-label="Previous">
-                                                            <span aria-hidden="true">&laquo;</span>
-                                                        </a>
-                                                    </li>
+                                          <ul class="pagination">
+                                              <% if (currentPage > 1) { %>
+                                                  <li class="page-item">
+                                                    <a class="page-link" href="search?page=<%= currentPage - 1 %>&limit=<%= limit %>&category=<%= selectedCategory || '' %>&search=<%= inputLetter || '' %>&sort=<%= sortOption%>" aria-label="Previous">
+                                                      <span aria-hidden="true">&laquo;</span>
+                                                    </a>
+                                                  </li>
                                                 <% } %>
-                                    
+                                                
                                                 <% for (let i = 1; i <= totalPages; i++) { %>
-                                                    <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                                                        <a class="page-link" href="?page=<%= i %>&limit=<%= limit %>&category=<%= selectedCategory %>&search=<%= inputLetter %>"><%= i %></a>
-                                                    </li>
+                                                  <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                                    <a class="page-link" href="search?page=<%= i %>&limit=<%= limit %>&category=<%= selectedCategory || '' %>&search=<%= inputLetter || '' %>&sort=<%= sortOption %>">
+                                                      <%= i %>
+                                                    </a>
+                                                  </li>
                                                 <% } %>
-                                    
+                                                
                                                 <% if (currentPage < totalPages) { %>
-                                                    <li class="page-item">
-                                                        <a class="page-link" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>&category=<%= selectedCategory %>&search=<%= inputLetter %>" aria-label="Next">
-                                                            <span aria-hidden="true">&raquo;</span>
-                                                        </a>
-                                                    </li>
+                                                  <li class="page-item">
+                                                    <a class="page-link" href="search?page=<%= currentPage + 1 %>&limit=<%= limit %>&category=<%= selectedCategory || '' %>&search=<%= inputLetter || '' %>&sort=<%= sortOption  %>" aria-label="Next">
+                                                      <span aria-hidden="true">&raquo;</span>
+                                                    </a>
+                                                  </li>
                                                 <% } %>
+                                                
                                             </ul>
+                                            
                                         </nav>
-                                    </div>
+                                      </div>
+                                           
+                                
+                                    
+                                    
+                                      
+
                         <div class="row d-none" id="search-result-elem">
                             <div class="col-lg-12">
                                 <div class="text-center py-5">
@@ -927,29 +948,31 @@
                 </div>
             </div>
         </section>
+       
         <script>
             document.getElementById("searchSortOptions").addEventListener("input", function(event) {
                 const inputLetter = event.target.value.charAt(event.target.value.length - 1);
-                console.log("Input letter:", inputLetter);
+                console.log("Input letter: ", inputLetter);
                 document.getElementById("inputLetter").value = inputLetter; 
             });</script>
             <script>
-            document.getElementById("searchForm").addEventListener("submit", function(event) {
-                const searchInput = document.getElementById("searchSortOptions").value.trim();
-                const sortOption = document.getElementById("sort-dropdown").value;
-                const inputLetter = document.getElementById("inputLetter").value; // Get the input letter
+                document.getElementById("sort-dropdown").addEventListener("change", function () {
+                    const sortOption = this.value;
                 
-                if (!searchInput) {
-                   
-                    document.getElementById("inputStatus").value = "EMPTY";
-                }
+                    if (sortOption === "option") {
+                        // Do nothing for the default option
+                        return;
+                    }
                 
-              
-                document.getElementById("sortOption").value = sortOption;
+                  
+                    const searchInput = document.getElementById("searchSortOptions").value.trim();
+                    const inputLetter = document.getElementById("inputLetter").value;
                 
-
-                document.getElementById("inputLetter").value = inputLetter;
-            });</script>
+                    document.getElementById("sortOption").value = sortOption;
+                    document.getElementById("inputLetter").value = inputLetter;
+                    document.getElementById("searchForm").submit();
+                });
+                </script>
   
      <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -968,7 +991,7 @@
                             body: JSON.stringify({
                                 productId, 
                                 quantity: 1,
-                                size: 0 // Default quantity
+                                size: 0 
                             }),
                         });
         
@@ -977,7 +1000,12 @@
                          window.location.href = '/cart';
                        
                         } else {
-                            alert(data.message || "Error adding product to cart.");
+                            const errorMessageElement = document.getElementById('errorMessage');
+                            if (errorMessageElement) {
+                                errorMessageElement.textContent = data.message;
+                                errorMessageElement.style.display = 'block';
+                            }
+                         
                         }
                     } catch (error) {
                         console.error('Error:', error);
@@ -1033,7 +1061,7 @@
         <script src="/libs/wnumb/wNumb.min.js"></script>
 
         <!-- Product-grid init js -->
-        <script src="/js/frontend/product-grid.init.js"></script>
+        <script src="/js/frontend/product-grid.init.js"></script><script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
         <!-- landing-index js -->
         <script src="/js/frontend/menu.init.js"></script>

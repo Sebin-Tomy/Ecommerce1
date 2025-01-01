@@ -3,8 +3,7 @@ const { payment } = require("../controller/usercontroller");
 
 const orderSchema = new mongoose.Schema({
   userId: {
-    type: String,
-    required: true,
+     type: mongoose.Schema.Types.ObjectId, ref: 'user'
   },
 addressid: {
     type: String,
@@ -49,6 +48,9 @@ is_cancelled: {
     type: String
   },
   createdAt: { type: Date, default: Date.now },
+  couponId: {
+    type: String
+}
 });
 const orderModel = mongoose.model("order", orderSchema);
 

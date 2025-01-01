@@ -56,23 +56,25 @@ const loginregister = async(req,res)=>{
         }
     }
 
-const loginHome = async (req, res) => {
+    const loginHome = async (req, res) => {
         try {
             if (req.session.user_id) {
                 const userData = await User.findById(req.session.user_id);
                 if (userData && userData.is_blocked) {
-                    return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
+                    return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
                 }
             } else {
                 return res.redirect('/login');
             }
     
-            const page = parseInt(req.query.page) || 1; 
-            const limit = parseInt(req.query.limit) || 4; 
-            const skip = (page - 1) * limit; 
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 2;
+            const skip = (page - 1) * limit;
     
-            const totalProducts = await Products.countDocuments(); 
-            const totalPages = Math.ceil(totalProducts / limit); 
+            const sort = req.query.sort || "option"; // Default sort option
+    
+            const totalProducts = await Products.countDocuments();
+            const totalPages = Math.ceil(totalProducts / limit);
     
             const products1 = await Products.find().skip(skip).limit(limit);
             const categories = await Category.find();
@@ -84,7 +86,8 @@ const loginHome = async (req, res) => {
                 selectedCategory: null,
                 currentPage: page,
                 totalPages: totalPages,
-                limit: limit
+                limit: limit,
+                sortOption: sort, 
             });
         } catch (error) {
             console.log(error.message);
@@ -531,7 +534,8 @@ const registerOtp = async (req, res) => {
     
     
 const logout = async(req,res)=>{
-    try{   req.session.destroy();
+    try{  
+        delete req.session.user_id;
             res.redirect('/login');
             console.log("hi");
         }
@@ -740,7 +744,7 @@ const getCartItems = async (req, res) => {
     return res.redirect('/login');
 }     const userId = req.session.user_id;
              const s = await Cart.findOne({userId:userId})
-             console.log('jkhkhklh', s.total);
+          
                 const updatedCart = await Cart.aggregate([
                     { $match: { userId: new mongoose.Types.ObjectId(userId) } },
                     { $unwind: "$products" },
@@ -795,7 +799,7 @@ const addToCart = async (req, res) => {
             } else {
                 return res.redirect('/login');
             }
-                console.log("enter in to addToCart");
+               console.log("enter in to addToCart");
                 const userId = req.session.user_id;
                 console.log(userId);
                 const productId = req.body.productId;
@@ -805,10 +809,16 @@ const addToCart = async (req, res) => {
                 console.log("DSf")
                 let saveData = await Cart.findOne({ userId: userId });
                 console.log(saveData);
+                const pr1 = await products.findOne({ _id: productId });
      if (!saveData) {console.log("ome")
                  const pr = await products.findOne({ _id: productId });
                  if (!pr) {
                     return res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: 'Product not found.' });
+                } if (quantity > pr.stock || quantity>10) {
+                    return res.json({
+                        success: false,
+                        message: 'Item cannot be added to the cart.'
+                    });
                 }
                     console.log("Product details:", pr);
                     let sub = pr.price * quantity;
@@ -822,13 +832,31 @@ const addToCart = async (req, res) => {
                         }],
                         total: sub
                     });
+                    // pr.stock -= quantity;
+                    // console.log(pr.stock,"adfsadf")
+             
                     await saveData.save();
                     console.log("Saved cart:", saveData);
                 } else {console.log("Dasfsd")
                     const existingProductIndex = saveData.products.findIndex(item => item.productId.toString() === productId);
                     if (existingProductIndex !== -1) {
+                        const existingProduct = saveData.products[existingProductIndex];
+                        console.log(existingProduct.quantity,"quantity")
+                        if (existingProduct.quantity + quantity > pr1.stock || existingProduct.quantity + quantity > 10 ) {
+                            return res.json({
+                                success: false,
+                                message: 'Item cannot be added to the cart.'
+                            });
+                        }
                         saveData.products[existingProductIndex].quantity += quantity;
+                      
                     } else {
+                        if (quantity > pr1.stock || quantity>10) {
+                            return res.json({
+                                success: false,
+                                message: 'Item cannot be added to the cart.'
+                            });
+                        }
                         saveData.products.push({
                             productId: productId,
                             size: size,
@@ -841,9 +869,13 @@ const addToCart = async (req, res) => {
                         totalAmount += pr.price * product.quantity;
                     }
                     saveData.total = totalAmount;
+                    // pr1.stock -= quantity;
+                    // console.log(pr1.stock,"adfsadf")
+    
                     await saveData.save();
                     console.log("Saved cart with updated total:", saveData);
                 }
+            
                 console.log("Saved cart wie total:", saveData.total);
                res.json({ success: true, message: 'Item added to cart successfully.' });
             } catch (error) {
@@ -856,11 +888,16 @@ const deleteCart = async (req, res) => {
     try {
         const itemId = req.params.itemId; 
         const userId = req.session.user_id; 
-
+        // const cart = await Cart.findOne({ userId: userId });
+        // const productToRemove = cart.products.find(product => product._id.toString() === itemId);
+        // const product = await Products.findById(productToRemove.productId);
         await Cart.updateOne(
             { userId: userId },
             { $pull: { products: { _id: itemId } } }
         );
+        // product.stock += productToRemove.quantity;
+        // await product.save();
+
 
         res.sendStatus(STATUS_CODES.SUCCESS);
     } catch (error) {
@@ -875,39 +912,36 @@ const checkout = async (req, res) => {
         if (req.session.user_id) {
             const userData = await User.findById(req.session.user_id);
             if (userData && userData.is_blocked) {
-                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
+                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
             }
         } else {
             return res.redirect('/login');
         }
 
         const userId = req.session.user_id;
-        console.log("User ID:", userId);
-
-    
         const Address = await address.find({ userId: userId });
         const userData = await User.findOne({ _id: userId });
 
         const coupon1 = await Coupon.find();
-
-   
         const saveData = await Cart.find({ userId: userId });
+        const originalTotal = saveData.reduce((acc, cart) => acc + (cart.total || 0), 0); // Original total
+
         let couponStatus = saveData[0]?.coupon || "Not Applied";
-
-        
-        const total = saveData.reduce((acc, cart) => acc + (cart.total || 0), 0);
-
-        const availableCoupons = coupon1.filter(coupon => total >= coupon.min_amount && total > coupon.discount_amount);
+        let discountAmount = saveData[0]?.discountAmount || 0; // Discount amount
         let appliedCouponCode = saveData[0]?.couponId 
             ? (await Coupon.findById(saveData[0].couponId))?.couponCode 
             : "";
-       
+
+        const total = originalTotal - discountAmount; // Total after discount
+
         res.render('checkout', {
             address: Address,
-            coup: availableCoupons, 
-            total: total,
+            coup: coupon1.filter(coupon => originalTotal >= coupon.min_amount && originalTotal > coupon.discount_amount),
+            total, // Total after discount
+            originalTotal, // Original total
+            discountAmount, // Discount amount
             saveData: saveData.length > 0 ? saveData : [{ coupon: "Not Applied" }],
-           appliedCouponCode
+            appliedCouponCode,
         });
     } catch (error) {
         console.log(error.message);
@@ -990,19 +1024,15 @@ const updatecheckedaddress = async(req,res)=>{
                       const userId = req.session.user_id;
                       const addressId = req.query.addressId; 
                       console.log('Address ID:', addressId);
-                      
-              
                       const cartItems = await Cart.find({ userId }).populate('products.productId');
-                      
-                   
+cartItems.forEach(cart => {
+    console.log(cart.couponId, "Coupon ID for cart");
+});
+const couponId = cartItems[0]?.couponId || null;
                       const totalSum = cartItems.reduce((acc, cart) => acc + cart.total, 0);
                       console.log('Total Sum:', totalSum);
-                      
-                    
                       const orderProducts = [];
-                  
-                  
-                      for (const cart of cartItems) {
+                     for (const cart of cartItems) {
                         for (const product of cart.products) {
                           if (product.productId) {
                           
@@ -1011,7 +1041,8 @@ const updatecheckedaddress = async(req,res)=>{
                               quantity: product.quantity,
                               productname: product.productId.productname,
                               Image: product.productId.image,
-                              price: product.productId.price
+                              price: product.productId.price,
+                              couponId: cart.couponId || null 
                             });
                   
                             const productId = product.productId._id;
@@ -1032,18 +1063,16 @@ const updatecheckedaddress = async(req,res)=>{
                           }
                         }
                       }
-                  
-                      
-                      const order = new orderModel({
+                  const order = new orderModel({
                         userId,
                         addressid: addressId,
                         products: orderProducts,
                         totalAmount: totalSum,
                         status: "Paid",
-                        payment: "online payment"
+                        payment: "online payment", 
+                        couponId
                       });
                   
-                
                       const savedOrder = await order.save();
 
                       console.log('Saved Order:', savedOrder);
@@ -1097,25 +1126,58 @@ const updatecheckedaddress = async(req,res)=>{
                 };
                 
                 
-const orderview = async (req, res) => {
-                    try {if (req.session.user_id) {
-                        const userData = await User.findById(req.session.user_id);
-                        if (userData && userData.is_blocked) {
-                            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
+                const orderview = async (req, res) => {
+                    try {
+                        if (req.session.user_id) {
+                            const userData = await User.findById(req.session.user_id);
+                            if (userData && userData.is_blocked) {
+                                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
+                            }
+                        } else {
+                            return res.redirect('/login');
                         }
-                    } else {
-                        return res.redirect('/login');
-                    }
-                        const orderId = req.query.orderId; 
-                        const order = await orderModel.findById(orderId).populate('products.productId').populate('userId').populate('addressid'); 
-                        const user = await User.findById(order.userId)
-                        const Address = await address.findById(order.addressid)
-                        res.render('order-view', { order,user,Address }); 
+                
+                        const userId = req.session.user_id;
+                        const orderId = req.query.orderId;
+                
+                        // Find the order and populate necessary fields
+                        const order = await orderModel.findById(orderId)
+                            .populate('products.productId')
+                            .populate('userId')
+                            .populate('addressid');
+                            const user = await User.findById(order.userId)
+                            const Address = await address.findById(order.addressid);
+                            console.log(order,"dfs")
+                   
+                      
+                
+                        // Find the coupon details if a coupon is applied
+                        let discountAmount = 0;
+                        if (order.couponId) {
+                            const coupon = await Coupon.findById( order.couponId );
+                            console.log(coupon,"Asdfsd")
+                            if (coupon) {
+                                // Calculate the discount amount based on coupon discount
+                                discountAmount = coupon.discount_amount || 0;
+                            }
+                        }
+                
+                        // Fetch user and address details
+                       
+                
+                        // Render the order view and pass discountAmount
+                        res.render('order-view', {
+                            order,
+                            user,
+                            Address,
+                            discountAmount
+                        });
                     } catch (error) {
                         console.log(error.message);
                         res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
                     }
                 };
+                
 
 const checkedaddaddress = async (req, res) => {
                     try {if (req.session.user_id) {
@@ -1162,67 +1224,98 @@ const checkaddressinsert = async(req, res) => {
                         res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
                     }
                 };
-
                 const searchProduct = async (req, res) => {
-                    try {if (req.session.user_id) {
-                        const userData = await User.findById(req.session.user_id);
-                        if (userData && userData.is_blocked) {
-                            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
+                    try {
+                        if (req.session.user_id) {
+                            const userData = await User.findById(req.session.user_id);
+                            if (userData && userData.is_blocked) {
+                                return res.render('logine1', { message: "Your account is blocked." });
+                            }
+                        } else {
+                            return res.redirect('/login');
                         }
-                    } else {
-                        return res.redirect('/login');
-                    }
-                        const userid = req.session.user_id;
-                        const user = await User.findOne({ _id: userid });
-                        
+                
                         const inputLetter = req.body.search || req.query.search || '';
                         const categoryFilter = req.query.category || null;
-                        const regex = new RegExp(`^${inputLetter}`, "i");
-                        
-                        const page = parseInt(req.query.page) || 1; 
-                        const limit = parseInt(req.query.limit) || 6;
-                        const skip = (page - 1) * limit;
-                        const categories = await Category.find();
-                        
-                        let query = { productname: { $regex: regex } };
+                
+                        // Escape input for safe regex
+                        function escapeRegex(text) {
+                            return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+                        }
+                
+                        let query = {};
+                        if (inputLetter) {
+                            const escapedInput = escapeRegex(inputLetter); // Escape special characters
+                            if (inputLetter.length === 1) {
+                                // Match product names starting with the single input letter
+                                query.productname = { $regex: `^${escapedInput}`, $options: "i" };
+                            } else {
+                                // Match product names containing the substring
+                                query.productname = { $regex: escapedInput, $options: "i" };
+                            }
+                        }
+                
                         if (categoryFilter) {
-                            query.category = categoryFilter; 
+                            const category = await Category.findOne({ name: categoryFilter.toUpperCase() });
+                            if (category) {
+                                query.categoryId = category._id;
+                            } else {
+                                query.categoryId = null;
+                            }
                         }
                 
-                      
-                        let sortOption = {};
-                        if (req.body.sortOption === "lowtohigh") {
-                            sortOption = { price: 1 };
-                        } else if (req.body.sortOption === "hightolow") {
-                            sortOption = { price: -1 };
-                        } else if (req.body.sortOption === "alphabeticallyAZ") {
-                            sortOption = { productname: 1 };
-                        } else if (req.body.sortOption === "alphabeticallyZA") {
-                            sortOption = { productname: -1 };
+                        const sortOption = {};
+                        const sortCriteria = req.body.sortOption || req.query.sort || "default";
+                
+                        switch (sortCriteria) {
+                            case "lowtohigh":
+                                sortOption.price = 1;
+                                break;
+                            case "hightolow":
+                                sortOption.price = -1;
+                                break;
+                            case "alphabeticallyAZ":
+                                sortOption.productname = 1;
+                                break;
+                            case "alphabeticallyZA":
+                                sortOption.productname = -1;
+                                break;
                         }
                 
-                        const totalProducts = await Products.countDocuments(query); 
-                        const totalPages = Math.ceil(totalProducts / limit); 
+                        const page = parseInt(req.query.page) || 1;
+                        const limit = parseInt(req.query.limit) || 2;
+                        const skip = (page - 1) * limit;
                 
+                        const totalProducts = await Products.countDocuments(query);
+                        const totalPages = Math.ceil(totalProducts / limit);
+                
+                        console.log("Query:", query);
+                        console.log("Regex Input:", inputLetter);
+                
+                        sortOption._id = 1; // Ensure consistent sorting
                         const products = await Products.find(query)
                             .sort(sortOption)
                             .skip(skip)
                             .limit(limit);
                 
-                        res.render("index1", { 
-                            inputLetter: inputLetter, 
-                            Products: products, 
-                            currentPage: page, 
-                            totalPages: totalPages, 
+                        const categories = await Category.find();
+                
+                        res.render("index1", {
+                            inputLetter: inputLetter,
+                            Products: products,
+                            currentPage: page,
+                            totalPages: totalPages,
                             limit: limit,
                             selectedCategory: categoryFilter,
-                            categories: categories
+                            categories: categories,
+                            sortOption: sortCriteria,
                         });
                     } catch (error) {
-                        console.log("Error:", error);
-                        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: "An error occurred while searching for products." });
+                        console.error("Error:", error);
+                        res.status(500).json({ error: "An error occurred while searching for products." });
                     }
                 };
+                
                 
               
 const cancelOrder = async (req, res) => {
@@ -1251,7 +1344,7 @@ const cancelOrder = async (req, res) => {
                       wallet2 = new wallet({ userId: order.userId });
                     }
                     wallet2.totalAmount += order.totalAmount;
-                    wallet2.refund.push({ productId: order._id, amount: order.totalAmount });
+                    wallet2.refund.push({ productId: order._id, amount: order.totalAmount,status:'Credited' });
                     await wallet2.save();
                    console.log(wallet2);
                     res.redirect('/order');
@@ -1302,8 +1395,7 @@ if (req.session.user_id) {
 const userId = req.session.user_id;
 
 const wish12 = await wishlist1.find({ userId }).populate('productId');
-
-res.render('wishlist', { weish12 });
+res.render('wishlist', { wish12 });
 } 
 
 const deleteWish = async (req, res) => {
@@ -1338,7 +1430,7 @@ const orderReturn=async(req,res)=>{
         console.log(orderId,"orderiddd");
         const update=await orderModel.findByIdAndUpdate({_id:orderId},{
             status:"requested for return"},{new:true})
-            console.log(update);
+            console.log(update,'upd');
 res.json({ success: true, message: "Order has been canceled." });
     } catch (error) {
         console.log(error);
@@ -1347,14 +1439,16 @@ res.json({ success: true, message: "Order has been canceled." });
 }
 
 const wallet1 = async (req, res) => {
-    try {if (req.session.user_id) {
-        const userData = await User.findById(req.session.user_id);
-        if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
+    try {
+        if (req.session.user_id) {
+            const userData = await User.findById(req.session.user_id);
+            if (userData && userData.is_blocked) {
+                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
+            }
+        } else {
+            return res.redirect('/login');
         }
-    } else {
-        return res.redirect('/login');
-    }
+
         const userId = req.session.user_id;
         if (!userId) {
             return res.status(STATUS_CODES.BAD_REQUEST).send("User ID is required");
@@ -1370,30 +1464,21 @@ const wallet1 = async (req, res) => {
         });
 
         if (!wallet2) {
-       
             return res.render('wallet', { 
-                wallet: { totalAmount: "No wallet amount" }, 
+                wallet: { totalAmount: "No wallet amount", createdAt: null }, 
                 refund: [] 
             });
         }
 
-        const refunds = wallet2.refund;
+        // Sort refunds in reverse chronological order
+        const refunds = wallet2.refund.slice().reverse();
+
         console.log("Wallet Details:", wallet2);
-        console.log("Total Amount:", wallet2.totalAmount);
 
-        refunds.forEach(refund => {
-            console.log("Refund:", refund);
-            if (refund.productId && Array.isArray(refund.productId.products)) {
-                refund.productId.products.forEach(product => {
-                    if (product.productId) {
-                        console.log("Product Name:", product.productId.productname);
-                    }
-                });
-            }
+        res.render('wallet', { 
+            wallet: wallet2, 
+            refund: refunds 
         });
-
-        console.log("Refunds Details:", refunds);
-        res.render('wallet', { wallet: wallet2, refund: refunds });
     } catch (error) {
         console.error("Error fetching wallet details:", error);
         res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
@@ -1576,7 +1661,10 @@ const orderfailure = async (req, res) => {
 
       const cartItems = await Cart.find({ userId }).populate('products.productId');
       
-   
+      cartItems.forEach(cart => {
+        console.log(cart.couponId, "Coupon ID for cart");
+    });
+    const couponId = cartItems[0]?.couponId || null;
       const totalSum = cartItems.reduce((acc, cart) => acc + cart.total, 0);
       console.log('Total Sum:', totalSum);
       
@@ -1593,7 +1681,8 @@ const orderfailure = async (req, res) => {
               quantity: product.quantity,
               productname: product.productId.productname,
               Image: product.productId.image,
-              price: product.productId.price
+              price: product.productId.price,
+              couponId: cart.couponId || null 
             });
   
             const productId = product.productId._id;
@@ -1620,7 +1709,8 @@ const orderfailure = async (req, res) => {
         products: orderProducts,
         totalAmount: totalSum,
         status: "Pending",
-        payment: "not paid"
+        payment: "not paid",
+        couponId
       });
   
 
@@ -1638,8 +1728,133 @@ const orderfailure = async (req, res) => {
       res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, error: error.message });
     }
   };
-  
+  const google = async (req, res) => {
+    try {
+        const { email,name } = req.body;
 
-module.exports={updateQuantity,insertUser,securePassword,loginHome,loginLoad,verifyLogin,verifyRegister,registerOtp,logout,userdetails,useredit,updateUsers,insertaddress,addresslist,addresslist,insertaddress,addaddress,deleteAddress,addressedit,updateaddress,getCartItems,productdetails,addToCart,deleteCart,checkout,checkaddressedit,updatecheckedaddress,payment,ordersuccess,order,orderview,loginregister,checkedaddaddress,checkaddressinsert,searchProduct,cancelOrder,wishlist,wishlistpage,deleteWish,orderReturn,wallet1,applycoupon,removecoupon,resendOtp,forgotspass,forgotpassotp,handleForgotPass,forgotregisterOtp,verifyRegister1,changepass,updatePassword,loginLoadin,orderfailure};
+        if (!email) {
+            return res.status(400).json({ message: "Email is required for Google Login" });
+        }
+
+        // Find or create user
+        let user = await User.findOne({ email });
+        if (!user) {
+            user = await User.create({
+                email,
+                name , 
+                        
+                is_admin: 0,             
+                isGoogleUser: true       
+            });
+        }
+
+        console.log(user, "user");
+
+        // Set session
+        req.session.user_id = user._id;
+        console.log(   req.session.user_id,"dssdf")
+
+        res.status(200).json({ message: "Google login successful" });
+    } catch (error) {
+        console.error("Error in /google-login:", error.message);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+const walletpayment = async (req, res) => {
+    try {
+        if (req.session.user_id) {
+            const userData = await User.findById(req.session.user_id);
+            if (userData && userData.is_blocked) {
+                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
+            }
+        } else {
+            return res.redirect('/login');
+        }
+
+        const userId = req.session.user_id;
+        const addressId = req.query.addressId;
+        console.log('Address ID:', addressId);
+
+        const cartItems = await Cart.find({ userId }).populate('products.productId');
+        cartItems.forEach(cart => {
+            console.log(cart.couponId, "Coupon ID for cart");
+        });
+        const couponId = cartItems[0]?.couponId || null;
+        const wallet2 = await wallet.findOne({ userId: userId });
+
+        if (!wallet2) {
+            return res.status(400).json({ success: false, message: "Insufficient amount in wallet" });
+        }
+
+        console.log(wallet2, "ADSfsfd");
+
+        const totalSum = cartItems.reduce((acc, cart) => acc + cart.total, 0);
+
+        // Check if wallet balance is sufficient
+        if (wallet2.totalAmount < totalSum) {
+            return res.status(400).json({ success: false, message: "Insufficient wallet balance to pay the amount." });
+        }
+
+        wallet2.totalAmount -= totalSum;
+        console.log('Total Sum:', totalSum);
+
+        const orderProducts = [];
+        for (const cart of cartItems) {
+            for (const product of cart.products) {
+                if (product.productId) {
+                    orderProducts.push({
+                        productId: product.productId._id,
+                        quantity: product.quantity,
+                        productname: product.productId.productname,
+                        Image: product.productId.image,
+                        price: product.productId.price,
+                        couponId: cart.couponId || null 
+                    });
+
+                    const productId = product.productId._id;
+                    const orderedQuantity = product.quantity;
+
+                    const foundProduct = await products.findById(productId);
+                    if (!foundProduct) {
+                        throw new Error('Product not found');
+                    }
+
+                    foundProduct.stock -= orderedQuantity;
+                    await foundProduct.save();
+                    console.log(`Stock reduced for product ${foundProduct._id} by ${orderedQuantity}`);
+                }
+            }
+        }
+
+        const order = new orderModel({
+            userId,
+            addressid: addressId,
+            products: orderProducts,
+            totalAmount: totalSum,
+            status: "Paid",
+            payment: "online payment",
+            couponId
+        });
+
+        const savedOrder = await order.save();
+        wallet2.refund.push({ productId: order._id, amount: order.totalAmount, status: "Debited" });
+        console.log(wallet2, 'wallet3');
+        await wallet2.save();
+        console.log('Saved Order:', savedOrder);
+
+        const cartDelete = await Cart.findOne({ userId: userId });
+        if (cartDelete) {
+            await Cart.findByIdAndDelete(cartDelete._id);
+        }
+
+        res.redirect('/order-successfull');
+    } catch (error) {
+        console.error('Error placing order:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+
+module.exports={updateQuantity,insertUser,securePassword,loginHome,loginLoad,verifyLogin,verifyRegister,registerOtp,logout,userdetails,useredit,updateUsers,insertaddress,addresslist,addresslist,insertaddress,addaddress,deleteAddress,addressedit,updateaddress,getCartItems,productdetails,addToCart,deleteCart,checkout,checkaddressedit,updatecheckedaddress,payment,ordersuccess,order,orderview,loginregister,checkedaddaddress,checkaddressinsert,searchProduct,cancelOrder,wishlist,wishlistpage,deleteWish,orderReturn,wallet1,applycoupon,removecoupon,resendOtp,forgotspass,forgotpassotp,handleForgotPass,forgotregisterOtp,verifyRegister1,changepass,updatePassword,loginLoadin,orderfailure,google,walletpayment};
 
 

@@ -11,6 +11,8 @@ const wallet = require('../models/Wallet')
 const offer12 = require('../models/offer')
 const Cart  = require('../models/cart');
 const wishlist1  = require('../models/wishlist');
+const moment = require('moment');
+
 const securePasword = async(password)=>{
     try{
         const passwordHash = await bycrypt.hash(password,10);
@@ -64,7 +66,8 @@ const verifyLogin = async (req, res) => {
             return;
         }
         
-        req.session.user_id = userData._id;
+        req.session.admin_id = userData._id;
+     
         res.redirect("/admin/home");
     } catch (error) {
         console.log(error.message);
@@ -73,7 +76,7 @@ const verifyLogin = async (req, res) => {
 
 const loadDashboard = async (req, res) => {
     try {
-        const userData = await User.findById({ _id: req.session.user_id });
+        const userData = await User.findById({ _id: req.session.admin_id });
 
         
         const topProducts = await orderModel.aggregate([
@@ -143,7 +146,7 @@ const loadDashboard = async (req, res) => {
         });
         console.log("Monthly Sales Data:", monthlySalesData);
   
-        const years = [2020, 2021, 2022, 2023, 2024];
+        const years = [2020, 2021, 2022, 2023, 2024,2025];
 
 const yearlySalesData = await orderModel.aggregate([
     {
@@ -184,7 +187,8 @@ const yearlySales = filledYearlySalesData.map(item => item.totalSales);
 
 const logout = async(req,res)=>{
     try{
-        req.session.destroy()
+      
+        delete req.session.admin_id;
         res.redirect('/admin')
         console.log("hi");
     }
@@ -598,7 +602,16 @@ const orderview1 = async (req, res) => {
         const order = await orderModel.findById(orderId).populate('products.productId').populate('userId').populate('addressid'); 
         const user = await User.findById(order.userId)
         const Address = await address.findById(order.addressid)
-        res.render('orderview1', { order,user,Address });  
+        let discountAmount = 0;
+        if (order.couponId) {
+            const coupon = await coupon1.findById( order.couponId );
+            console.log(coupon,"Asdfsd")
+            if (coupon) {
+            
+                discountAmount = coupon.discount_amount || 0;
+            }
+        }
+        res.render('orderview1', { order,user,Address,discountAmount });  
     } catch (error) {
         console.log(error.message);
         res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
@@ -718,25 +731,90 @@ const deleteCoupon = async (req, res) => {
             }
     };
 
-const salesreport = async (req, res) => {
+    const salesreport = async (req, res) => {
         try {
-            const orders = await orderModel.find();
-            const totalOrders = orders.length; 
-            const overallOrderAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0); 
-            const coupons = await coupon1.find(); 
-            const totalDiscountAmount = coupons.reduce((sum, coupon) => sum + coupon.discount_amount, 0); 
+            // Extract the date range from the request query
+            const { min, max, filterType } = req.query;
+            console.log(req.query);
     
+            let minDate, maxDate;
+    
+            // Determine filter type (week, month, year) or custom date range
+            if (filterType) {
+                // Handle week, month, or year filtering
+                const now = moment();
+    
+                if (filterType === 'week') {
+                    minDate = now.startOf('week').toDate();
+                    maxDate = now.endOf('week').toDate();
+                } else if (filterType === 'month') {
+                    minDate = now.startOf('month').toDate();
+                    maxDate = now.endOf('month').toDate();
+                } else if (filterType === 'year') {
+                    minDate = now.startOf('year').toDate();
+                    maxDate = now.endOf('year').toDate();
+                }
+            } else {
+                // Custom filtering with min and max dates
+                minDate = min ? new Date(min) : null;
+                maxDate = max ? new Date(max) : null;
+            }
+    
+            // Check if the date objects are valid
+            const isValidDate = (date) => date instanceof Date && !isNaN(date);
+    
+            // Validate the dates
+            if (minDate && !isValidDate(minDate)) {
+                console.log("Invalid min date:", min);
+                return res.status(400).json({ message: "Invalid min date" });
+            }
+            if (maxDate && !isValidDate(maxDate)) {
+                console.log("Invalid max date:", max);
+                return res.status(400).json({ message: "Invalid max date" });
+            }
+    
+            console.log("Received minDate:", minDate, "maxDate:", maxDate);
+    
+            // Build the query to filter orders based on the date range
+            let dateFilter = {};
+    
+            // Apply filters if the dates are provided
+            if (minDate && maxDate) {
+                // If both min and max are provided
+                dateFilter.orderDate = { $gte: minDate, $lte: maxDate };
+            } else if (minDate) {
+                // If only min date is provided
+                dateFilter.orderDate = { $gte: minDate };
+            } else if (maxDate) {
+                // If only max date is provided
+                dateFilter.orderDate = { $lte: maxDate };
+            }
+            console.log("Date filter:", dateFilter);
+    
+            // Query to fetch the filtered orders
+            const orders = await orderModel.find(dateFilter).populate(
+     'userId');
+    
+            // Calculate totals and other stats
+            const totalOrders = orders.length;
+            const overallOrderAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+            const coupons = await coupon1.find();
+            const totalDiscountAmount = coupons.reduce((sum, coupon) => sum + coupon.discount_amount, 0);
+    
+            // Render the sales report page with the filtered orders
             res.render('sales-report', {
                 orders: orders,
                 totalOrders: totalOrders,
                 overallOrderAmount: overallOrderAmount,
-                totalDiscountAmount: totalDiscountAmount 
+                totalDiscountAmount: totalDiscountAmount,
             });
         } catch (error) {
             console.log(error.message);
-            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);   
+            res.status(500).json({ message: 'Internal Server Error' });
         }
     };
+    
+    
     
 const addoffer = async (req, res) => {
         try {

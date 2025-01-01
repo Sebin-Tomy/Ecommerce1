@@ -546,14 +546,27 @@
                                                                 <tr>
                                                                     <td><%= (currentPage - 1) * 10 + index + 1 %></td>
                                                                     <td>
-                                                                        <% order.products.forEach(product => { %>
-                                                                            <div class="product-container">
-                                                                                <img src="/userImages/<%= product.Image[0] %>" class="img-sm img-thumbnail" width="50" height="50">
-                                                                                <a href="product-details.html">
-                                                                                    <h6 class="fs-16"><%= product.productname %></h6>
+                                                                        <% order.products.slice(0, 1).forEach(product => { %> <!-- Display only the first 3 products -->
+                                                                            <div class="product-container d-flex align-items-center mb-2">
+                                                                                <img 
+                                                                                    src="/userImages/<%= product.Image[0] %>" 
+                                                                                    class="img-sm img-thumbnail me-2" 
+                                                                                    width="50" 
+                                                                                    height="50"
+                                                                                >
+                                                                                <a href="product-details.html" class="text-decoration-none text-dark">
+                                                                                    <h6 class="fs-16 mb-0"><%= product.productname %></h6>
                                                                                 </a>
                                                                             </div>
                                                                         <% }) %>
+                                                        
+                                                                        <% if (order.products.length > 1) { %>
+                                                                            <div class="mt-2">
+                                                                                <a href="/order-view?orderId=<%= order._id %>" class="text-decoration-none text-primary">
+                                                                                    View all products ( <%= order.products.length %> )
+                                                                                </a>
+                                                                            </div>
+                                                                        <% } %>
                                                                     </td>
                                                                     <td>Rs<%= order.totalAmount %></td>
                                                                     <td>
@@ -572,7 +585,7 @@
                                                                                     class="btn btn-hover btn-primary w-100 text-center" 
                                                                                     style="height: 40px;" 
                                                                                     data-order-id="<%= order._id %>">
-                                                                                   Retry
+                                                                                    Retry
                                                                                 </button>
                                                                             </div>
                                                                         <% } else { %>
@@ -588,6 +601,8 @@
                                                                 </tr>
                                                             <% }) %>
                                                         </tbody>
+                                                        
+                                                        
                                                         
                                                         
                                                     </table>

@@ -254,9 +254,9 @@
                                     <div class="d-flex gap-3">
                                         <div class="flex-grow-1">
                                             <h6 class="fs-18 mb-3">Billing Address</h6>
-                                            <p class="mb-0"><%= Address.fullName %>, Floor 2</p>
-                                            <p class="mb-1">Tashkent, Uzbekistan</p>
-                                            <p class="mb-0">013-789-9876</p>
+                                            <p class="mb-0"><%= Address.fullName %>, <%= Address.postalCode  %></p>
+                                            <p class="mb-1"><%= Address.city  %>, <%=  Address.state %></p>
+                                            <p class="mb-0"><%= Address.phoneNumber  %></p>
                                         </div>
                                     </div>
                                 </div>
@@ -313,6 +313,7 @@
                                                     <thead>
                                                         <tr>
                                                             <!-- Omit Product ID and Image columns -->
+                                                            <th scope="col">Order Id</th>
                                                             <th scope="col">Product Name</th>
                                                             <th scope="col">Amount</th>
                                                             <th scope="col">Quantity</th>
@@ -323,15 +324,20 @@
                                                         <% order.products.forEach(product => { %>
                                                             <tr>
                                                                 <!-- Skip Product ID -->
+                                                                <td><%= Math.floor(Math.random() * 1000000) %> </td>
                                                                 <td><%= product.productname %></td>
                                                                 <td>Rs<%= product.price %></td>
                                                                 <td><%= product.quantity %> PCS</td>
                                                                 <td class="text-end">Rs<%= product.price * product.quantity %></td>
                                                             </tr>
                                                         <% }) %>
-                                                        
                                                         <tr>
-                                                            <td colspan="2"></td>
+                                                            <td colspan="3"></td>
+                                                            <td>Discount Amount:</td>
+                                                            <td class="text-end">- RS <%= discountAmount %></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="3"></td>
                                                             <td>Subtotal:</td>
                                                             <td class="text-end">RS<%= order.totalAmount %></td>
                                                         </tr>
@@ -1561,9 +1567,9 @@
             // Add address lines below billing address
             doc.setFontSize(12);
             const addressLines = [
-                "<%= Address.fullName %>, Floor 2",
-                "Tashkent, Uzbekistan",
-                "013-789-9876"
+                "<%= Address.fullName %>,  <%= Address.postalCode  %>",
+                "<%= Address.city %>, <%= Address.state  %>",
+                "<%= Address.phoneNumber  %>"
             ]; // Replace these placeholders with dynamic EJS values
             let yPosition = invoiceEndY + 8; // Start slightly below the "Billed To" heading
             addressLines.forEach(line => {
@@ -1579,29 +1585,34 @@
                 const cells = row.querySelectorAll("td");
         
                 // Ensure the row has the expected number of cells (avoid processing empty rows)
-                if (cells && cells.length > 3) {
-                    const productName = cells[0]?.innerText.trim() || ""; // Safely access Product Name
-                    const amount = cells[1]?.innerText.trim() || ""; // Safely access Amount
-                    const quantity = cells[2]?.innerText.trim() || ""; // Safely access Quantity
-                    const total = cells[3]?.innerText.trim() || ""; // Safely access Total
-        
+                if (cells && cells.length > 4) {
+                    const orderId = cells[0]?.innerText.trim() || "";
+                    const productName = cells[1]?.innerText.trim() || ""; // Safely access Product Name
+                    const amount = cells[2]?.innerText.trim() || ""; // Safely access Amount
+                    const quantity = cells[3]?.innerText.trim() || ""; // Safely access Quantity
+                    const total = cells[4]?.innerText.trim() || ""; // Safely access Total
+                    const discount = cells[4]?.innerText.trim() || "";
                     // Check if this is not the subtotal row
                     if (index < rows.length - 1) {
-                        tableData.push([productName, amount, quantity, total]);
+                        tableData.push([orderId,productName, amount, quantity, total]);
                     }
                 }
             });
-        
+            const discountCell = document.querySelector("tbody tr:nth-last-child(2) td:last-child");
+            if (discountCell) {
+                const discountRow = discountCell.innerText.trim();
+                tableData.push(["", "  ","Discount Amount:"," ", discountRow]);
+            }
             // Add subtotal as the last row
             const subtotalCell = document.querySelector("tbody tr:last-child td:last-child");
             if (subtotalCell) {
                 const subtotalRow = subtotalCell.innerText.trim();
-                tableData.push(["", "", "Subtotal:", subtotalRow]);
+                tableData.push(["", "  ", "Subtotal:"," ", subtotalRow]);
             }
         
             // Generate table in the PDF
             doc.autoTable({
-                head: [["Product Name", "Amount", "Quantity", "Total"]], // Define table headers
+                head: [["Order Id","Product Name", "Amount", "Quantity", "Total"]], // Define table headers
                 body: tableData, // Table content
                 startY: yPosition + 10, // Position table below the billing address
                 styles: {

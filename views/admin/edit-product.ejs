@@ -296,7 +296,7 @@
                 showError('product_stock', 'Stock is required.');
             } else if (isNaN(stock)) {
                 showError('product_stock', 'Stock must be a number.');
-            } else if (parseInt(stock) <= 0) {
+            } else if (parseInt(stock) < 0) {
                 showError('product_stock', 'Stock must be a positive value.');
             }
     

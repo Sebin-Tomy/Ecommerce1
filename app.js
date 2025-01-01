@@ -2,7 +2,11 @@ require('dotenv').config()
 const mongoose = require('mongoose');
 
 
-mongoose.connect(process.env.MONGO_URL)
+mongoose.connect(process.env.MONGO_URL,{
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000, // 5 seconds
+  })
 .then(() => console.log('MongoDB connected'))
 
 const express = require("express");

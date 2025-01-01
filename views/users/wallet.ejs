@@ -527,27 +527,32 @@
                                                     <table class="table fs-15 align-middle">
                                                         <thead>
                                                             <tr>
-                                                                <th scope="col">Order Number</th>
+                                                                <th scope="col">Order ID</th>
+                                                              
                                                                 <th scope="col">Products</th>
                                                                 <th scope="col">Total Price</th>
+                                                                <th scope="col">Type</th>
+                                                                <th scope="col">Order Date</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             <% if (refund.length === 0) { %>
                                                                 <tr>
-                                                                    <td colspan="3">No refunds available</td>
+                                                                    <td colspan="5">No refunds available</td>
                                                                 </tr>
                                                             <% } else { %>
-                                                                <% let i = 1 %>
-                                                                <% refund.forEach(ref => { %>
+                                                                <% refund.forEach((ref, index) => { %>
                                                                     <tr>
-                                                                        <td>Order no: <%= i++ %></td>
+                                                                        <!-- Generate Random Order ID -->
+                                                                        <td>Order no: <%= Math.random().toString(36).substring(2, 10).toUpperCase() %></td>
+                                                                        
+                                                                        <!-- Products -->
                                                                         <td class="d-block" style="vertical-align: middle;">
                                                                             <% if (ref.productId && Array.isArray(ref.productId.products)) { %>
                                                                                 <% ref.productId.products.forEach(product => { %>
                                                                                     <% if (product.productId) { %>
                                                                                         <div>
-                                                                                            <%= product.productId.productname %> 
+                                                                                            <%= product.productId.productname %>
                                                                                         </div>
                                                                                     <% } else { %>
                                                                                         <div>Product name not available</div>
@@ -557,13 +562,27 @@
                                                                                 <div>No products available</div>
                                                                             <% } %>
                                                                         </td>
+                                                        
+                                                                        <!-- Total Price -->
                                                                         <td>
                                                                             <span class="badge bg-danger-subtle text-danger"><%= ref.amount %></span>
+                                                                        </td>
+                                                        
+                                                                        <!-- Type -->
+                                                                        <td>
+                                                                            <span class="badge bg-danger-subtle text-danger"><%= ref.status %></span>
+                                                                        </td>
+                                                        
+                                                                        <!-- Wallet Creation Date -->
+                                                                        <td>
+                                                                            <%= new Date(wallet.createdAt).toLocaleDateString() %>
                                                                         </td>
                                                                     </tr>
                                                                 <% }); %>
                                                             <% } %>
                                                         </tbody>
+                                                        
+                                                        
                                                     </table>
                                                 </div>
                                             </div>

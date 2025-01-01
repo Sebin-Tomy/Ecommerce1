@@ -2,7 +2,12 @@ const express = require('express');
 const user_route = express();
 const session = require("express-session");
 const config = require("../config/config");
-user_route.use(session({secret:config.sessionSecret}))
+user_route.use(session({
+    secret:  "user_secret_key",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 3600000 } // 1 hour
+}));
 user_route.set('view engine','ejs')
 user_route.set('views','./views/users')
 const auth  = require("../middleware/userAuth");
@@ -32,6 +37,7 @@ const upload = multer({storage:storage});
 user_route.get('/Loadregister',userController.loginregister);
 user_route.post('/register',userController.insertUser);
 user_route.get('/',auth.isLogout,userController.loginLoadin);
+user_route.post('/google-login',userController.google);
 user_route.get('/login',auth.isLogout,userController.loginLoadin);
 user_route.post('/login',userController.verifyLogin);
 user_route.get('/index1',auth.isLogin,userController.loginHome);
@@ -92,7 +98,7 @@ user_route.post('/removeCoupon',auth.isLogin,userController.removecoupon);
 user_route.get('/failed-payment',auth.isLogin,userController.orderfailure);
 user_route.post('/payOnline1',auth.isLogin,paymentController.payOnline1);
 user_route.get('/order1',auth.isLogin,userController.order);
-
+user_route.post('/wallet-payment',auth.isLogin,userController.walletpayment);
 // user_route.get("*", function (req, res) {
 //     res.redirect("/login");
 //   });

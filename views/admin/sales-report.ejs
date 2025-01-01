@@ -170,11 +170,11 @@
                   <table border="0" cellspacing="5" cellpadding="5">
                     <tbody>
                       <tr>
-                        <td>Minimum date:</td>
+                        <td>Start date:</td>
                         <td><input type="text" id="min" name="min" /></td>
                       </tr>
                       <tr>
-                        <td>Maximum date:</td>
+                        <td>End date:</td>
                         <td><input type="text" id="max" name="max" /></td>
                       </tr>
                       <tr class="d-flex justify-content-between">
@@ -187,7 +187,7 @@
                   <table class="table table-hover" id="myTable">
                     <thead>
                       <tr>
-                        <th>#USERID</th>
+                        <th>#USERNAME</th>
                         <th scope="col">OrderId</th>
                         <th scope="col">Total</th>
                         <th scope="col">Payment</th>
@@ -199,7 +199,8 @@
                     <tbody>
                       <% orders.forEach(order => { %>
                         <tr>
-                          <td><%= order.userId %></td>
+                          <td><%= order.userId ? order.userId.name : 'Unknown User' %></td>
+
                           <td><b><%= order._id %></b></td>
                           <td><%= order.totalAmount %></td>
                           <td><span class="badge rounded-pill alert-warning"><%= order.status %></span></td>
@@ -270,7 +271,8 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.2/moment.min.js"></script>
 
- <script>
+
+<script>
   let minDate, maxDate;
 
   // Custom filtering function which will search data in column four between two values
@@ -385,20 +387,29 @@
   
 
   // Refilter the table
-  document.querySelectorAll("#min, #max").forEach((el) => {
-    el.addEventListener("change", () => {
-      var total = table
-         .column(3) // Change 3 to the index of the column you want to calculate the total for
-         .data()
-        .reduce(function (acc, val) {
-          return acc + parseFloat(val);
-         }, 0);
-      console.log(total);
+// Refilter the table when the min/max date inputs change
+// Refilter the table when the min/max date inputs change
+// Refilter the table when the min/max date inputs change
+document.querySelectorAll("#min, #max").forEach((el) => {
+  el.addEventListener("change", () => {
+    // Get the selected min and max date values from the input fields
+    const min = minDate.val();
+    const max = maxDate.val();
 
-      table.row.add(["Total", "", "", total, "", "", "", ""]);
-      table.draw();
-    });
+    // Check if the dates are valid before sending the request
+    const isValidDate = (date) => moment(date, "MMMM Do YYYY", true).isValid();
+console.log(isValidDate,"Adf")
+    if (isValidDate(min) && isValidDate(max)) {
+      console.log("Min Date:", min, "Max Date:", max);
+      // Redirect to the sales report page with the updated date range in the query params
+      window.location.href = `/admin/salesreport?min=${min}&max=${max}`;
+    } else {
+      console.error("Invalid Date(s) detected. Please select valid dates.");
+    }
   });
+});
+
+
 
   document.querySelector("#week").addEventListener("click", (e) => {
     var startOfWeek = moment().startOf("week");
@@ -431,6 +442,17 @@
   });
 
 
+  document.querySelector("#week").addEventListener("click", (e) => {
+    window.location.href = "/admin/salesreport?filterType=week"; // Use filterType instead of min/max
+});
+
+document.querySelector("#month").addEventListener("click", (e) => {
+    window.location.href = "/admin/salesreport?filterType=month"; // Use filterType instead of min/max
+});
+
+document.querySelector("#year").addEventListener("click", (e) => {
+    window.location.href = "/admin/salesreport?filterType=year"; // Use filterType instead of min/max
+});
 
 //to show delivered products only 
 
@@ -444,7 +466,6 @@ dropdown.addEventListener('change', function() {
 });
 
 </script> 
-
 
 
 </body>

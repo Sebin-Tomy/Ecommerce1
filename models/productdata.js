@@ -2,7 +2,7 @@ const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const productSchema = new mongoose.Schema({
   productname: { type: String,  trim: true,uppercase: true,unique:true},
-  price: { type: Number,  min: 0, trim: true },
+  price: { type: Number,  min: 0 },
   material: { type: String, uppercase: true },
   color: { type: String, uppercase: true },
   stock: { type: Number,  min: 0 },

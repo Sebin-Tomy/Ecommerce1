@@ -576,20 +576,23 @@
                                     <table class="table table-borderless mb-0 fs-15">
                                         <tbody>
                                             <tr>
-                                                <td>Sub Total :</td>
-                                                <td class="text-end cart-subtotal"><%= total %></td>
+                                                <td>Original Amount :</td>
+                                                <td class="text-end cart-subtotal"> <%= originalTotal %>Rs</td>
                                             </tr>
-                                         
-                                          
+                                            <tr>
+                                                <td>Discount Amount :</td>
+                                                <td class="text-end cart-subtotal"> - (<%= discountAmount || 0 %>)Rs</td>
+                                            </tr>
                                             <tr class="table-active">
                                                 <th>Total (Rupees) :</th>
                                                 <td class="text-end">
-                                                    <span class="fw-semibold cart-total">Rs<%= total %></span>
+                                                    <span class="fw-semibold cart-total">Rs <%= total %></span>
                                                 </td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
+                                
                                 <!-- end table-responsive -->
                             </div>
                         </div>

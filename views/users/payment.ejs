@@ -527,6 +527,12 @@
                                     <span class="d-none d-sm-block"> <i class="ri-money-dollar-box-fill align-bottom pe-2"></i> Cash on Delivery</span>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link py-3" data-bs-toggle="tab" href="#cash1" role="tab">
+                                    <span class="d-block d-sm-none"><i class="ri-money-dollar-box-fill align-bottom"></i></span>
+                                    <span class="d-none d-sm-block"> <i class="ri-money-dollar-box-fill align-bottom pe-2"></i> Payment using Wallet</span>
+                                </a>
+                            </li>
                         </ul>
                         <!-- Tab panes -->
                         <div class="tab-content text-muted">
@@ -534,11 +540,7 @@
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="row gy-3">
-                                         
-
-                            
-
-                                            <div class="col-md-12">
+                                          <div class="col-md-12">
                                                
                                                 <div class="d-flex gap-4 mt-1">
                                                    
@@ -574,8 +576,10 @@
                                             <% } %>
                                           
                                         </div>
+                                        <!-- this is working -->
                                         <script>
                                             function sendData() {
+                                            
                                                 console.log("hi");
                                                 const urlParams = new URLSearchParams(window.location.search);
                                                 const addressId = urlParams.get('addressId');
@@ -599,7 +603,40 @@
                                                     });
                                                 } else {
                                                     console.log("AddressId is null or undefined");
-                                              
+                                         
+                                                }
+                                            }
+                                        </script>    
+                                        <script>
+                                            function sendData1() {
+                                                const errorMessageDiv = document.getElementById('error-message');
+                                                errorMessageDiv.style.display = 'none'; // Hide the error message initially
+                                        
+                                                const urlParams = new URLSearchParams(window.location.search);
+                                                const addressId = urlParams.get('addressId');
+                                        
+                                                if (addressId) {
+                                                    fetch(`/wallet-payment?addressId=${addressId}`, {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'Content-Type': 'application/json',
+                                                        },
+                                                    })
+                                                        .then(response => {
+                                                            if (!response.ok) {
+                                                                return response.json().then(errorData => {
+                                                                    throw new Error(errorData.message || 'Payment failed.');
+                                                                });
+                                                            }
+                                                            window.location.href = '/order-successfull';
+                                                        })
+                                                        .catch(error => {
+                                                            console.error('Error:', error);
+                                                            errorMessageDiv.innerText = error.message;
+                                                            errorMessageDiv.style.display = 'block'; // Show the error message
+                                                        });
+                                                } else {
+                                                    console.log("AddressId is null or undefined");
                                                 }
                                             }
                                         </script>
@@ -636,6 +673,31 @@
                                         <div class="hstack gap-2 justify-content-end pt-3">
                                             <button type="button" class="btn btn-hover w-md btn-primary" onclick="sendData()" <% if (!isCodAvailable) { %> disabled <% } %>>
                                                 Continue<i class="ri-logout-box-r-line align-bottom ms-2"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="cash1" role="tabpanel">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row gy-3">
+                                         
+
+                            
+
+                                            <div class="col-md-12">
+                                               
+                                                <div class="d-flex gap-4 mt-1">
+                                                   </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="hstack gap-2 justify-content-end pt-4">
+                              
+
+                                            <button type="button"  class="btn btn-hover btn-primary"  onclick="sendData1()">
+                                                <i class="ri-paypal-fill align-bottom align-bottom pe-2"></i> Paying with wallet </button>
+                                                <div id="error-message" style="color: red; display: none;"></div>
                                         </div>
                                     </div>
                                 </div>
