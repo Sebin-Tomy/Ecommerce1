@@ -108,7 +108,7 @@
  
     const firebaseConfig = {
       apiKey: "AIzaSyDzCPmFZhh0FFc1gzmxCBkS4_Xnc8U25dc",
-      authDomain: "authentication-33a52.firebaseapp.com",
+      authDomain: "kerelablasters.shop",
       projectId: "authentication-33a52",
       storageBucket: "authentication-33a52.firebasestorage.app",
       messagingSenderId: "56739148431",
@@ -139,7 +139,7 @@ googlelogin.addEventListener("click", async function () {
             window.location.href = "/index1"; // Redirect to index page
       
     } catch (error) {
-        console.error("Error during Google sign-in:", error);
+        console.error("Error during Google sign-in:", error.message,error.code);
         alert("An error occurred during Google sign-in. Please try again.");
     }
 });
