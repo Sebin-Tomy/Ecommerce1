@@ -546,7 +546,7 @@
                                                                 <tr>
                                                                     <td><%= (currentPage - 1) * 10 + index + 1 %></td>
                                                                     <td>
-                                                                        <% order.products.slice(0, 1).forEach(product => { %> <!-- Display only the first 3 products -->
+                                                                        <% order.products.slice(0, 1).forEach(product => { %> 
                                                                             <div class="product-container d-flex align-items-center mb-2">
                                                                                 <img 
                                                                                     src="/userImages/<%= product.Image[0] %>" 
@@ -560,13 +560,13 @@
                                                                             </div>
                                                                         <% }) %>
                                                         
-                                                                        <% if (order.products.length > 1) { %>
+                                                                        <!-- <% if (order.products.length > 1) { %>
                                                                             <div class="mt-2">
                                                                                 <a href="/order-view?orderId=<%= order._id %>" class="text-decoration-none text-primary">
                                                                                     View all products ( <%= order.products.length %> )
                                                                                 </a>
                                                                             </div>
-                                                                        <% } %>
+                                                                        <% } %> -->
                                                                     </td>
                                                                     <td>Rs<%= order.totalAmount %></td>
                                                                     <td>

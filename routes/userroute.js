@@ -53,6 +53,7 @@ user_route.post('/registerOtp1',userController.verifyRegister1)
 user_route.post('/registerOtp',userController.verifyRegister)
 user_route.post('/Resendotp', userController.resendOtp);
 user_route.get('/logout',auth.isLogin,userController.logout)
+user_route.post('/logout',auth.isLogin,userController.logout)
 user_route.get('/user',auth.isLogin,userController.userdetails)
 user_route.get('/user-edit/:id',auth.isLogin,userController.useredit)
 user_route.post('/user-edit/:id',auth.isLogin,userController.updateUsers)

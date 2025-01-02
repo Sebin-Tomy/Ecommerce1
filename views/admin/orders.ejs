@@ -212,7 +212,7 @@ Swal.fire({
                                                 <tr>
                                                     <td><%= index + 1 %></td>
                                                     <td>
-                                                        <% order.products.forEach(product => { %>
+                                                        <% order.products.slice(0,2).forEach(product => { %>
                                                             <div>
                                                            
                                                                     <h6 class="fs-16"><%= product.productname %></h6>

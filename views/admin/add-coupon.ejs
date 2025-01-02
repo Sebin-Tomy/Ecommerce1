@@ -121,11 +121,22 @@
                         <h2 class="content-title">Add New Coupon</h2>
                         
                     </div>
-                </div>m
+                </div>
                 <div class="col-lg-6">
                     <div class="card mb-4">
                         <div class="card-body">
                             <form id = "addproduct" action="/admin/add-coupon" method="POST">
+                                
+                            <div class="mb-4">
+                                <label for="product_title" class="form-label">Start date</label>
+                                <input type="text" name="valid_from" placeholder="Type here" class="form-control" id="product_title1">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="product_title" class="form-label">Expiry date</label>
+                                <input type="text" name="valid_to" placeholder="Type here" class="form-control" id="product_title2">
+                            </div>
+
                             <div class="mb-4">
                                 <label for="product_title" class="form-label">Coupon Code</label>
                                 <input type="text" name="couponCode" placeholder="Type here" class="form-control" id="product_title">
@@ -180,12 +191,12 @@
     <script>
         document.getElementById('addproduct').addEventListener('submit', function (e) {
             e.preventDefault(); // Prevent form submission
-    
+        
             // Clear previous errors
             document.querySelectorAll('.error-message').forEach(el => el.remove());
-    
+        
             let errors = 0;
-    
+        
             // Helper function to show errors
             function showError(inputId, message) {
                 const inputField = document.getElementById(inputId);
@@ -193,7 +204,7 @@
                 errorElement.className = 'error-message';
                 errorElement.style.color = 'red';
                 errorElement.innerText = message;
-    
+        
                 if (inputField.parentElement.classList.contains('mb-4')) {
                     inputField.parentElement.appendChild(errorElement);
                 } else {
@@ -201,13 +212,28 @@
                 }
                 errors++;
             }
-    
-            // Validate fields
+        
+            const datePattern = /^(\d{2})\/(\d{2})\/(\d{2})$/;
+
+        const startDate = document.querySelector('[name="valid_from"]').value.trim();
+        const expiryDate = document.querySelector('[name="valid_to"]').value.trim();
+
+        if (!startDate) {
+            showError('product_title1', 'Start date is required.');
+        } else if (!datePattern.test(startDate)) {
+            showError('product_title1', 'Start date must be in the format dd/mm/yy.');
+        }
+
+        if (!expiryDate) {
+            showError('product_title2', 'Expiry date is required.');
+        } else if (!datePattern.test(expiryDate)) {
+            showError('product_title2', 'Expiry date must be in the format dd/mm/yy.');
+        }
             const couponCode = document.getElementById('product_title').value.trim();
             if (!couponCode) {
                 showError('product_title', 'Coupon code is required.');
             }
-    
+        
             const discountAmount = document.querySelector('[name="discount_amount"]').value.trim();
             if (!discountAmount) {
                 showError('product_color', 'Discount amount is required.');
@@ -216,7 +242,7 @@
             } else if (parseFloat(discountAmount) <= 0) {
                 showError('product_color', 'Discount amount must be a positive value.');
             }
-    
+        
             const minAmount = document.querySelector('[name="min_amount"]').value.trim();
             if (!minAmount) {
                 showError('product_brand', 'Minimum amount is required.');
@@ -225,12 +251,13 @@
             } else if (parseFloat(minAmount) <= 0) {
                 showError('product_brand', 'Minimum amount must be a positive value.');
             }
-    
+        
             // Submit the form if no errors
             if (errors === 0) {
                 this.submit();
             }
         });
+        
     </script>
     
 </body>

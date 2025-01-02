@@ -869,8 +869,7 @@ const addToCart = async (req, res) => {
                         totalAmount += pr.price * product.quantity;
                     }
                     saveData.total = totalAmount;
-                    // pr1.stock -= quantity;
-                    // console.log(pr1.stock,"adfsadf")
+               
     
                     await saveData.save();
                     console.log("Saved cart with updated total:", saveData);
@@ -924,22 +923,22 @@ const checkout = async (req, res) => {
 
         const coupon1 = await Coupon.find();
         const saveData = await Cart.find({ userId: userId });
-        const originalTotal = saveData.reduce((acc, cart) => acc + (cart.total || 0), 0); // Original total
+        const originalTotal = saveData.reduce((acc, cart) => acc + (cart.total || 0), 0);
 
         let couponStatus = saveData[0]?.coupon || "Not Applied";
-        let discountAmount = saveData[0]?.discountAmount || 0; // Discount amount
+        let discountAmount = saveData[0]?.discountAmount || 0; 
         let appliedCouponCode = saveData[0]?.couponId 
             ? (await Coupon.findById(saveData[0].couponId))?.couponCode 
             : "";
 
-        const total = originalTotal - discountAmount; // Total after discount
+        const total = originalTotal - discountAmount; 
 
         res.render('checkout', {
             address: Address,
             coup: coupon1.filter(coupon => originalTotal >= coupon.min_amount && originalTotal > coupon.discount_amount),
-            total, // Total after discount
-            originalTotal, // Original total
-            discountAmount, // Discount amount
+            total, 
+            originalTotal, 
+            discountAmount, 
             saveData: saveData.length > 0 ? saveData : [{ coupon: "Not Applied" }],
             appliedCouponCode,
         });
@@ -1140,7 +1139,6 @@ const couponId = cartItems[0]?.couponId || null;
                         const userId = req.session.user_id;
                         const orderId = req.query.orderId;
                 
-                        // Find the order and populate necessary fields
                         const order = await orderModel.findById(orderId)
                             .populate('products.productId')
                             .populate('userId')
@@ -1150,22 +1148,19 @@ const couponId = cartItems[0]?.couponId || null;
                             console.log(order,"dfs")
                    
                       
-                
-                        // Find the coupon details if a coupon is applied
+          
                         let discountAmount = 0;
                         if (order.couponId) {
                             const coupon = await Coupon.findById( order.couponId );
                             console.log(coupon,"Asdfsd")
                             if (coupon) {
-                                // Calculate the discount amount based on coupon discount
+                         
                                 discountAmount = coupon.discount_amount || 0;
                             }
                         }
                 
-                        // Fetch user and address details
-                       
-                
-                        // Render the order view and pass discountAmount
+                   
+
                         res.render('order-view', {
                             order,
                             user,
@@ -1238,19 +1233,19 @@ const checkaddressinsert = async(req, res) => {
                         const inputLetter = req.body.search || req.query.search || '';
                         const categoryFilter = req.query.category || null;
                 
-                        // Escape input for safe regex
+                       
                         function escapeRegex(text) {
                             return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
                         }
                 
                         let query = {};
                         if (inputLetter) {
-                            const escapedInput = escapeRegex(inputLetter); // Escape special characters
+                            const escapedInput = escapeRegex(inputLetter); 
                             if (inputLetter.length === 1) {
-                                // Match product names starting with the single input letter
+                               
                                 query.productname = { $regex: `^${escapedInput}`, $options: "i" };
                             } else {
-                                // Match product names containing the substring
+                         
                                 query.productname = { $regex: escapedInput, $options: "i" };
                             }
                         }
@@ -1292,7 +1287,7 @@ const checkaddressinsert = async(req, res) => {
                         console.log("Query:", query);
                         console.log("Regex Input:", inputLetter);
                 
-                        sortOption._id = 1; // Ensure consistent sorting
+                        sortOption._id = 1; 
                         const products = await Products.find(query)
                             .sort(sortOption)
                             .skip(skip)
@@ -1736,7 +1731,7 @@ const orderfailure = async (req, res) => {
             return res.status(400).json({ message: "Email is required for Google Login" });
         }
 
-        // Find or create user
+     
         let user = await User.findOne({ email });
         if (!user) {
             user = await User.create({
@@ -1750,7 +1745,7 @@ const orderfailure = async (req, res) => {
 
         console.log(user, "user");
 
-        // Set session
+
         req.session.user_id = user._id;
         console.log(   req.session.user_id,"dssdf")
 
@@ -1790,7 +1785,7 @@ const walletpayment = async (req, res) => {
 
         const totalSum = cartItems.reduce((acc, cart) => acc + cart.total, 0);
 
-        // Check if wallet balance is sufficient
+ 
         if (wallet2.totalAmount < totalSum) {
             return res.status(400).json({ success: false, message: "Insufficient wallet balance to pay the amount." });
         }

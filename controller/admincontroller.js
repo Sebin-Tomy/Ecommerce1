@@ -692,7 +692,7 @@ const addcoupon = async (req, res) => {
 
 const insertcoupon = async (req, res) => {
     try {
-        const { couponCode, discount_amount, min_amount } = req.body;
+        const { couponCode, discount_amount, min_amount,valid_from,valid_to } = req.body;
 
       
         const existingCoupon = await coupon1.findOne({ couponCode: couponCode });
@@ -707,6 +707,8 @@ const insertcoupon = async (req, res) => {
             min_amount: min_amount,
             couponCode: couponCode,
             discount_amount: discount_amount,
+            valid_from: valid_from,
+            valid_to: valid_to
         });
 
         await coupon.save();
@@ -733,15 +735,14 @@ const deleteCoupon = async (req, res) => {
 
     const salesreport = async (req, res) => {
         try {
-            // Extract the date range from the request query
+           
             const { min, max, filterType } = req.query;
             console.log(req.query);
     
             let minDate, maxDate;
     
-            // Determine filter type (week, month, year) or custom date range
             if (filterType) {
-                // Handle week, month, or year filtering
+           
                 const now = moment();
     
                 if (filterType === 'week') {
@@ -755,15 +756,15 @@ const deleteCoupon = async (req, res) => {
                     maxDate = now.endOf('year').toDate();
                 }
             } else {
-                // Custom filtering with min and max dates
+               
                 minDate = min ? new Date(min) : null;
                 maxDate = max ? new Date(max) : null;
             }
     
-            // Check if the date objects are valid
+      
             const isValidDate = (date) => date instanceof Date && !isNaN(date);
     
-            // Validate the dates
+      
             if (minDate && !isValidDate(minDate)) {
                 console.log("Invalid min date:", min);
                 return res.status(400).json({ message: "Invalid min date" });
@@ -775,33 +776,30 @@ const deleteCoupon = async (req, res) => {
     
             console.log("Received minDate:", minDate, "maxDate:", maxDate);
     
-            // Build the query to filter orders based on the date range
+           
             let dateFilter = {};
     
-            // Apply filters if the dates are provided
             if (minDate && maxDate) {
-                // If both min and max are provided
+              
                 dateFilter.orderDate = { $gte: minDate, $lte: maxDate };
             } else if (minDate) {
-                // If only min date is provided
+        
                 dateFilter.orderDate = { $gte: minDate };
             } else if (maxDate) {
-                // If only max date is provided
+             
                 dateFilter.orderDate = { $lte: maxDate };
             }
             console.log("Date filter:", dateFilter);
     
-            // Query to fetch the filtered orders
             const orders = await orderModel.find(dateFilter).populate(
      'userId');
     
-            // Calculate totals and other stats
+          
             const totalOrders = orders.length;
             const overallOrderAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
             const coupons = await coupon1.find();
             const totalDiscountAmount = coupons.reduce((sum, coupon) => sum + coupon.discount_amount, 0);
     
-            // Render the sales report page with the filtered orders
             res.render('sales-report', {
                 orders: orders,
                 totalOrders: totalOrders,

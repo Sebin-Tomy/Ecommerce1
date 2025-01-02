@@ -18,11 +18,12 @@ const couponSchema=new mongoose.Schema({
     min_amount: {
         type: Number,
       
-    },
+    },valid_from: {
+        type: String,
+      },
     valid_to: {
         type: String,
-      
-    },
+      },
     coupon: {
         type: [String] 
      },

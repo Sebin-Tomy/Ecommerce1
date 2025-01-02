@@ -157,7 +157,8 @@
                                                 <th scope="col">Coupon Code</th>
                                                 <th scope="col">Discount Amount</th>
                                                 <th scope="col">Min. amount</th>
-                                                <!-- <th scope="col">Valid To</th> -->
+                                                <th scope="col">Valid To</th>
+                                                <th scope="col">Valid From</th>
                                                 <th scope="col">Action</th>
                                             </tr>
                                         </thead>
@@ -167,6 +168,8 @@
                                                     <td><%= coupon.couponCode %></td>
                                                     <td><%= coupon.discount_amount %></td>
                                                     <td><%= coupon.min_amount %></td>
+                                                    <td><%= coupon.valid_from %></td>
+                                                    <td><%= coupon.valid_to %></td>
                                                     <td>
                                                         <button class="btn btn-danger" onclick="deleteCoupon('<%= coupon._id %>')">Delete</button>
                                                     </td>
