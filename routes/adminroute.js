@@ -113,6 +113,19 @@ admin_route.delete(
   auth.isLogin,
   adminController.deleteoffer
 );
+
+admin_route.patch("/list-category/:id", auth.isLogin, adminController.listCategory);
+admin_route.patch(
+  "/unlist-category/:id",
+  auth.isLogin,
+  adminController.unlistCategory
+);
+admin_route.patch("/list-product/:id", auth.isLogin, adminController.listProduct);
+admin_route.patch(
+  "/unlist-product/:id",
+  auth.isLogin,
+  adminController.unlistProduct
+);
 admin_route.get("*", function (req, res) {
   res.redirect("/admin");
 });

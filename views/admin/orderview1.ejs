@@ -308,19 +308,40 @@
                     <!-- end page title -->
                     <form action="/admin/update-order-status/<%= order._id %>" method="post">
                         <select class="form-control" required id="delivered-status" name="status">
-                            <option value="">Delivery Status</option>
-                            <% if (order.status !== 'Delivered') { %>
-                                <option value="Pending" <% if (order.status === 'Pending') { %> selected <% } %>>Pending</option>
-                                <option value="Shipped" <% if (order.status === 'Shipped') { %> selected <% } %>>Shipped</option>
-                                
+                            <% if (order.status === 'Pending') { %>
+                                <option value="Pending" selected>Pending</option>
+                                <option value="Shipped">Shipped</option>
+                                <option value="Delivered">Delivered</option>
+                                <option value="Cancelled">Cancelled</option>
+                            <% } else if (order.status === 'Shipped') { %>
+                                <option value="Pending" disabled>Pending</option>
+                                <option value="Shipped" selected>Shipped</option>
+                                <option value="Delivered">Delivered</option>
+                                <option value="Cancelled">Cancelled</option>
+                            <% } else if (order.status === 'Delivered') { %>
+                                <option value="Pending" disabled>Pending</option>
+                                <option value="Shipped" disabled>Shipped</option>
+                                <option value="Delivered" selected>Delivered</option>
+                                <option value="Cancelled" disabled>Cancelled</option>
+                            <% } else if (order.status === 'Cancelled') { %>
+                                <!-- <option value="Pending" disabled>Pending</option>
+                                <option value="Shipped" disabled>Shipped</option>
+                                <option value="Delivered">Delivered</option> -->
+                                <option value="Cancelled" selected>Cancelled</option>
+                            <% } else if (order.status === 'returns') { %>
+                                <option value="returns" selected>Returned</option>
+                            <% } else { %>
+                                <option value=""><%= order.status  %></option>
+                                <option value="Pending">Pending</option>
+                                <option value="Shipped">Shipped</option>
+                                <option value="Delivered">Delivered</option>
+                                <option value="Cancelled">Cancelled</option>
+                                <!-- <option value="Returned">Returned</option> -->
                             <% } %>
-                            <option value="Processing" <% if (order.status === 'Processing') { %> selected <% } %>>Processing</option>
-                            <option value="Delivered" <% if (order.status === 'Delivered') { %> selected <% } %>>Delivered</option>
-                            <option value="returns" <% if (order.status === 'returns') { %> selected <% } %>>Returns</option>
-                            <!-- Add other options as needed -->
                         </select>
                         <button type="submit" class="btn btn-primary">Update Status</button>
                     </form>
+                    
                     
                     
                     <div class="row">
@@ -421,9 +442,10 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <% order.products.forEach(product => { %>
+                                                        <% let k = 0; %>
+                                                        <% order.products.forEach((product,index) => { %>
                                                             <tr>
-                                                                <td><%= Math.floor(Math.random() * 1000000) %> </td>
+                                                                <td><%= index === 0 ? order.trackingId : '' %></td>
                                                                 <td>
                                                                     <div class="d-flex align-items-center">
                                                                         <div class="flex-shrink-0 me-2">
@@ -437,6 +459,7 @@
                                                                 </td>
                                                                 <td><%= product.quantity %> PCS</td>
                                                                 <td class="text-end">Rs<%= product.price * product.quantity %></td>
+                                                                <% k += product.price * product.quantity; %>
                                                             </tr>
                                                         <% }) %>
                                                         <tr>
@@ -447,7 +470,7 @@
                                                                         <tr>
                                                                           
                                                                             <td>Discount Amount:</td>
-                                                                            <td class="text-end">RS - <%= discountAmount %></td>
+                                                                            <td class="text-end">- RS <%= Math.round(((discountAmount/100) * k))%></td>
                                                                         </tr>
                                                                         <tr>
                                                                             <td>Sub Total:</td>
@@ -470,7 +493,8 @@
                             </div>
                         </div>
                         
-                  
+                        <div class="right-align">
+                            Payment Method: <%= order.payment  %></div>
 
                         <div class="col-lg-12">
                             <div class="card" id="track-order">

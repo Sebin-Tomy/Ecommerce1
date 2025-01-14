@@ -9,7 +9,10 @@ const CategorySchema = new mongoose.Schema({
   description: {
     type: String,
     unique:false,
-  }
+  },    list: {
+    type: Boolean,
+    default: false
+}
 });
 
 const Category = mongoose.model("Category", CategorySchema);

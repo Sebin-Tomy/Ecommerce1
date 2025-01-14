@@ -227,7 +227,7 @@
                 showError('product_title', 'Offer must be a number.');
             } else if (parseFloat(offer) <= 0 && parseFloat(offer)) {
                 showError('product_title', 'Offer must be a positive value.');
-            }else if (parseFloat(offer)>100) {
+            }else if (parseFloat(offer) >= 100) {
                 showError('product_title', 'Offer should be less than 100.');
             }
     

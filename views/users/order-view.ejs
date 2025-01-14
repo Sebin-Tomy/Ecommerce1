@@ -237,7 +237,7 @@
                                             <h6 class="fs-18 mb-3">Customer Info</h6>
                                             <p class="mb-0 fw-medium"><%= user.name %></p>
                                             <p class="mb-1"><%= user.email %></p>
-                                            <p class="mb-0">013-789-9876</p>
+                                            <p class="mb-0"><%= user.phone %></p>
                                         </div>
                                         <div class="avatar-sm flex-shrink-0">
                                             <div class="avatar-title bg-success-subtle text-success rounded fs-3">
@@ -321,36 +321,44 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <% order.products.forEach(product => { %>
+
+                                                        <% let k = 0; %>
+                                                        <% order.products.forEach((product, index) => { %>
+                                                     
                                                             <tr>
-                                                                <!-- Skip Product ID -->
-                                                                <td><%= Math.floor(Math.random() * 1000000) %> </td>
+                                                                <!-- Only display Order Id for the first product -->
+                                                                <td><%= index === 0 ? order.trackingId : '' %></td>
                                                                 <td><%= product.productname %></td>
                                                                 <td>Rs<%= product.price %></td>
                                                                 <td><%= product.quantity %> PCS</td>
                                                                 <td class="text-end">Rs<%= product.price * product.quantity %></td>
+                                                                <% k += product.price * product.quantity; %>
                                                             </tr>
-                                                        <% }) %>
+                                                            <% }) %>
+                                                   
                                                         <tr>
                                                             <td colspan="3"></td>
                                                             <td>Discount Amount:</td>
-                                                            <td class="text-end">- RS <%= discountAmount %></td>
+                                                            <td class="text-end">- RS <%= Math.round(((discountAmount/100) * k))%></td>
                                                         </tr>
+                                                        
                                                         <tr>
                                                             <td colspan="3"></td>
                                                             <td>Subtotal:</td>
                                                             <td class="text-end">RS<%= order.totalAmount %></td>
                                                         </tr>
+                                                       
                                                     </tbody>
                                                 </table>
-                                                
+                                               
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+                        <div class="right-align">
+                        Payment Method: <%= order.payment  %></div>
                         <!-- Button to Download PDF -->
                         <div class="d-flex justify-content-end mt-3 mb-4">
                             <button id="download-pdf" class="btn btn-primary" style="width: 250px;">Download Invoice</button>
@@ -1585,34 +1593,34 @@
                 const cells = row.querySelectorAll("td");
         
                 // Ensure the row has the expected number of cells (avoid processing empty rows)
-                if (cells && cells.length > 4) {
+                if (cells && cells.length > 3) {
                     const orderId = cells[0]?.innerText.trim() || "";
                     const productName = cells[1]?.innerText.trim() || ""; // Safely access Product Name
                     const amount = cells[2]?.innerText.trim() || ""; // Safely access Amount
                     const quantity = cells[3]?.innerText.trim() || ""; // Safely access Quantity
                     const total = cells[4]?.innerText.trim() || ""; // Safely access Total
-                    const discount = cells[4]?.innerText.trim() || "";
+        
                     // Check if this is not the subtotal row
                     if (index < rows.length - 1) {
-                        tableData.push([orderId,productName, amount, quantity, total]);
+                        tableData.push([orderId, productName, amount, quantity, total]);
                     }
                 }
             });
             const discountCell = document.querySelector("tbody tr:nth-last-child(2) td:last-child");
             if (discountCell) {
                 const discountRow = discountCell.innerText.trim();
-                tableData.push(["", "  ","Discount Amount:"," ", discountRow]);
+                tableData.push(["", "  ", "Discount Amount:", " ", discountRow]);
             }
             // Add subtotal as the last row
             const subtotalCell = document.querySelector("tbody tr:last-child td:last-child");
             if (subtotalCell) {
                 const subtotalRow = subtotalCell.innerText.trim();
-                tableData.push(["", "  ", "Subtotal:"," ", subtotalRow]);
+                tableData.push(["", "  ", "Subtotal:", " ", subtotalRow]);
             }
         
             // Generate table in the PDF
             doc.autoTable({
-                head: [["Order Id","Product Name", "Amount", "Quantity", "Total"]], // Define table headers
+                head: [["Order Id", "Product Name", "Amount", "Quantity", "Total"]], // Define table headers
                 body: tableData, // Table content
                 startY: yPosition + 10, // Position table below the billing address
                 styles: {
@@ -1623,13 +1631,19 @@
                 },
             });
         
-            // Add "Thank You!" below the table
+            // Add payment method information below the table
             const tableEndY = doc.autoTable.previous.finalY; // Get the Y position where the table ends
-            doc.setFontSize(14);
-            doc.text("Thank You!", 105, tableEndY + 20, { align: "center" }); // Center the "Thank You!" message with some space below the table
+            doc.setFontSize(12);
+            doc.text("Payment Method: <%= order.payment %>", 14, tableEndY + 10); // Add "Payment Method:" heading
+           // Add the actual payment method value below the heading -->
         
-            // Add payment information below "Thank You!"
-            const paymentInfoStartY = tableEndY + 40; // Add extra space below "Thank You!"
+            // Add "Thank You!" below the payment information
+            const paymentInfoEndY = tableEndY + 15; // Position below the payment method
+            doc.setFontSize(14);
+            doc.text("Thank You!", 105, paymentInfoEndY + 20, { align: "center" }); // Center the "Thank You!" message with some space below the payment info
+        
+            // Add customer details (if needed)
+            const paymentInfoStartY = paymentInfoEndY + 40; // Add extra space below "Thank You!"
             doc.setFontSize(16);
             doc.text("Payment Information :", 14, paymentInfoStartY); // Heading
             
@@ -1638,7 +1652,7 @@
             const customerDetails = [
                 "<%= user.name %>",
                 "<%= user.email %>",
-                "013-789-9876"
+                "<%= user.phone %>"
             ]; // Replace with dynamic EJS values
             let customerY = paymentInfoStartY + 7;
             customerDetails.forEach(detail => {
@@ -1649,9 +1663,10 @@
             // Save the generated PDF
             doc.save("Order_Invoice.pdf");
         });
+        
+    
 
     </script>
-    
     <!-- App js -->
     <script src="/js/app.js"></script>
 </body>

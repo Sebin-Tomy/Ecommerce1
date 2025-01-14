@@ -127,15 +127,16 @@
                         <div class="card-body">
                             <form id = "addproduct" action="/admin/add-coupon" method="POST">
                                 
-                            <div class="mb-4">
-                                <label for="product_title" class="form-label">Start date</label>
-                                <input type="text" name="valid_from" placeholder="Type here" class="form-control" id="product_title1">
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label for="product_title" class="form-label">Expiry date</label>
-                                <input type="text" name="valid_to" placeholder="Type here" class="form-control" id="product_title2">
-                            </div>
+                                <div class="mb-4">
+                                    <label for="start_date" class="form-label">Start Date</label>
+                                    <input type="date" name="valid_from" class="form-control" id="product_title1">
+                                </div>
+                
+                                <!-- Expiry Date Field -->
+                                <div class="mb-4">
+                                    <label for="expiry_date" class="form-label">Expiry Date</label>
+                                    <input type="date" name="valid_to" class="form-control" id="product_title2">
+                                </div>
 
                             <div class="mb-4">
                                 <label for="product_title" class="form-label">Coupon Code</label>
@@ -144,7 +145,7 @@
                             <div class="row gx-3">
     
                                 <div class="col-md-4  mb-3">
-                                    <label for="product_color" class="form-label">Discount Amount</label>
+                                    <label for="product_color" class="form-label">Discount Percentage</label>
                                     <input type="text" name="discount_amount" placeholder="Type here" class="form-control" id="product_color">
                                 </div>
                             </div>
@@ -167,6 +168,7 @@
                         </div>
                     </div> <!-- card end// -->
                 </div>
+                
           
             
                 </div>
@@ -213,22 +215,29 @@
                 errors++;
             }
         
-            const datePattern = /^(\d{2})\/(\d{2})\/(\d{2})$/;
-
-        const startDate = document.querySelector('[name="valid_from"]').value.trim();
-        const expiryDate = document.querySelector('[name="valid_to"]').value.trim();
-
-        if (!startDate) {
-            showError('product_title1', 'Start date is required.');
-        } else if (!datePattern.test(startDate)) {
-            showError('product_title1', 'Start date must be in the format dd/mm/yy.');
-        }
-
-        if (!expiryDate) {
-            showError('product_title2', 'Expiry date is required.');
-        } else if (!datePattern.test(expiryDate)) {
-            showError('product_title2', 'Expiry date must be in the format dd/mm/yy.');
-        }
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Remove time for comparison
+        
+            const startDateInput = document.querySelector('[name="valid_from"]');
+            const expiryDateInput = document.querySelector('[name="valid_to"]');
+        
+            const startDate = startDateInput.value ? new Date(startDateInput.value) : null;
+            const expiryDate = expiryDateInput.value ? new Date(expiryDateInput.value) : null;
+        
+            if (!startDate) {
+                showError('product_title1', 'Start date is required.');
+            } else if (startDate < today) {
+                showError('product_title1', 'Start date cannot be before today.');
+            }
+        
+            if (!expiryDate) {
+                showError('product_title2', 'Expiry date is required.');
+            } else if (expiryDate < today) {
+                showError('product_title2', 'Expiry date cannot be before today.');
+            } else if (startDate && expiryDate <= startDate) {
+                showError('product_title2', 'Expiry date cannot be earlier than start date.');
+            }
+        
             const couponCode = document.getElementById('product_title').value.trim();
             if (!couponCode) {
                 showError('product_title', 'Coupon code is required.');
@@ -236,11 +245,13 @@
         
             const discountAmount = document.querySelector('[name="discount_amount"]').value.trim();
             if (!discountAmount) {
-                showError('product_color', 'Discount amount is required.');
+                showError('product_color', 'Discount percentage is required.');
             } else if (isNaN(discountAmount)) {
-                showError('product_color', 'Discount amount must be a number.');
+                showError('product_color', 'Discount percentage must be a number.');
             } else if (parseFloat(discountAmount) <= 0) {
-                showError('product_color', 'Discount amount must be a positive value.');
+                showError('product_color', 'Discount percentage must be a positive value.');
+            }else if(parseFloat(discountAmount) >= 100) {
+                showError('product_color', 'Discount percentage must be less than 100.');
             }
         
             const minAmount = document.querySelector('[name="min_amount"]').value.trim();
@@ -257,6 +268,7 @@
                 this.submit();
             }
         });
+        
         
     </script>
     

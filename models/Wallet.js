@@ -13,7 +13,11 @@ const walletSchema = new mongoose.Schema({
         amount: {
             type: Number,
         },
-        status: { type: String },
+        status: { type: String },trackingId: {
+            type: String,
+            default: function () {
+              return Math.floor(100000 + Math.random() * 900000).toString();
+            }}
     }],
     totalAmount: {
         type: Number,

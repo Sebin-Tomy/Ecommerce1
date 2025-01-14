@@ -68,16 +68,16 @@ const loginregister = async(req,res)=>{
             }
     
             const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 2;
+            const limit = parseInt(req.query.limit) || 3;
             const skip = (page - 1) * limit;
     
             const sort = req.query.sort || "option"; // Default sort option
     
-            const totalProducts = await Products.countDocuments();
+            const totalProducts = await Products.countDocuments({list:false});
             const totalPages = Math.ceil(totalProducts / limit);
     
-            const products1 = await Products.find().skip(skip).limit(limit);
-            const categories = await Category.find();
+            const products1 = await Products.find({list:false}).skip(skip).limit(limit);
+            const categories = await Category.find({list:false});
     
             res.render('index1', {
                 Products: products1,
@@ -209,16 +209,17 @@ const handleForgotPass = async (req, res) => {
 const insertUser = async (req, res) => {
         try {
             console.log("enter into register ");
-            const { email, name, phone, password, confirmPassword, reference } = req.body;
-    
+            let { email, name, phone, password, confirmPassword, reference } = req.body;
+            name = name.trim();
+            email = email.trim();
             const phonePattern = /^[1-9][0-9]{9}$/;
             const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     
             if (email.trim() === "" || name.trim() === "" || phone.trim() === "" || password.trim() === "" ||
-                !emailPattern.test(email) || !phonePattern.test(phone) || /\s/.test(name) || name.length < 3 ||
+                !emailPattern.test(email) || !phonePattern.test(phone) ||  name.length < 3 ||
                 !validatePassword(password) || password !== confirmPassword) {
                 return res.render('register', { message: "Invalid input" });
-            }
+            } 
             
             const existingUser = await User.findOne({ email });
             if (existingUser) {
@@ -887,15 +888,12 @@ const deleteCart = async (req, res) => {
     try {
         const itemId = req.params.itemId; 
         const userId = req.session.user_id; 
-        // const cart = await Cart.findOne({ userId: userId });
-        // const productToRemove = cart.products.find(product => product._id.toString() === itemId);
-        // const product = await Products.findById(productToRemove.productId);
+     
         await Cart.updateOne(
             { userId: userId },
             { $pull: { products: { _id: itemId } } }
         );
-        // product.stock += productToRemove.quantity;
-        // await product.save();
+    
 
 
         res.sendStatus(STATUS_CODES.SUCCESS);
@@ -1052,12 +1050,8 @@ const couponId = cartItems[0]?.couponId || null;
                             if (!foundProduct) {
                               throw new Error('Product not found');
                             }
-                  
-                
-                            foundProduct.stock -= orderedQuantity;
-                  
-                            
-                            await foundProduct.save();
+                           foundProduct.stock -= orderedQuantity;
+                           await foundProduct.save();
                             console.log(`Stock reduced for product ${foundProduct._id} by ${orderedQuantity}`);
                           }
                         }
@@ -1068,7 +1062,7 @@ const couponId = cartItems[0]?.couponId || null;
                         products: orderProducts,
                         totalAmount: totalSum,
                         status: "Paid",
-                        payment: "online payment", 
+                        payment: "Online payment", 
                         couponId
                       });
                   
@@ -1116,7 +1110,8 @@ const couponId = cartItems[0]?.couponId || null;
                         res.render('order', {
                             order1: orders,
                             currentPage: page,
-                            totalPages: totalPages
+                            totalPages: totalPages,
+                            limit: limit, 
                         });
                     } catch (error) {
                         console.log(error.message);
@@ -1219,7 +1214,7 @@ const checkaddressinsert = async(req, res) => {
                         res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
                     }
                 };
-                const searchProduct = async (req, res) => {
+const searchProduct = async (req, res) => {
                     try {
                         if (req.session.user_id) {
                             const userData = await User.findById(req.session.user_id);
@@ -1238,7 +1233,7 @@ const checkaddressinsert = async(req, res) => {
                             return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
                         }
                 
-                        let query = {};
+                        let query = { };
                         if (inputLetter) {
                             const escapedInput = escapeRegex(inputLetter); 
                             if (inputLetter.length === 1) {
@@ -1278,22 +1273,22 @@ const checkaddressinsert = async(req, res) => {
                         }
                 
                         const page = parseInt(req.query.page) || 1;
-                        const limit = parseInt(req.query.limit) || 2;
+                        const limit = parseInt(req.query.limit) || 3;
                         const skip = (page - 1) * limit;
                 
-                        const totalProducts = await Products.countDocuments(query);
+                        const totalProducts = await Products.countDocuments({...query,list:false});
                         const totalPages = Math.ceil(totalProducts / limit);
                 
                         console.log("Query:", query);
                         console.log("Regex Input:", inputLetter);
                 
                         sortOption._id = 1; 
-                        const products = await Products.find(query)
+                        const products = await Products.find({...query,list:false})
                             .sort(sortOption)
                             .skip(skip)
                             .limit(limit);
-                
-                        const categories = await Category.find();
+                console.log(products,"Dfs")
+                        const categories = await Category.find({list:false});
                 
                         res.render("index1", {
                             inputLetter: inputLetter,
@@ -1321,8 +1316,7 @@ const cancelOrder = async (req, res) => {
                     }
                 } else {
                     return res.redirect('/login');
-                }
-                    const orderId = req.params.orderId;
+                }   const orderId = req.params.orderId;
                     const order = await orderModel.findById(orderId);
                     if (!order) {
                       return res.status(STATUS_CODES.NOT_FOUND).send("Order not found");
@@ -1331,13 +1325,13 @@ const cancelOrder = async (req, res) => {
                     if (!cancellableStatuses.includes(order.status)) {
                       return res.status(STATUS_CODES.BAD_REQUEST).send("Order cannot be cancelled");
                     }
-                    
-                   order.status = "Cancelled";
+                  order.status = "Cancelled";
                    await order.save();
                    let wallet2 = await wallet.findOne({ userId: order.userId });
                     if (!wallet2) {
                       wallet2 = new wallet({ userId: order.userId });
                     }
+                    wallet2.trackingId = order.trackingId
                     wallet2.totalAmount += order.totalAmount;
                     wallet2.refund.push({ productId: order._id, amount: order.totalAmount,status:'Credited' });
                     await wallet2.save();
@@ -1459,20 +1453,39 @@ const wallet1 = async (req, res) => {
         });
 
         if (!wallet2) {
+            const page = parseInt(req.query.page) || 1; // Current page
+            const limit = 5; // Refunds per page
+            const skip = (page - 1) * limit;
+      
+            const totalRefunds = 1;
+            const totalPages = Math.ceil(totalRefunds / limit);
+    
+         
             return res.render('wallet', { 
                 wallet: { totalAmount: "No wallet amount", createdAt: null }, 
-                refund: [] 
+                refund: [] ,
+                currentPage: page, 
+                totalPages 
             });
         }
 
-        // Sort refunds in reverse chronological order
-        const refunds = wallet2.refund.slice().reverse();
+        const page = parseInt(req.query.page) || 1; // Current page
+        const limit = 5; // Refunds per page
+        const skip = (page - 1) * limit;
 
-        console.log("Wallet Details:", wallet2);
+
+       
+        const refunds = wallet2.refund.slice().reverse();
+        const totalRefunds = refunds.length;
+        const totalPages = Math.ceil(totalRefunds / limit);
+
+        const paginatedRefunds = refunds.slice(skip, skip + limit);
 
         res.render('wallet', { 
             wallet: wallet2, 
-            refund: refunds 
+            refund: paginatedRefunds, 
+            currentPage: page, 
+            totalPages 
         });
     } catch (error) {
         console.error("Error fetching wallet details:", error);
@@ -1520,124 +1533,101 @@ const updateQuantity = async(req,res)=>{
     }
 }
 
-const applycoupon = async(req, res) => {
-    try {if (req.session.user_id) {
-        const userData = await User.findById(req.session.user_id);
-        if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
+const applycoupon = async (req, res) => {
+    try {
+        if (req.session.user_id) {
+            const userData = await User.findById(req.session.user_id);
+            if (userData && userData.is_blocked) {
+                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
+            }
+        } else {
+            return res.redirect('/login');
         }
-    } else {
-        return res.redirect('/login');
-    }
-        const Address = await address.find();
-        let k = await Coupon.find();
 
-        const couponCode = req.body.couponCode; 
         const userId = req.session.user_id;
-        const couponFind = await Coupon.findOne({couponCode:couponCode})
-        console.log(couponFind,"cou")
-        const user = await User.findById(userId)
-        console.log("user,adsf",user);
+        const couponCode = req.body.couponCode;
+
+        const couponFind = await Coupon.findOne({ couponCode });
+        if (!couponFind) {
+            return res.status(400).json({ success: false, message: 'Invalid coupon code' });
+        }
+
+        const user = await User.findById(userId);
         if (user.coupon.includes(couponFind._id)) {
             return res.status(400).json({ success: false, message: 'Coupon already used' });
         }
-        console.log('ji')
-        const saveData = await Cart.find({userId: userId});
-        console.log('ji')
-        const totalSum = saveData.reduce((acc, cart) => acc + cart.total, 0);
-        console.log("total",totalSum); 
-        console.log("d",couponFind.discount_amount)
-        if (Number(couponFind.discount_amount) > totalSum) {
-            console.log('hi');
-            return res.status(400).json({ success: false, message: 'Coupon discount amount exceeds the total value.' });
+
+        const cart = await Cart.findOne({ userId });
+        if (!cart) {
+            return res.status(400).json({ success: false, message: 'Cart not found' });
         }
 
-        const coupon = await Coupon.findOne({ 
-        couponCode:couponCode });
-        console.log("discount amount",coupon);
-        console.log(totalSum);
-        console.log(coupon.discount_amount);
-       
-  let minus = Number(totalSum) - Number(coupon.discount_amount)
-  console.log("sdfsf",minus);
-  const updateCart=await Cart.findOneAndUpdate(
-    { userId: userId},{total: minus},{new :true}
- )
- if(updateCart){
-  const updateCouponStatus = await Cart.updateOne(
-        { userId: userId },
-        { coupon: "Applied" },{new:true}
-    );
-    const cartUpdate = await Cart.updateOne({userId: userId},{couponId:couponFind._id,discountAmount:coupon.discount_amount},{new:true})
-   user.coupon.push(couponFind._id); 
-    await user.save()
-    res.json({ success: true, message: 'Coupon applied successfully' });
-}  }
-    catch (error) {
-        console.log(error.message);
-        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
-    }
-};
+        const totalSum = cart.total || 0;
+        const discountAmount = Math.round((couponFind.discount_amount / 100) * totalSum);
+        const updatedTotal = totalSum - discountAmount;
 
-const removecoupon = async(req, res) => {
-    try {if (req.session.user_id) {
-        const userData = await User.findById(req.session.user_id);
-        if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-        }
-    } else {
-        return res.redirect('/login');
-    }
-        const Address = await address.find();
-        const couponCode = req.body.couponCode;
-        const userId = req.session.user_id;
-
-        console.log('hii');   
-        const user = await User.findById(userId);
-        const saveData = await Cart.find({ userId: userId });
-        const totalSum = saveData.reduce((acc, cart) => acc + cart.total, 0);
-
-        console.log("sdfsdfs", totalSum); 
-        const coupon = await Coupon.findOne({ couponCode: couponCode });
-
-        if (!coupon) {
-            return res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: 'Coupon not found' });
+        if (discountAmount >= totalSum) {
+            return res.status(400).json({ success: false, message: 'Discount exceeds total amount' });
         }
 
-        console.log("discount amount", coupon);
-        let add = Number(totalSum) + Number(coupon.discount_amount);
-        
-        const updateCart = await Cart.findOneAndUpdate(
-            { userId: userId }, 
-            { total: add }, 
-            { new: true }
-        );
+        cart.total = updatedTotal;
+        cart.coupon = "Applied";
+        cart.couponId = couponFind._id;
+        cart.discountAmount = discountAmount;
 
-        if (updateCart) {
-            await Cart.updateOne(
-                { userId: userId },
-                { coupon: "Not Applied", couponId: null, discountAmount: 0 },
-                { new: true }
-            );
-        
-        await User.updateOne(
-                { _id: userId },
-                { $pull: { coupon: coupon._id } }
-            );
+        await cart.save();
+        user.coupon.push(couponFind._id);
+        await user.save();
 
-            console.log("welcome to remove");
-            console.log("this is the user", user);
-            res.json({ success: true, message: 'Coupon removed successfully' });
-        } else {
-            res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: 'Failed to update cart' });
-        }
-
-         console.log('dsfsdf');
+        res.json({ success: true, message: 'Coupon applied successfully' });
     } catch (error) {
-        console.log(error.message);
-        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
+        console.error(error.message);
+        res.status(500).send('Internal Server Error');
     }
 };
+
+
+const removecoupon = async (req, res) => {
+    try {
+        if (req.session.user_id) {
+            const userData = await User.findById(req.session.user_id);
+            if (userData && userData.is_blocked) {
+                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
+            }
+        } else {
+            return res.redirect('/login');
+        }
+
+        const userId = req.session.user_id;
+        const couponCode = req.body.couponCode;
+
+        const couponFind = await Coupon.findOne({ couponCode });
+        if (!couponFind) {
+            return res.status(400).json({ success: false, message: 'Coupon not found' });
+        }
+
+        const cart = await Cart.findOne({ userId });
+        if (!cart) {
+            return res.status(400).json({ success: false, message: 'Cart not found' });
+        }
+
+        const originalTotal = Number(cart.total) + Number(cart.discountAmount); // Recover original total before the discount
+        cart.total = Math.round(originalTotal); // Ensure no decimals
+        cart.coupon = "Not Applied";
+        cart.couponId = null;
+        cart.discountAmount = 0;
+
+        await cart.save();
+        await User.updateOne({ _id: userId }, { $pull: { coupon: couponFind._id } });
+
+        res.json({ success: true, message: 'Coupon removed successfully' });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+
 
 const orderfailure = async (req, res) => {
     try {if (req.session.user_id) {
@@ -1704,7 +1694,7 @@ const orderfailure = async (req, res) => {
         products: orderProducts,
         totalAmount: totalSum,
         status: "Pending",
-        payment: "not paid",
+        payment: "Online Payment",
         couponId
       });
   
@@ -1737,8 +1727,7 @@ const orderfailure = async (req, res) => {
             user = await User.create({
                 email,
                 name , 
-                        
-                is_admin: 0,             
+              is_admin: 0,             
                 isGoogleUser: true       
             });
         }
@@ -1827,11 +1816,12 @@ const walletpayment = async (req, res) => {
             products: orderProducts,
             totalAmount: totalSum,
             status: "Paid",
-            payment: "online payment",
+            payment: "Wallet payment",
             couponId
         });
 
         const savedOrder = await order.save();
+        wallet2.trackingId = order.trackingId
         wallet2.refund.push({ productId: order._id, amount: order.totalAmount, status: "Debited" });
         console.log(wallet2, 'wallet3');
         await wallet2.save();
@@ -1848,8 +1838,84 @@ const walletpayment = async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 };
+const offlinepayment = async (req, res) => {
+    try {if (req.session.user_id) {
+        const userData = await User.findById(req.session.user_id);
+        if (userData && userData.is_blocked) {
+            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
+        }
+    } else {
+        return res.redirect('/login');
+    }
+      const userId = req.session.user_id;
+      const addressId = req.query.addressId; 
+      console.log('Address ID:', addressId);
+      const cartItems = await Cart.find({ userId }).populate('products.productId');
+cartItems.forEach(cart => {
+console.log(cart.couponId, "Coupon ID for cart");
+});
+const couponId = cartItems[0]?.couponId || null;
+      const totalSum = cartItems.reduce((acc, cart) => acc + cart.total, 0);
+      console.log('Total Sum:', totalSum);
+      const orderProducts = [];
+     for (const cart of cartItems) {
+        for (const product of cart.products) {
+          if (product.productId) {
+          
+            orderProducts.push({
+              productId: product.productId._id,
+              quantity: product.quantity,
+              productname: product.productId.productname,
+              Image: product.productId.image,
+              price: product.productId.price,
+              couponId: cart.couponId || null 
+            });
+  
+            const productId = product.productId._id;
+            const orderedQuantity = product.quantity;
+           
+            const foundProduct = await products.findById(productId);
+            
+            if (!foundProduct) {
+              throw new Error('Product not found');
+            }
+  
+
+            foundProduct.stock -= orderedQuantity;
+  
+            
+            await foundProduct.save();
+            console.log(`Stock reduced for product ${foundProduct._id} by ${orderedQuantity}`);
+          }
+        }
+      }
+  const order = new orderModel({
+        userId,
+        addressid: addressId,
+        products: orderProducts,
+        totalAmount: totalSum,
+        status: "Paid",
+        payment: "Offline payment", 
+        couponId
+      });
+  
+      const savedOrder = await order.save();
+
+      console.log('Saved Order:', savedOrder);
+     const cartDelete = await Cart.findOne({userId: userId})
+     if(cartDelete){
+        await Cart.findByIdAndDelete(cartDelete._id);
+     }
+      
+      res.redirect('/order-successfull');
+    } catch (error) {
+      console.error('Error placing order:', error);
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, error: error.message });
+    }
+  };
+  
 
 
-module.exports={updateQuantity,insertUser,securePassword,loginHome,loginLoad,verifyLogin,verifyRegister,registerOtp,logout,userdetails,useredit,updateUsers,insertaddress,addresslist,addresslist,insertaddress,addaddress,deleteAddress,addressedit,updateaddress,getCartItems,productdetails,addToCart,deleteCart,checkout,checkaddressedit,updatecheckedaddress,payment,ordersuccess,order,orderview,loginregister,checkedaddaddress,checkaddressinsert,searchProduct,cancelOrder,wishlist,wishlistpage,deleteWish,orderReturn,wallet1,applycoupon,removecoupon,resendOtp,forgotspass,forgotpassotp,handleForgotPass,forgotregisterOtp,verifyRegister1,changepass,updatePassword,loginLoadin,orderfailure,google,walletpayment};
+module.exports={updateQuantity,insertUser,securePassword,loginHome,loginLoad,verifyLogin,verifyRegister,registerOtp,logout,userdetails,useredit,updateUsers,insertaddress,addresslist,addresslist,insertaddress,addaddress,deleteAddress,addressedit,updateaddress,getCartItems,productdetails,addToCart,deleteCart,checkout,checkaddressedit,updatecheckedaddress,payment,ordersuccess,order,orderview,loginregister,checkedaddaddress,checkaddressinsert,searchProduct,cancelOrder,wishlist,wishlistpage,deleteWish,orderReturn,wallet1,applycoupon,removecoupon,resendOtp,forgotspass,forgotpassotp,handleForgotPass,forgotregisterOtp,verifyRegister1,changepass,updatePassword,loginLoadin,orderfailure,google,walletpayment,offlinepayment};
 
 

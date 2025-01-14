@@ -544,7 +544,8 @@
                                                         <tbody>
                                                             <% order1.forEach((order, index) => { %>
                                                                 <tr>
-                                                                    <td><%= (currentPage - 1) * 10 + index + 1 %></td>
+                                                                  <td>  <%= (currentPage - 1) * limit + index + 1 %></td>
+
                                                                     <td>
                                                                         <% order.products.slice(0, 1).forEach(product => { %> 
                                                                             <div class="product-container d-flex align-items-center mb-2">
@@ -1376,7 +1377,7 @@
                                     key: res.key_id,
                                     amount: res.amount,
                                     currency: "INR",
-                                    name: res.product_name,
+                                    name: res.name,
                                     description: res.description,
                                     order_id: res.order_id,
                                     handler: function (response) {

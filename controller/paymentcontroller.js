@@ -1,5 +1,6 @@
 const Razorpay = require('razorpay'); 
 const {orderModel} = require('../models/order');
+const User = require('../models/userModel');
 const { RAZORPAY_ID_KEY, RAZORPAY_SECRET_KEY } = process.env;
 
 const razorpayInstance = new Razorpay({
@@ -21,6 +22,14 @@ try {
 const payOnline = async(req,res)=>{
     try {
         const userId = req.session.user_id;
+        const name = await User.findById(userId);
+        console.log(name.name);
+        console.log(name.email);
+        console.log(name.phone);
+        let name1 = name.name;
+        let email1 = name.email;
+        let phone1 = name.phone;
+     
         const cartItems = await Cart.find({ userId }).populate('products.productId');
         const totalSum = cartItems.reduce((acc, cart) => acc + cart.total, 0);
         console.log(totalSum);
@@ -41,9 +50,9 @@ const payOnline = async(req,res)=>{
                         order_id:order.id,
                         amount:amount,
                         key_id:RAZORPAY_ID_KEY, 
-                        contact:"9061816133",
-                        name: "Sebin",
-                        email: "sebintomy8@gmail.com"
+                        contact:phone1,
+                        name: name1,
+                        email: email1
                     });
                 }
                 else{
@@ -62,6 +71,10 @@ const payOnline1 = async(req,res)=>{
     try {
         const userId = req.session.user_id;
         const orderId = req.body.orderId;
+        const name = await User.findById(userId);
+        let name1 = name.name;
+        let email1 = name.email;
+        let phone1 = name.phone;
         const order = await orderModel.findOne({ _id: orderId, userId }); 
         order.status = "Paid";
         await order.save();
@@ -81,9 +94,9 @@ const payOnline1 = async(req,res)=>{
                     order_id: razorpayOrder.id,
                     amount: amount,
                     key_id: RAZORPAY_ID_KEY,
-                    contact: "9061816133", 
-                    name: "Sebin",
-                    email: "sebintomy8@gmail.com"
+                    contact: phone1, 
+                    name: name1,
+                    email: email1
                 });
                 }
                 else{

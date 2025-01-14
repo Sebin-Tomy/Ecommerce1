@@ -201,26 +201,59 @@ const logout = async(req,res)=>{
 const userlist = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 8; 
+        const limit = parseInt(req.query.limit) || 8;
         const skip = (page - 1) * limit;
 
-        const usersData = await User.find({ is_admin: 0 })
+        function escapeRegex(text) {
+            return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+        }
+
+
+        const inputLetter = req.query.search || "";
+
+  
+        const filter = { is_admin: 0 };
+
+     
+        console.log(inputLetter);
+        if (inputLetter) {
+            const escapedInput = escapeRegex(inputLetter);
+            if (inputLetter.length == 1) {
+ 
+                filter.$or = [
+                    { name: { $regex: `^${escapedInput}`, $options: "i" } },
+                    // { email: { $regex: `^${escapedInput}`, $options: "i" } }
+                ];
+            } else {
+         
+                filter.$or = [
+                    { name: { $regex: escapedInput, $options: "i" } },
+                    { email: { $regex: escapedInput, $options: "i" } }
+                ];
+            }
+        }
+
+ 
+        const usersData = await User.find(filter).sort({_id:-1})
                                     .skip(skip)
                                     .limit(limit)
                                     .exec();
 
-        const totalUsers = await User.countDocuments({ is_admin: 0 });
+   
+        const totalUsers = await User.countDocuments(filter);
         const totalPages = Math.ceil(totalUsers / limit);
-        console.log("hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"+page);
+
+     
         res.render('users', {
             users: usersData,
             currentPage: page,
             totalPages: totalPages,
-            limit: limit
+            limit: limit,
+            searchQuery: inputLetter 
         });
     } catch (error) {
         console.log(error.message);
-        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
+        res.status(500).render('error', { error: "Internal Server Error" });
     }
 };
 
@@ -263,41 +296,98 @@ const unblockUser = async (req, res) => {
 
 const insertCategory = async (req, res) => {
     try {
-        const { name, description } = req.body;
+        let { name, description } = req.body;
 
-        const category = new Category({
-            name: name,
-            description: description
-        });
+        name = name.trim();
 
+
+        const existingCategory = await Category.findOne({ name: { $regex: `^${name}$`, $options: "i" } });
+        if (existingCategory) {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 5;
+            const skip = (page - 1) * limit;
+
+            const totalCategories = await Category.countDocuments();
+            const categories = await Category.find().skip(skip).limit(limit).sort({_id:-1});
+            const totalPages = Math.ceil(totalCategories / limit);
+
+            return res.render('categories', { 
+                message: "Duplicate category name. Please choose a different name.", 
+                categories, 
+                currentPage: page, 
+                totalPages, 
+                limit, 
+                skip 
+            });
+        }
+
+ 
+        const category = new Category({ name, description });
         await category.save();
 
-        if (category) {
-            const categories = await Category.find();
-            res.render('categories', { categories });
-        } else {
-            res.render('categories', { message: "Your addition of categories has failed." });
-        }
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page - 1) * limit;
+
+        const totalCategories = await Category.countDocuments();
+        const categories = await Category.find().skip(skip).limit(limit).sort({_id:-1});
+        const totalPages = Math.ceil(totalCategories / limit);
+
+        res.render('categories', { 
+            categories, 
+            currentPage: page, 
+            totalPages, 
+            limit, 
+            skip 
+        });
     } catch (error) {
-        let errorMessage = "An error occurred while creating the category.";
-        if (error.code === 11000 && error.keyPattern && error.keyPattern.name === 1) {
-            errorMessage = "Duplicate category name. Please choose a different name.";
-        } else {
-            console.log(error);
-        }
-        const categories = await Category.find();
-        res.render('categories', { message: errorMessage, categories });
+        console.error(error);
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page - 1) * limit;
+
+        const totalCategories = await Category.countDocuments();
+        const categories = await Category.find().skip(skip).limit(limit).sort({_id:-1});
+        const totalPages = Math.ceil(totalCategories / limit);
+
+        res.render('categories', { 
+            message: "An error occurred while creating the category.", 
+            categories, 
+            currentPage: page, 
+            totalPages, 
+            limit, 
+            skip 
+        });
     }
 };
 
 
+
 const categorylist = async (req, res) => {
-try { const categories = await Category.find();
-            res.render('categories', { categories: categories }); 
-        } catch (error) {
-            console.log(error.message);
-            res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
-        } };
+    try {
+        const page = parseInt(req.query.page) || 1; 
+        const limit = parseInt(req.query.limit) || 5; 
+        const skip = (page - 1) * limit;
+
+        const totalCategories = await Category.countDocuments(); 
+        const categories = await Category.find().skip(skip).limit(limit).sort({_id:-1}); 
+
+        const totalPages = Math.ceil(totalCategories / limit); 
+
+        res.render('categories', { 
+            categories, 
+            currentPage: page, 
+            totalPages, 
+            limit, 
+            skip 
+        });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
 
 const categoriesedit = async(req,res)=>
 {
@@ -314,26 +404,32 @@ catch(error){
 const updateUsers = async (req, res) => {
     try {
         const id = req.params.id;
-        const { name, description } = req.body;
+        let { name, description } = req.body;
+        console.log("hhi")
+        // Trim whitespace from the name
+        name = name.trim();
 
-      
-        const existingCategory = await Category.findOne({  name: name.toUpperCase(), _id: { $ne: id } });
-     
+
+        const existingCategory = await Category.findOne({
+            name: { $regex: `^${name}$`, $options: "i" }, 
+            _id: { $ne: id } 
+        });
+
         if (existingCategory) {
             const category = await Category.findById(id);
-            return res.render('categories-edit', { 
-                categories: category, 
-                message: 'Category name already exists. Please use a different name.' 
+            return res.render('categories-edit', {
+                categories: category,
+                message: 'Category name already exists. Please use a different name.'
             });
         }
+        console.log("hhi")
 
-        // Update the category if no conflict
-        await Category.findByIdAndUpdate(id, { $set: { name, description } });
+     
+        await Category.findByIdAndUpdate(id, { $set: { name: name.toUpperCase(), description } });
         res.redirect('/admin/categories');
     } catch (error) {
         console.log(error.message);
-      
-        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
+        res.status(500).send("Internal Server Error");
     }
 };
 
@@ -355,29 +451,68 @@ const deleteCategory = async (req, res) => {
 };
 
 const products = async (req, res) => {
-const page = parseInt(req.query.page) || 1;
-const perPage = 6; 
- try {
-        const products1 = await Products.find().populate('categoryId')
+    const page = parseInt(req.query.page) || 1; 
+    const perPage = 3; 
+    const searchTerm = req.query.search || ""; 
+
+  
+    function escapeRegex(text) {
+        return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+    }
+
+    try {
+        let searchFilter = {};
+
+   
+        if (searchTerm.length === 1) {
+            const escapedInput = escapeRegex(searchTerm);
+            searchFilter = {
+                $or: [
+                    { productname: { $regex: `^${escapedInput}`, $options: "i" } },
+                    // { description: { $regex: `^${escapedInput}`, $options: "i" } },
+                    // { brand: { $regex: `^${escapedInput}`, $options: "i" } },
+                    // { color: { $regex: `^${escapedInput}`, $options: "i" } },
+                ],
+            };
+        } else {
+           
+            searchFilter = {
+                $or: [
+                    { productname: { $regex: escapeRegex(searchTerm), $options: "i" } },
+                    { description: { $regex: escapeRegex(searchTerm), $options: "i" } },
+                    { brand: { $regex: escapeRegex(searchTerm), $options: "i" } },
+                    { color: { $regex: escapeRegex(searchTerm), $options: "i" } },
+                ],
+            };
+        }
+
+    
+        const products1 = await Products.find(searchFilter)
+            .populate('categoryId').sort({_id:-1})
             .skip((page - 1) * perPage)
             .limit(perPage)
             .exec();
-       
-      const totalProducts = await Products.countDocuments();
-      const totalPages = Math.ceil(totalProducts / perPage);
-       res.render('products', { 
+
+        const totalProducts = await Products.countDocuments(searchFilter);
+        const totalPages = Math.ceil(totalProducts / perPage);
+
+      
+        res.render('products', { 
             Products: products1,
             currentPage: page,
-            totalPages: totalPages
+            totalPages: totalPages,
+            search: searchTerm,
         });
     } catch (error) {
-        console.log(error.message);
-        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR); 
+        console.error(error.message);
+        res.status(500).send("Internal Server Error");
     }
 };
 
+
+
 const addproducts = async (req, res) => {
-    try { const category = await Category.find()
+    try { const category = await Category.find({list:false})
         console.log("Sfasdf",category);
         res.render('add-products',{category:category});
     } catch (error) {
@@ -387,13 +522,13 @@ const addproducts = async (req, res) => {
 
 const insertProducts = async (req, res) => {
     try {
-        const { category, productname, productprice, brand, color, description, stock } = req.body;
+        let { category, productname, productprice, brand, color, description, stock } = req.body;
         const files = req.files;
 console.log(req.body,"req")
-   
+   productname = productname.trim()
         const existingProduct = await Products.findOne({ productname: { $regex: `^${productname}$`, $options: "i" } });
         if (existingProduct) {
-            const categories = await Category.find(); 
+            const categories = await Category.find({list:false}); 
             return res.render('add-products', { 
                 category: categories, 
                 message: 'Product name already exists. Please use a different name.' 
@@ -441,7 +576,7 @@ console.log(prod,"roducts")
 const productsedit = async(req,res)=>
 {try{const id = req.params.id
 const products = await Products.findById(id).populate('categoryId')
-const category = await Category.find();
+const category = await Category.find({list:false});
 res.render('edit-product',{Products:products,category:category});
 }
 catch(error){
@@ -454,8 +589,8 @@ const updateproducts = async (req, res) => {
     try {
         console.log(req.body);
         const id = req.params.id;
-        const { productname, productprice, brand, material, color, description, dimensions, stock,category } = req.body;
-
+        let { productname, productprice, brand, material, color, description, dimensions, stock,category } = req.body;
+productname = productname.trim()  
        console.log(category,"Adsfsdf");
         const existingProduct = await Products.findOne({ 
             productname: { $regex: `^${productname}$`, $options: "i" }, 
@@ -576,23 +711,61 @@ const order = async (req, res) => {
         const page = parseInt(req.query.page) || 1; 
         const limit = parseInt(req.query.limit) || 5; 
         const skip = (page - 1) * limit; 
-        const totalOrders = await orderModel.countDocuments();
-        const orders = await orderModel.find().sort({ orderDate: -1 }) .skip(skip).limit(limit);
+        const searchTerm = req.query.search || ""; 
+
+       
+        function escapeRegex(text) {
+            return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+        }
+
+   
+        let searchFilter = {
+            $or: [
+                { "products.productname": { $regex: escapeRegex(searchTerm), $options: "i" } },
+                { status: { $regex: escapeRegex(searchTerm), $options: "i" } },
+                { trackingId: { $regex: escapeRegex(searchTerm), $options: "i" } }, 
+            ],
+        };
+
+    
+        const numericSearchTerm = parseFloat(searchTerm);
+        if (!isNaN(numericSearchTerm)) {
+            searchFilter.$or.push({ totalAmount: numericSearchTerm });
+        }
+
+       
+        if (searchTerm.length === 1) {
+            const escapedInput = escapeRegex(searchTerm);
+            searchFilter.$or[2] = { trackingId: { $regex: `^${escapedInput}`, $options: "i" } };
+            searchFilter.$or[0] = { "products.productname": { $regex: `^${escapedInput}`, $options: "i" } };
+        }
+
+      
+        const totalOrders = await orderModel.countDocuments(searchFilter);
+
+        const orders = await orderModel
+            .find(searchFilter)
+            .sort({ orderDate: -1 })
+            .skip(skip)
+            .limit(limit);
+
         const totalPages = Math.ceil(totalOrders / limit);
 
 
-
-        res.render('orders', { 
-            order1: orders, 
-            currentPage: page, 
-            totalPages: totalPages, 
-            limit: limit 
+        res.render("orders", {
+            order1: orders,
+            currentPage: page,
+            totalPages: totalPages,
+            limit: limit,
+            search: searchTerm, 
         });
     } catch (error) {
-        console.log(error.message);
-        res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
+        console.error(error.message);
+        res.status(500).render("error", { message: "Internal Server Error" });
     }
 };
+
+
 
 
 const orderview1 = async (req, res) => {
@@ -647,7 +820,8 @@ const orderReturn1 = async (req, res) => {
                       wallet2 = new wallet({ userId: update.userId });
                     }
                     wallet2.totalAmount += update.totalAmount;
-                    wallet2.refund.push({ productId: update._id, amount: update.totalAmount });
+                    wallet2.trackingId = update.trackingId
+                    wallet2.refund.push({ productId: update._id, amount: update.totalAmount ,status: "Credited"});
                     await wallet2.save();
                    console.log("wallesf",wallet2);
         res.json({ success: true, message: "Approval request sent." });
@@ -664,7 +838,7 @@ const coupon = async (req, res) => {
         const skip = (page - 1) * limit;
 
         const totalCoupons = await coupon1.countDocuments();
-        const couponcode = await coupon1.find().skip(skip).limit(limit);
+        const couponcode = await coupon1.find().skip(skip).limit(limit).sort({_id:-1});
 
         res.render('coupon', {
             coup: couponcode,
@@ -692,9 +866,9 @@ const addcoupon = async (req, res) => {
 
 const insertcoupon = async (req, res) => {
     try {
-        const { couponCode, discount_amount, min_amount,valid_from,valid_to } = req.body;
+        let { couponCode, discount_amount, min_amount,valid_from,valid_to } = req.body;
 
-      
+      couponCode = couponCode.trim();
         const existingCoupon = await coupon1.findOne({ couponCode: couponCode });
 
         if (existingCoupon) {
@@ -832,7 +1006,7 @@ const addoffer = async (req, res) => {
             const skip = (page - 1) * limit;
     
             const totalOffers = await offer12.countDocuments(); 
-            const offers = await offer12.find().skip(skip).limit(limit);
+            const offers = await offer12.find().skip(skip).limit(limit).sort({_id:-1});
     
             res.render('offer', {
                 offers,
@@ -950,5 +1124,49 @@ const deleteoffer = async (req, res) => {
         res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send('Failed to delete offer');
     }
 };
+const listCategory = async (req, res) => {
+    try {  
+        const id = req.params.id;
+        console.log(id)
+        await Category.findByIdAndUpdate(id, {list: true });
+        console.log(id);
+        res.sendStatus(STATUS_CODES.SUCCESS);
+    } catch (error) {
+        console.log(error.message);
+        res.sendStatus(STATUS_CODES.INTERNAL_SERVER_ERROR);
+    }
+};
+const unlistCategory = async (req, res) => {
+    try {
+        const id = req.params.id;
+        await Category.findByIdAndUpdate(id, { list: false });
+        res.sendStatus(STATUS_CODES.SUCCESS);
+    } catch (error) {
+        console.log(error.message);
+        res.sendStatus(STATUS_CODES.INTERNAL_SERVER_ERROR);
+    }
+};
+const listProduct = async (req, res) => {
+    try {  
+        const id = req.params.id;
+        console.log(id)
+        await Products.findByIdAndUpdate(id, {list: true });
+        console.log(id);
+        res.sendStatus(STATUS_CODES.SUCCESS);
+    } catch (error) {
+        console.log(error.message);
+        res.sendStatus(STATUS_CODES.INTERNAL_SERVER_ERROR);
+    }
+};
+const unlistProduct = async (req, res) => {
+    try {
+        const id = req.params.id;
+        await Products.findByIdAndUpdate(id, { list: false });
+        res.sendStatus(STATUS_CODES.SUCCESS);
+    } catch (error) {
+        console.log(error.message);
+        res.sendStatus(STATUS_CODES.INTERNAL_SERVER_ERROR);
+    }
+};
 
-module.exports = {loadLogin,verifyLogin,securePasword,loadDashboard,logout,userlist,deleteUser,blockUser,unblockUser,categorylist,insertCategory,categorylist,categoriesedit,updateUsers,deleteCategory,products,addproducts,insertProducts,productsedit,updateproducts,deleteProduct,order,orderview1,updateOrderStatus,orderReturn1,coupon,addcoupon,insertcoupon,deleteCoupon,salesreport,offer2,insertoffer,addoffer,deleteoffer}
+module.exports = {loadLogin,verifyLogin,securePasword,loadDashboard,logout,userlist,deleteUser,blockUser,unblockUser,categorylist,insertCategory,categorylist,categoriesedit,updateUsers,deleteCategory,products,addproducts,insertProducts,productsedit,updateproducts,deleteProduct,order,orderview1,updateOrderStatus,orderReturn1,coupon,addcoupon,insertcoupon,deleteCoupon,salesreport,offer2,insertoffer,addoffer,deleteoffer,listCategory,unlistCategory,listProduct, unlistProduct}

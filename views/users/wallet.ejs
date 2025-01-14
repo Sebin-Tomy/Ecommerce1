@@ -527,12 +527,12 @@
                                                     <table class="table fs-15 align-middle">
                                                         <thead>
                                                             <tr>
-                                                                <th scope="col">Order ID</th>
+                                                                <th scope="col">ID</th>
                                                               
                                                                 <th scope="col">Products</th>
                                                                 <th scope="col">Total Price</th>
                                                                 <th scope="col">Type</th>
-                                                                <th scope="col">Order Date</th>
+                                                                <th scope="col">Date</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
@@ -544,7 +544,7 @@
                                                                 <% refund.forEach((ref, index) => { %>
                                                                     <tr>
                                                                         <!-- Generate Random Order ID -->
-                                                                        <td>Order no: <%= Math.random().toString(36).substring(2, 10).toUpperCase() %></td>
+                                                                        <td><%=  ref.trackingId  %></td>
                                                                         
                                                                         <!-- Products -->
                                                                         <td class="d-block" style="vertical-align: middle;">
@@ -565,7 +565,7 @@
                                                         
                                                                         <!-- Total Price -->
                                                                         <td>
-                                                                            <span class="badge bg-danger-subtle text-danger"><%= ref.amount %></span>
+                                                                            <span class="badge bg-danger-subtle text-danger"><%= ref.amount %> Rs</span>
                                                                         </td>
                                                         
                                                                         <!-- Type -->
@@ -575,7 +575,7 @@
                                                         
                                                                         <!-- Wallet Creation Date -->
                                                                         <td>
-                                                                            <%= new Date(wallet.createdAt).toLocaleDateString() %>
+                                                                            <%= new Date(wallet.updatedAt).toLocaleDateString() %>
                                                                         </td>
                                                                     </tr>
                                                                 <% }); %>
@@ -590,6 +590,29 @@
                                     </div>
                                 </div>
                             </div>           
+      
+
+<!-- Pagination Controls -->
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        <% if (currentPage > 1) { %>
+            <li class="page-item">
+                <a class="page-link" href="?page=<%= currentPage - 1 %>">Previous</a>
+            </li>
+        <% } %>
+        <% for (let i = 1; i <= totalPages; i++) { %>
+            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+            </li>
+        <% } %>
+        <% if (currentPage < totalPages) { %>
+            <li class="page-item">
+                <a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a>
+            </li>
+        <% } %>
+    </ul>
+</nav>
+
                             <!--end tab-pane-->
                             <div class="tab-pane fade" id="custom-v-pills-order" role="tabpanel">
                                 <div class="card">

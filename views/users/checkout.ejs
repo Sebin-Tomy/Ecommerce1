@@ -31,6 +31,11 @@
                 margin-bottom: 1rem;
             }
         }
+        .card-body h6.text-end {
+            text-align: right;
+            margin-left: 100px; /* Adjust margin as needed */
+            margin-top: 10px; /
+        }
         
     </style>
 </head>
@@ -523,11 +528,30 @@
                                 </div>
                                 <% if (saveData[0].coupon === "Not Applied") { %>
                                     <div class="hstack gap-3 px-3 mx-n3 flex-wrap">
-                                        <input class="form-control me-auto mb-2 mb-md-0" 
+                                        <!-- <input class="form-control me-auto mb-2 mb-md-0" 
                                                id="couponCode" 
                                                type="text" 
                                                placeholder="Enter coupon code" 
-                                               aria-label="Add Promo Code here...">
+                                               aria-label="Add Promo Code here..."> -->
+                                               <% if (coup.length === 0) { %>
+                                                <p>No coupons available</p>
+                                            <% } else { %>
+        
+                                                <% if (saveData[0].coupon !== "Not Applied") { %>
+                                                    <%}    else{%>
+                                                        <h6 class="mb-3 fs-15 text-end">Available Coupons:</h6>
+                                                <select name="coupon" class="form-control">
+                                                    <option value="" selected disabled>Select Coupon</option>
+                                                    <% coup.forEach(coupon => { %>
+                                                        <option value="<%= coupon._id %>" data-code="<%= coupon.couponCode %>">
+                                                            <%= coupon.couponCode %> 
+                                                        </option>  
+                                                    <% }); %>
+                                                </select>
+                                                <% coup.forEach(coupon => { %>
+                                                    <input type="hidden" id="productId" value="<%= coupon._id %>">
+                                                <% }); %><% } %>
+                                            <% } %>
                                         <button type="button" class="btn btn-success w-100 w-md-auto" id="applyCoupon">Apply</button>
                                     </div>
                                 <% } else { %>
@@ -542,7 +566,7 @@
                                     </div>
                                 <% } %>
                         
-                                <div class="text-center mt-4">
+                                <!-- <div class="text-center mt-4">
                                     <% if (coup.length === 0) { %>
                                         <p>No coupons available</p>
                                     <% } else { %>
@@ -562,7 +586,7 @@
                                             <input type="hidden" id="productId" value="<%= coupon._id %>">
                                         <% }); %><% } %>
                                     <% } %>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         
@@ -577,7 +601,7 @@
                                         <tbody>
                                             <tr>
                                                 <td>Original Amount :</td>
-                                                <td class="text-end cart-subtotal"> <%= originalTotal %>Rs</td>
+                                                <td class="text-end cart-subtotal"> <%= originalTotal + Number(discountAmount) %>Rs</td>
                                             </tr>
                                             <tr>
                                                 <td>Discount Amount :</td>
@@ -586,7 +610,7 @@
                                             <tr class="table-active">
                                                 <th>Total (Rupees) :</th>
                                                 <td class="text-end">
-                                                    <span class="fw-semibold cart-total">Rs <%= total %></span>
+                                                    <span class="fw-semibold cart-total">Rs <%= Number(originalTotal)+ Number(discountAmount) - discountAmount %></span>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -658,58 +682,75 @@ function getSelectedAddressId() {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('applyCoupon').addEventListener('click', function () {
-            console.log('dfsdf');
-            var couponCode = document.getElementById('couponCode').value;
-            var productId = document.querySelector('input[type="hidden"]').value;
+        let selectedCouponCode = null;
+        let selectedProductId = null;
     
-            console.log(couponCode);
-            console.log(productId);
+        // Listen for changes in the coupon dropdown
+        const couponDropdown = document.querySelector('select[name="coupon"]');
+        if (couponDropdown) {
+            couponDropdown.addEventListener('change', function () {
+                const selectedOption = couponDropdown.options[couponDropdown.selectedIndex];
+                selectedCouponCode = selectedOption.getAttribute('data-code');
+                selectedProductId = selectedOption.value;
     
-            // Display confirmation message using SweetAlert
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'This coupon will be applied!',
-                icon: 'warning',
-                showCancelButton: false,
-                confirmButtonText: 'Yes, list it!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    console.log("hi");
-              
-                    fetch('/applyCoupon', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ couponCode: couponCode, productId: productId })
-                    })
-                    .then(async response => {
-                
-                        if (!response.ok) {
-                            const errorData = await response.json(); 
-                            throw new Error(errorData.message || 'Unknown error occurred');
-                        }
-                        return response.json(); 
-                    })
-                    .then(data => {
-                        if (data.success) {
-                    
-                            Swal.fire('Listed!', 'The coupon has been applied.', 'success');
-                       
-                            window.location.reload(true);
-                        }
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        
-                        Swal.fire("Error", error.message, 'error');
-                    });
-                }
+             
             });
-        });
+        }
+    
+        // Handle the "Apply" button click
+        const applyCouponButton = document.getElementById('applyCoupon');
+        if (applyCouponButton) {
+            applyCouponButton.addEventListener('click', function () {
+                if (!selectedCouponCode || !selectedProductId) {
+                    Swal.fire({
+                        title: 'No Coupon Selected',
+                        text: 'Please select a coupon ',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                    });
+                    return;
+                }
+    
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `You are about to apply the coupon "${selectedCouponCode}".`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, apply it!',
+                    cancelButtonText: 'Cancel',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch('/applyCoupon', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ couponCode: selectedCouponCode, productId: selectedProductId }),
+                        })
+                            .then(async (response) => {
+                                if (!response.ok) {
+                                    const errorData = await response.json();
+                                    throw new Error(errorData.message || 'Unknown error occurred');
+                                }
+                                return response.json();
+                            })
+                            .then((data) => {
+                                if (data.success) {
+                                    Swal.fire('Success!', 'The coupon has been applied.', 'success').then(() => {
+                                        window.location.reload(true);
+                                    });
+                                }
+                            })
+                            .catch((error) => {
+                                console.error(error);
+                                Swal.fire('Error', error.message, 'error');
+                            });
+                    }
+                });
+            });
+        }
     });
+    
     
 </script>
 <script>
@@ -732,7 +773,7 @@ function getSelectedAddressId() {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ couponCode: couponCode }) // Replace with actual coupon code
+                body: JSON.stringify({ couponCode: couponCode }) 
             })
             .then(response => response.json())
             .then(data => {

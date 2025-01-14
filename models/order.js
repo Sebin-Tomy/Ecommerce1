@@ -50,7 +50,13 @@ is_cancelled: {
   createdAt: { type: Date, default: Date.now },
   couponId: {
     type: String
-}
+},trackingId: {
+  type: String,
+  default: function () {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  },
+  unique: true,
+},
 });
 const orderModel = mongoose.model("order", orderSchema);
 

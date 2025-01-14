@@ -21,7 +21,11 @@ const productSchema = new mongoose.Schema({
   offerPercentage:{
   type:String,
   default:"nil"
-},   originalPrice: { type: Number }
+},   originalPrice: { type: Number },  list: {
+  type: Boolean,
+  default: false
+}
+
   });
 const products = mongoose.model("products", productSchema);
 module.exports = products;

@@ -80,7 +80,7 @@ user_route.post('/update-quantity',auth.isLogin,userController.updateQuantity)
 user_route.get('/order-successfull',auth.isLogin, (req, res) => {
     res.render('ordersuccess');
 });
-user_route.post('/order-successfull',auth.isLogin,userController.ordersuccess);
+user_route.post('/order-successfull',auth.isLogin,userController.offlinepayment);
 user_route.get('/order',auth.isLogin,userController.order);
 user_route.get('/order-view',auth.isLogin,userController.orderview);
 user_route.post('/add-checkoutaddress/',auth.isLogin,userController.checkaddressinsert);

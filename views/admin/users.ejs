@@ -168,6 +168,28 @@ Swal.fire({
                     <h2 class="content-title card-title">Users List</h2>
                 </div>
             </div>
+            <div style="margin-bottom: 20px;">
+           
+                <input 
+                    type="text" 
+                    class="form-control d-inline-block w-auto mx-2" 
+                    placeholder="Search users..." 
+                    id="searchInput" 
+                
+                /><button 
+                class="btn btn-primary" 
+                onclick="handleSearch()"
+            >
+                Search
+            </button>
+            <div style="margin-top: 10px;">
+                <a href="/admin/users" class="btn btn-primary" style="margin-left: 7px;">Clear</a>
+            </div>
+            
+            
+            
+            </div>
+            
             <div class="card mb-4">
           <!-- card-header end// -->
                 <div class="card-body">
@@ -185,44 +207,32 @@ Swal.fire({
                                                             <th>NO</th>
                                                             <th scope="col">Name</th>
                                                             <th scope="col">Email</th>
-                                                            <th scope="col">Delete</th>
+                                                            <!-- <th scope="col">Delete</th> -->
                                                             <th scope="col">Block/Unblock</th>
                                                            </tr>
                                                     </thead>
                                                     <tbody>
                                                         <% if(users.length > 0) { %>
-                                    <!-- Add these buttons inside your table's <tbody> section -->
-<% for (let i = 0; i < users.length; i++) { %>
-    <tr id="userRow-<%= users[i]._id %>">
-        <td><%= i + 1 %></td>
-        <td><b><%= users[i].name %></b></td>
-        <td><%= users[i].email %></td>
-        <td>
-            <div class="col-lg-1 col-sm-2 col-4 text-start">
-                <a href="#" onclick="deleteUser('<%= users[i]._id %>')" class="btn btn-sm btn-danger w-10 w-md-auto">Delete</a>
-            </div>
-            <!-- <div class="dropdown">
-                <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm">
-                    <i class="material-icons md-more_horiz"></i>
-                </a>
-                <div class="dropdown-menu">
-                    <a class="dropdown-item text-danger" href="#"  onclick="deleteProduct('<%= users._id %>')" class="btn btn-sm btn-danger w-10 w-md-auto">Delete</a>
-                </div>
-            </div> -->
-        </td>
-        <td>
-        <!-- Add a condition to show "Block" or "Unblock" button based on is_blocked field -->
-        <% if (users[i].is_blocked) { %>
-             <button class="btn btn-danger" style="display: none;">Blocked</button>
-             <button class="btn btn-success" onclick="unblockUser('<%= users[i]._id %>')">Unblock</button>
-           <% } else { %>
-<button class="btn btn-danger" onclick="blockUser('<%= users[i]._id %>')">Block</button>
-<button class="btn btn-success" style="display: none;">Unblocked</button>
-<% } %></td>
-    </tr>
-<% } %>
-<% }  %>
-                                                  </tbody>
+                                                            <% const startIndex = (currentPage - 1) * limit + 1; %>
+                                                            <% for (let i = 0; i < users.length; i++) { %>
+                                                                <tr id="userRow-<%= users[i]._id %>">
+                                                                    <td><%= startIndex + i %></td>
+                                                                    <td><b><%= users[i].name %></b></td>
+                                                                    <td><%= users[i].email %></td>
+                                                                    <td>
+                                                                        <% if (users[i].is_blocked) { %>
+                                                                            <button class="btn btn-danger" style="display: none;">Blocked</button>
+                                                                            <button class="btn btn-success" onclick="unblockUser('<%= users[i]._id %>')">Unblock</button>
+                                                                        <% } else { %>
+                                                                            <button class="btn btn-danger" onclick="blockUser('<%= users[i]._id %>')">Block</button>
+                                                                            <button class="btn btn-success" style="display: none;">Unblocked</button>
+                                                                        <% } %>
+                                                                    </td>
+                                                                </tr>
+                                                            <% } %>
+                                                        <% } %>
+                                                    </tbody>
+                                                    
                                                 </table>
                                             </div> <!-- table-responsive //end -->
                                         </div> <!-- card-body end// -->
@@ -239,24 +249,25 @@ Swal.fire({
         <ul class="pagination justify-content-start">
             <% if (currentPage > 1) { %>
                 <li class="page-item">
-                    <a class="page-link" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>">
+                    <a class="page-link" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>&search=<%= searchQuery %>">
                         <i class="material-icons md-chevron_left"></i>
                     </a>
                 </li>
             <% } %>
             <% for (let i = 1; i <= totalPages; i++) { %>
                 <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                    <a class="page-link" href="?page=<%= i %>&limit=<%= limit %>"><%= ('0' + i).slice(-2) %></a>
+                    <a class="page-link" href="?page=<%= i %>&limit=<%= limit %>&search=<%= searchQuery %>"><%= ('0' + i).slice(-2) %></a>
                 </li>
             <% } %>
             <% if (currentPage < totalPages) { %>
                 <li class="page-item">
-                    <a class="page-link" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">
+                    <a class="page-link" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>&search=<%= searchQuery %>">
                         <i class="material-icons md-chevron_right"></i>
                     </a>
                 </li>
             <% } %>
         </ul>
+        
     </nav>
 </div>
 
@@ -265,15 +276,25 @@ Swal.fire({
            
         </footer>
         <script>
-            var path = window.location.pathname;
-            var menuLinks = document.querySelectorAll(".navbar-nav .nav-link");
-            menuLinks.forEach(function (link) {
-              var href = link.getAttribute("href");
-              if (path === href) {
-                link.closest(".nav-item").classList.add("active-bar", "rounded");
-              }
-            });
-          </script>
+            function handleSearch() {
+                const searchInput = document.getElementById("searchInput").value.trim();
+        
+                if (!searchInput) {
+                    alert("Please enter a search term!");
+                    return;
+                }
+        
+                const urlParams = new URLSearchParams(window.location.search);
+        
+                // Set search query and reset to the first page
+                urlParams.set("search", searchInput);
+                urlParams.set("page", 1); // Reset to the first page for new searches
+        
+                // Reload the page with the updated URL
+                window.location.search = urlParams.toString();
+            }
+        </script>
+        
 </main>
 <script src="/js/vendors/jquery-3.6.0.min.js"></script>
 <script src="/js/vendors/bootstrap.bundle.min.js"></script>
@@ -317,6 +338,7 @@ Swal.fire({
         });
     }
 </script>
+
 </body>
 
 

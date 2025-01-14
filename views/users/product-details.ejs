@@ -364,7 +364,7 @@
                                 <h4 class="lh-base mb-1"><%= Product.productname %></h4>
                                 <p class="text-muted mb-4"><%= Product.description %>
                                 <h5 class="fs-24 mb-4"> Price :<%= Product.price%> Rs <span class="text-muted fs-14"><del></del></span> <span class="fs-14 ms-2 text-danger"> </span></h5>
-                                <p class="text-muted mb-4">Stock: <%= Product.stock %></p>
+                                <!-- <p class="text-muted mb-4">Stock: <%= Product.stock %></p> -->
                                 <ul class="list-unstyled vstack gap-2">
                                     <% if(Product.stock<=0){%>
                                         <li class="">Out of stock</li>
@@ -374,6 +374,11 @@
                                      <li class="">Free delivery available</li>
                                     
                                 </ul>
+                                <ul class="list-unstyled vstack gap-2">
+                                    <% if(Product.offer){%>
+                                        <li class="">Offer: <%= Product.offerPercentage %>% off</li>
+                                    <% } %>
+                                </ul>
                                 <h6 class="fs-14 text-muted mb-3">Available offers :</h6>
                                 <ul class="list-unstyled vstack gap-2 mb-0">
                                     <li>
@@ -382,11 +387,11 @@
                                                 <i class="bi bi-tag-fill text-success align-middle fs-15"></i>
                                             </div>
                                             <div class="flex-grow-1">
-                                                <b>Bank Offer</b> 10% instant discount on Federal Bank Debit Cards, up to ₹3000 on orders of ₹5,000 and above <a href="#!" data-bs-toggle="tooltip" data-bs-title="Terms & Conditions">T&C</a>
+                                                <b>Bank Offer</b> 10% instant discount on Federal Bank Debit Cards, up to ₹3000 on orders of ₹5,000 and above <a href="#!" data-bs-toggle="tooltip" data-bs-title="Terms & Conditions"></a>
                                             </div>
                                         </div>
                                     </li>
-                                    <li>
+                                    <!-- <li>
                                         <div class="d-flex gap-3">
                                             <div class="flex-shrink-0">
                                                 <i class="bi bi-tag-fill text-success align-middle fs-15"></i>
@@ -395,7 +400,7 @@
                                                 <b>Bank Offer</b> 10% instant discount on Federal Bank Debit Cards, up to ₹3000 on orders of ₹5,000 and above <a href="#!" data-bs-toggle="tooltip" data-bs-title="Terms & Conditions">T&C</a>
                                             </div>
                                         </div>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </div>
                             <input type="hidden" id="productId" value="<%= Product._id %>">
