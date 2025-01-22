@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { payment } = require("../controller/usercontroller");
+const { payment } = require("../controller/User/usercontroller");
 
 const orderSchema = new mongoose.Schema({
   userId: {

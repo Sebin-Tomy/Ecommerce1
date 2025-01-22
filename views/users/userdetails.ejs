@@ -548,6 +548,17 @@
                                                                     <%= user.email %>
                                                                 </td>
                                                             </tr>
+                                                            <tr>
+                                                                <% if(!(user.isReferenceUsed)){ %>
+                                                                <td>
+                                                                    Referral Code
+                                                                </td>
+                                                                <td class="fw-medium">
+                                                               
+                                                                    <%= user.reference %>
+                                                                </td>
+                                                                <% } %>
+                                                            </tr>
                         
                                                         </tbody>
                                                     </table>

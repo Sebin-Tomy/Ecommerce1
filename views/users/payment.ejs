@@ -811,10 +811,8 @@
                                 console.log("Razorpay Options:", options);
                                 var razorpayObject = new Razorpay(options);
                                 razorpayObject.on('payment.failed', function (response){
-                                      
-                                        window.location.href = `/failed-payment?addressId=${addressId}`;
-
-                                });
+                                 window.location.href = `/failed-payment?addressId=${addressId}`;
+                             });
                                 razorpayObject.open();
                             }
                             else{

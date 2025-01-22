@@ -359,7 +359,7 @@
                     <% let totalAmount %>
 
                     <% updatedCart.forEach(item=> { %>
-                  <div class="card product"  id="cartItemCard" data-pid="<%=item.productId %>" data-price = '<%=item.productPrice %>'>
+                  <div class="card product"  id="cartItemCard" data-pid="<%=item.productId %>" data-price = '<%=item.productPrice %>'data-stock="<%= item.stock %>">
                        <div class="card-body p-4" >
                             <div class="row gy-3">
                                 <div class="col-sm-auto">
@@ -377,13 +377,16 @@
                                       
                                         <li class="list-inline-item"><%= item.productName  %> <span class="fw-medium"></span></li>
                                     </ul>
+                                
                                     <div class="input-step">
                                         <button type="button" class="minus">–</button>
                                         <% const max = (item.stock<10)? item.stock:10%>
                                         <input type="number" class="product-quantity" value="<%= item.quantity %>"  min="1" max="<%= max %>" readonly>
                                         <button type="button" class="plus">+</button>
                                     </div>  
+                                  
                                 </div>
+                             
                                 <div class="col-sm-auto">
                                     <div class="text-lg-end">
                                         <p class="text-muted mb-1 fs-12">Item Price: </p>
@@ -392,7 +395,10 @@
                                 </div>
                             </div>
                         </div>
-                       
+                        <% if (item.stock == 0) { %>
+                            <span style="color: red;">Product is out of stock</span>
+                        <% } %>
+                        
                         <div class="card-footer">
                             <div class="row align-items-center gy-3">
                                 <div class="col-sm">
@@ -450,15 +456,21 @@
                                 <!-- end table-responsive -->
                             </div>
                         </div>
-                        <div class="hstack gap-2 justify-content-end">
-                          
-                            <a href="/checkout" class="d-block d-md-inline-block text-center">
-                                <button type="button" class="btn btn-hover btn-success w-100 w-md-auto">
-                                    Check Out 
-                                </button>
-                            </a>
+                        <% let allOutOfStock = updatedCart.every(item => item.stock === 0); %>
+                        <% if (!allOutOfStock) { %>
+                            <div class="hstack gap-2 justify-content-end">
+                                <a href="/checkout" class="d-block d-md-inline-block text-center">
+                                    <button 
+                                        type="button" 
+                                        class="btn btn-hover btn-success w-100 w-md-auto" 
+                                        onclick="validateCart(event)">
+                                        Check Out
+                                    </button>
+                                </a>
+                            </div>
+                            <% } %>
                             
-                        </div>
+                        
                     </div>
                     <!-- end sticky -->
                 </div>
@@ -578,7 +590,29 @@
         })
     </script>
 
-
+    <script>
+        function validateCart(event) {
+            console.log("hid")
+            const cartItems = Array.from(document.querySelectorAll('.product'));
+            const outOfStockItems = cartItems.filter(item => {
+                const stock = parseInt(item.getAttribute('data-stock'), 10) || 0;
+                return stock === 0;
+            });
+    
+            if (outOfStockItems.length > 0) {
+                event.preventDefault(); 
+                Swal.fire({
+                    title: 'Out of Stock!',
+                    text: 'Please remove the products that are out of stock before proceeding to checkout.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+ 
+    </script>
+    
+    
 
 </body>
 

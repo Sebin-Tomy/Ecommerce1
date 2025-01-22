@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema({
     },
     reference: {
         type: String
-    },
+    }, isReferenceUsed: { type: Boolean, default: false },
     image: [
         {
             type: String
