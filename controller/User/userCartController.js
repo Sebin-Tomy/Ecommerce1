@@ -16,14 +16,7 @@ const cart = require('../../models/cart');
 const wallet = require('../../models/Wallet')
 
 const getCartItems = async (req, res) => {
-    try {  if (req.session.user_id) {
-       const userData = await User.findById(req.session.user_id);
-       if (userData && userData.is_blocked) {
-           return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
-       }
-   } else {
-       return res.redirect('/login');
-   }     const userId = req.session.user_id;
+    try {       const userId = req.session.user_id;
                 const s = await Cart.findOne({userId:userId})
              
                    const updatedCart = await Cart.aggregate([
@@ -69,14 +62,7 @@ const getCartItems = async (req, res) => {
            };
    
    const addToCart = async (req, res) => {
-           try {if (req.session.user_id) {
-                   const userData = await User.findById(req.session.user_id);
-                   if (userData && userData.is_blocked) {
-                       return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
-                   }
-               } else {
-                   return res.redirect('/login');
-               }
+           try {
               
                    const userId = req.session.user_id;
            
@@ -201,14 +187,7 @@ const getCartItems = async (req, res) => {
                }
            };
 const updateQuantity = async(req,res)=>{
-            try {if (req.session.user_id) {
-                const userData = await User.findById(req.session.user_id);
-                if (userData && userData.is_blocked) {
-                    return res.render('logine1', { message:MESSAGES.ACCOUNT_BLOCKED });
-                }
-            } else {
-                return res.redirect('/login');
-            }
+            try {
                 const quantity = Number(req.query.quantity);
                 const productId = req.query.pid;
               
@@ -238,14 +217,7 @@ const updateQuantity = async(req,res)=>{
             }
         }
         const productdetails = async(req,res)=>{
-            try{ if (req.session.user_id) {
-                const userData = await User.findById(req.session.user_id);
-                if (userData && userData.is_blocked) {
-                    return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-                }
-            } else {
-                return res.redirect('/login');
-            }const productId = req.params.productId;
+            try{ const productId = req.params.productId;
                  const product = await Products.findById(productId);
                 res.render('product-details', {Product: product });
                             }

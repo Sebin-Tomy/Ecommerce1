@@ -18,14 +18,7 @@ const wallet = require('../../models/Wallet')
 
 const wishlist = async(req,res) => {
     try {
-        if (req.session.user_id) {
-            const userData = await User.findById(req.session.user_id);
-            if (userData && userData.is_blocked) {
-                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-            }
-        } else {
-            return res.redirect('/login');
-        }
+      
         const  userId = req.session.user_id;
         const productId = req.body.productId;
        
@@ -46,28 +39,14 @@ const wishlist = async(req,res) => {
 
 const wishlistpage = async(req,res) => {
 
-if (req.session.user_id) {
-    const userData = await User.findById(req.session.user_id);
-    if (userData && userData.is_blocked) {
-        return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
-    }
-} else {
-    return res.redirect('/login');
-}
+
 const userId = req.session.user_id;
 const wish12 = await wishlist1.find({ userId }).populate('productId');
 res.render('wishlist', { wish12 });
 } 
 
 const deleteWish = async (req, res) => {
-    try {if (req.session.user_id) {
-        const userData = await User.findById(req.session.user_id);
-        if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-        }
-    } else {
-        return res.redirect('/login');
-    }
+    try {
         const id = req.params.id;
         await wishlist1.deleteOne({ _id: id });
         res.sendStatus(STATUS_CODES.SUCCESS);

@@ -20,14 +20,7 @@ const wallet = require('../../models/Wallet')
 
 const applycoupon = async (req, res) => {
     try {
-        if (req.session.user_id) {
-            const userData = await User.findById(req.session.user_id);
-            if (userData && userData.is_blocked) {
-                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-            }
-        } else {
-            return res.redirect('/login');
-        }
+      
 
         const userId = req.session.user_id;
         const couponCode = req.body.couponCode;
@@ -74,14 +67,7 @@ const applycoupon = async (req, res) => {
 
 const removecoupon = async (req, res) => {
     try {
-        if (req.session.user_id) {
-            const userData = await User.findById(req.session.user_id);
-            if (userData && userData.is_blocked) {
-                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-            }
-        } else {
-            return res.redirect('/login');
-        }
+       
 
         const userId = req.session.user_id;
         const couponCode = req.body.couponCode;
@@ -113,14 +99,7 @@ const removecoupon = async (req, res) => {
 };
 const checkout = async (req, res) => {
     try {
-        if (req.session.user_id) {
-            const userData = await User.findById(req.session.user_id);
-            if (userData && userData.is_blocked) {
-                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-            }
-        } else {
-            return res.redirect('/login');
-        }
+       
 
         const userId = req.session.user_id;
         const Address = await address.find({ userId: userId });

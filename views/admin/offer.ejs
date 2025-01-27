@@ -237,14 +237,14 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 let request = { method: 'DELETE' };
-                // Send AJAX request to delete category
+               
                 fetch(`/admin/offer-delete/${ProductId}`, request)
                     .then(response => {
                         if (response.ok) {
                             const row = document.getElementById(`categoryRow-${ProductId}`);
                             if (row) row.remove();
                             Swal.fire('Deleted!', 'The offer has been deleted.', "success");
-                            // Reload the page after deletion
+                          
                         
                         } else {
                             throw new Error('Failed to delete product.');

@@ -21,65 +21,88 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script>
     function blockUser(userId) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'This user will be blocked!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, block it!',
-                cancelButtonText: 'Cancel',
-              }).then((result) => {
-                if (result.isConfirmed) {
-                    let request = {method : 'PATCH'}
-                    // Send AJAX request to block user
-                    fetch(`/admin/block-user/${userId}`,request)
-                        .then(response => {
-                            if (response.ok) {
-                                Swal.fire('Blocked!', `The user has been blocked${userId}.`, "success");
-                                // Reload the page after blocking
-                                location.reload();
-                            } else {
-                                throw new Error('Failed to block user.');
-                            }
-                        })
-                        .catch(error => {
-                            console.log("Adfdssf")
-                            console.error(error);
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'This user will be blocked!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, block it!',
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let request = { method: 'PATCH' };
+                fetch(`/admin/block-user/${userId}`, request)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.message === 'User blocked successfully') {
+                            Swal.fire('Blocked!', 'The user has been blocked.', 'success');
+                          
+                            updateUserButtons(userId, true);
+                        } else {
                             Swal.fire('Error!', 'Failed to block user.', 'error');
-                        });
-                }
-            });
-        }
-function unblockUser(userId) {
-Swal.fire({
-               title: 'Are you sure?',
-                text: 'This user will be unblocked!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, unblock it!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    let request = {method : 'PATCH'}
-                    // Send AJAX request to unblock user
-                    fetch(`/admin/unblock-user/${userId}`,request)
-                        .then(response => {
-                            if (response.ok) {
-                                Swal.fire('Unblocked!', 'The user has been unblocked.', 'success');
-                                // Reload the page after unblocking
-                                location.reload();
-                            } else {
-                                throw new Error('Failed to unblock user.');
-                            }
-                        })
-                        .catch(error => {
-                            console.error(error);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        Swal.fire('Error!', 'Failed to block user.', 'error');
+                    });
+            }
+        });
+    }
+    
+    function unblockUser(userId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'This user will be unblocked!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, unblock it!',
+            cancelButtonText: 'Cancel',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let request = { method: 'PATCH' };
+                fetch(`/admin/unblock-user/${userId}`, request)
+                    .then((response) => response.json()) 
+                    .then((data) => {
+                        if (data.message === 'User unblocked successfully') {
+                            Swal.fire('Unblocked!', 'The user has been unblocked.', 'success');
+                         
+                            updateUserButtons(userId, false);
+                        } else {
                             Swal.fire('Error!', 'Failed to unblock user.', 'error');
-                        });
-                }
-            });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        Swal.fire('Error!', 'Failed to unblock user.', 'error');
+                    });
+            }
+        });
+    }
+    
+
+    function updateUserButtons(userId, isBlocked) {
+        const userRow = document.querySelector(`#userRow-${userId}`);
+        if (userRow) {
+            const blockButton = userRow.querySelector('.btn-danger');
+            const unblockButton = userRow.querySelector('.btn-success');
+    
+            if (isBlocked) {
+              
+                blockButton.style.display = 'none';
+                unblockButton.style.display = 'inline-block';
+                unblockButton.textContent = 'Unblock'; 
+                unblockButton.setAttribute('onclick', `unblockUser('${userId}')`);
+            } else {
+             
+                unblockButton.style.display = 'none';
+                blockButton.style.display = 'inline-block';
+                blockButton.textContent = 'Block'; 
+                blockButton.setAttribute('onclick', `blockUser('${userId}')`);
+            }
         }
-    </script>
+    }
+</script>
 </head>
 <body>
     <div class="screen-overlay"></div>
@@ -212,7 +235,7 @@ Swal.fire({
                                                            </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <% if(users.length > 0) { %>
+                                                        <% if (users.length > 0) { %>
                                                             <% const startIndex = (currentPage - 1) * limit + 1; %>
                                                             <% for (let i = 0; i < users.length; i++) { %>
                                                                 <tr id="userRow-<%= users[i]._id %>">
@@ -232,6 +255,7 @@ Swal.fire({
                                                             <% } %>
                                                         <% } %>
                                                     </tbody>
+                                                    
                                                     
                                                 </table>
                                             </div> <!-- table-responsive //end -->

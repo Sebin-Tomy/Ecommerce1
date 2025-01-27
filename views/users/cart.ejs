@@ -25,7 +25,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function deleteCategory(itemId) {
-            console.log('Item ID to be deleted:', itemId); 
+            console.log('Item ID to be deleted:', itemId);
     
             Swal.fire({
                 title: 'Are you sure?',
@@ -41,8 +41,35 @@
                             if (response.ok) {
                                 Swal.fire('Deleted!', 'The cart has been deleted.', 'success')
                                     .then(() => {
-                                   
-                                        location.reload();
+                                        // Remove the item from the DOM
+                                        const cartItemCard = document.querySelector(`[data-id="${itemId}"]`);
+                                        if (cartItemCard) {
+                                            // Update total price
+                                            const itemPrice = parseFloat(cartItemCard.getAttribute('data-price'));
+                                            const itemQuantity = parseInt(cartItemCard.querySelector('.product-quantity').value);
+                                            const itemSubtotal = itemPrice * itemQuantity;
+    
+                                            const totalElement = document.getElementById('totalPrice');
+                                            const currentTotal = parseFloat(totalElement.innerText);
+                                            const newTotal = currentTotal - itemSubtotal;
+                                            totalElement.innerText = newTotal.toFixed(0);
+    
+                                            // Remove the item card
+                                            cartItemCard.remove();
+    
+                                            // Update product count
+                                            updateProductCount();
+    
+                                            // Check if there are any items left in the cart
+                                            const cartItems = document.querySelectorAll('.card.product');
+                                            if (cartItems.length === 0) {
+                                                // Hide the checkout button if the cart is empty
+                                                const checkoutButton = document.querySelector('.btn-success');
+                                                if (checkoutButton) {
+                                                    checkoutButton.style.display = 'none';
+                                                }
+                                            }
+                                        }
                                     });
                             } else {
                                 throw new Error('Failed to delete cart.');
@@ -55,7 +82,20 @@
                 }
             });
         }
+    
+        function updateProductCount() {
+            const productCountElement = document.querySelector('.product-count');
+            const cartItems = document.querySelectorAll('.card.product');
+            productCountElement.textContent = cartItems.length;
+        }
+    
+        // Initial update of the product count on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateProductCount();
+        });
     </script>
+    
+    
     <style>
     .btn-hover {
         transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -359,7 +399,7 @@
                     <% let totalAmount %>
 
                     <% updatedCart.forEach(item=> { %>
-                  <div class="card product"  id="cartItemCard" data-pid="<%=item.productId %>" data-price = '<%=item.productPrice %>'data-stock="<%= item.stock %>">
+                  <div class="card product"  id="cartItemCard" data-pid="<%=item.productId %>" data-price = '<%=item.productPrice %>'data-stock="<%= item.stock %>" data-id="<%= item._id%>">
                        <div class="card-body p-4" >
                             <div class="row gy-3">
                                 <div class="col-sm-auto">

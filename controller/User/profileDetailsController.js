@@ -18,17 +18,8 @@ const wallet = require('../../models/Wallet')
 
 
 const userdetails = async(req,res)=>{
-    try{     if (req.session.user_id) {
-        const userData = await User.findById(req.session.user_id);
-        if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-        }
-    } else {
-        return res.redirect('/login');
-    }
-    
-  
-    const userData = await User.findById({_id:req.session.user_id});
+    try{   
+ const userData = await User.findById({_id:req.session.user_id});
             res.render('userdetails',{user:userData});
             }
     catch(error){
@@ -37,14 +28,7 @@ const userdetails = async(req,res)=>{
      }}
     
     const useredit = async(req,res)=>   
-    {try{if (req.session.user_id) {
-        const userData = await User.findById(req.session.user_id);
-        if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-        }
-    } else {
-        return res.redirect('/login');
-    }
+    {try{
     const id = req.params.id;
     const user = await User.findById(id);
     res.render('editprofile',{user});

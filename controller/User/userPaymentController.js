@@ -17,14 +17,7 @@ const wallet = require('../../models/Wallet')
 
 
 const payment = async (req, res) => {
-    try {if (req.session.user_id) {
-        const userData = await User.findById(req.session.user_id);
-        if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-        }
-    } else {
-        return res.redirect('/login');
-    }
+    try {
         const userId = req.session.user_id;
         const cartItems = await Cart.find({ userId }).populate('products.productId');
         const totalSum = cartItems.reduce((acc, cart) => acc + cart.total, 0);

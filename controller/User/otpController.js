@@ -78,7 +78,7 @@ const insertUser = async (req, res) => {
                 await newWallet.save();
             }
 
-            // Mark the reference as used
+         
             referringUser.isReferenceUsed = true;
             await referringUser.save();
         }

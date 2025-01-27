@@ -16,14 +16,7 @@ const cart = require('../../models/cart');
 const wallet = require('../../models/Wallet')
 
 const ordersuccess = async (req, res) => {
-    try {if (req.session.user_id) {
-        const userData = await User.findById(req.session.user_id);
-        if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
-        }
-    } else {
-        return res.redirect('/login');
-    }
+    try {
       const userId = req.session.user_id;
       const addressId = req.query.addressId; 
       console.log('Address ID:', addressId);
@@ -89,14 +82,7 @@ const couponId = cartItems[0]?.couponId || null;
   
 const order = async (req, res) => {
     try {
-        if (req.session.user_id) {
-            const userData = await User.findById(req.session.user_id);
-            if (userData && userData.is_blocked) {
-                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-            }
-        } else {
-            return res.redirect('/login');
-        }
+       
 
         const userId = req.session.user_id;
         const page = parseInt(req.query.page) || 1;
@@ -127,15 +113,7 @@ const order = async (req, res) => {
 
 const orderview = async (req, res) => {
     try {
-        if (req.session.user_id) {
-            const userData = await User.findById(req.session.user_id);
-            if (userData && userData.is_blocked) {
-                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-            }
-        } else {
-            return res.redirect('/login');
-        }
-
+        
         const userId = req.session.user_id;
         const orderId = req.query.orderId;
 
@@ -171,14 +149,7 @@ res.render('order-view', {
 };
 
 const cancelOrder = async (req, res) => {
-    try {if (req.session.user_id) {
-      const userData = await User.findById(req.session.user_id);
-      if (userData && userData.is_blocked) {
-          return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
-      }
-  } else {
-      return res.redirect('/login');
-  }   const orderId = req.params.orderId;
+    try {  const orderId = req.params.orderId;
       const order = await orderModel.findById(orderId);
       if (!order) {
         return res.status(STATUS_CODES.NOT_FOUND).send("Order not found");
@@ -217,14 +188,7 @@ const cancelOrder = async (req, res) => {
   };
 
 const orderReturn=async(req,res)=>{
-    try {if (req.session.user_id) {
-        const userData = await User.findById(req.session.user_id);
-        if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-        }
-    } else {
-        return res.redirect('/login');
-    }
+    try {
      
         const { orderId } = req.body
       
@@ -239,15 +203,7 @@ const orderReturn=async(req,res)=>{
 }
 
 const orderfailure = async (req, res) => {
-    try {if (req.session.user_id) {
-        const userData = await User.findById(req.session.user_id);
-        if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED
-             });
-        }
-    } else {
-        return res.redirect('/login');
-    }
+    try {
       const userId = req.session.user_id;
       const addressId = req.query.addressId; 
 

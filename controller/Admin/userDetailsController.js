@@ -86,27 +86,35 @@ const deleteUser = async(req,res)=>{
     res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
 }}
 const blockUser = async (req, res) => {
-    try {  
+    try {
         const id = req.params.id;
- 
-        await User.findByIdAndUpdate(id, {is_blocked: true });
-    
-        res.sendStatus(STATUS_CODES.SUCCESS);
+        const updatedUser = await User.findByIdAndUpdate(id, { is_blocked: true }, { new: true });
+        
+        res.status(200).json({
+            message: 'User blocked successfully',
+            is_blocked: updatedUser.is_blocked // send the updated status of the user
+        });
     } catch (error) {
         console.log(error.message);
-        res.sendStatus(STATUS_CODES.INTERNAL_SERVER_ERROR);
+        res.status(500).json({ message: 'Failed to block user' });
     }
 };
 
 const unblockUser = async (req, res) => {
     try {
         const id = req.params.id;
-        await User.findByIdAndUpdate(id, { is_blocked: false });
-        res.sendStatus(STATUS_CODES.SUCCESS);
+        const updatedUser = await User.findByIdAndUpdate(id, { is_blocked: false }, { new: true });
+        
+        res.status(200).json({
+            message: 'User unblocked successfully',
+            is_blocked: updatedUser.is_blocked // send the updated status of the user
+        });
     } catch (error) {
         console.log(error.message);
-        res.sendStatus(STATUS_CODES.INTERNAL_SERVER_ERROR);
+        res.status(500).json({ message: 'Failed to unblock user' });
     }
 };
+
+
 
 module.exports = {userlist,deleteUser,blockUser,unblockUser}

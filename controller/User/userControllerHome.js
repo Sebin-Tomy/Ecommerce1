@@ -19,16 +19,9 @@ const wallet = require('../../models/Wallet')
 
 const loginHome = async(req, res) => {
     try {
-        if (req.session.user_id) {
-            const userData = await User.findById(req.session.user_id);
-            if (userData && userData.is_blocked) {
-                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-            }
-        } else {
-            return res.redirect('/login');
-        }
+     
 
-        const page = parseInt(req.query.page) || 1;
+       const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 3;
         const skip = (page - 1) * limit;
 
@@ -92,14 +85,7 @@ const verifyLogin = async (req, res) => {
 };
 const searchProduct = async (req, res) => {
     try {
-        if (req.session.user_id) {
-            const userData = await User.findById(req.session.user_id);
-            if (userData && userData.is_blocked) {
-                return res.render('logine1', { message: "Your account is blocked." });
-            }
-        } else {
-            return res.redirect('/login');
-        }
+      
 
         const inputLetter = req.body.search || req.query.search || '';
         const categoryFilter = req.query.category || null;

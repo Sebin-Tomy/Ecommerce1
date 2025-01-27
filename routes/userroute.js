@@ -46,70 +46,70 @@ const storage = multer.diskStorage({
 const upload = multer({storage:storage});
 user_route.get('/Loadregister',userController.loginregister);
 user_route.post('/register',otp.insertUser);
-user_route.get('/',auth.isLogout,userController.loginLoadin);
+user_route.get('/',userController.loginLoadin);
 user_route.post('/google-login',userController.google);
 user_route.get('/login',auth.isLogout,userController.loginLoadin);
 user_route.post('/login',homepage.verifyLogin);
-user_route.get('/index1',auth.isLogin,homepage.loginHome);
-user_route.post('/index1',auth.isLogin,homepage.loginHome);
+user_route.get('/index1',auth.isLogin,auth.is_blocked,homepage.loginHome);
+user_route.post('/index1',auth.isLogin,auth.is_blocked,homepage.loginHome);
 user_route.get('/changepassword',userController.changepass)
-user_route.post('/changepassword', userController.updatePassword);
+user_route.post('/changepassword',userController.updatePassword);
 user_route.get('/registerOtp',otp.registerOtp)
 user_route.get('/forgot',userController.forgotspass)
 user_route.post('/forgot',userController.handleForgotPass)
-user_route.get('/forgot/otp', otp.forgotpassotp); 
+user_route.get('/forgot/otp',otp.forgotpassotp); 
 user_route.get('/forgotregisterOtp', otp.forgotregisterOtp); 
 user_route.post('/registerOtp1',otp.verifyRegister1)
 user_route.post('/registerOtp',otp.verifyRegister)
 user_route.post('/Resendotp', otp.resendOtp);
-user_route.get('/logout',auth.isLogin,userController.logout)
-user_route.post('/logout',auth.isLogin,userController.logout)
-user_route.get('/user',auth.isLogin,profiledetails.userdetails)
-user_route.get('/user-edit/:id',auth.isLogin,profiledetails.useredit)
-user_route.post('/user-edit/:id',auth.isLogin,profiledetails.updateUsers)
+user_route.get('/logout',auth.isLogin,auth.is_blocked,userController.logout)
+user_route.post('/logout',auth.isLogin,auth.is_blocked,userController.logout)
+user_route.get('/user',auth.isLogin,auth.is_blocked,profiledetails.userdetails)
+user_route.get('/user-edit/:id',auth.isLogin,auth.is_blocked,profiledetails.useredit)
+user_route.post('/user-edit/:id',auth.isLogin,auth.is_blocked,profiledetails.updateUsers)
 // address
-user_route.get('/address',auth.isLogin,addressController.addresslist)
-user_route.get('/add-address',auth.isLogin,addressController.addaddress)
-user_route.post('/add-address',auth.isLogin,addressController.insertaddress)
+user_route.get('/address',auth.isLogin,auth.is_blocked,addressController.addresslist)
+user_route.get('/add-address',auth.isLogin,auth.is_blocked,addressController.addaddress)
+user_route.post('/add-address',auth.isLogin,auth.is_blocked,addressController.insertaddress)
 //delete address
-user_route.get('/delete-address/:id',auth.isLogin,addressController.deleteAddress);
+user_route.get('/delete-address/:id',auth.isLogin,auth.is_blocked,addressController.deleteAddress);
 //edit address
-user_route.get('/edit-address/:id',auth.isLogin,addressController.addressedit);
-user_route.post('/edit-address/:id',auth.isLogin,addressController.updateaddress);
-user_route.get('/product/:productId',auth.isLogin,userCartController.productdetails)
-user_route.get('/cart',auth.isLogin,userCartController.getCartItems)
-user_route.post('/addToCart',auth.isLogin, userCartController.addToCart); 
-user_route.delete("/delete-cart/:itemId",auth.isLogin,userCartController.deleteCart)
-user_route.get('/checkout',auth.isLogin,userCouponController.checkout);
-user_route.get('/edit-checkoutaddress/:id',auth.isLogin,addressController.checkaddressedit);
-user_route.post('/edit-checkoutaddress/:id',auth.isLogin,addressController.updatecheckedaddress);
-user_route.get('/add-checkoutaddress/',auth.isLogin,addressController.checkedaddaddress);
-user_route.get('/payment',auth.isLogin,payment.payment);
-user_route.post('/payOnline',auth.isLogin,paymentController.payOnline);
-user_route.post('/update-quantity',auth.isLogin,userCartController.updateQuantity)
-user_route.get('/order-successfull',auth.isLogin, (req, res) => {
+user_route.get('/edit-address/:id',auth.isLogin,auth.is_blocked,addressController.addressedit);
+user_route.post('/edit-address/:id',auth.isLogin,auth.is_blocked,addressController.updateaddress);
+user_route.get('/product/:productId',auth.isLogin,auth.is_blocked,userCartController.productdetails)
+user_route.get('/cart',auth.isLogin,auth.is_blocked,userCartController.getCartItems)
+user_route.post('/addToCart',auth.isLogin, auth.is_blocked,userCartController.addToCart); 
+user_route.delete("/delete-cart/:itemId",auth.isLogin,auth.is_blocked,userCartController.deleteCart)
+user_route.get('/checkout',auth.isLogin,auth.is_blocked,userCouponController.checkout);
+user_route.get('/edit-checkoutaddress/:id',auth.isLogin,auth.is_blocked,addressController.checkaddressedit);
+user_route.post('/edit-checkoutaddress/:id',auth.isLogin,auth.is_blocked,addressController.updatecheckedaddress);
+user_route.get('/add-checkoutaddress/',auth.isLogin,auth.is_blocked,addressController.checkedaddaddress);
+user_route.get('/payment',auth.isLogin,auth.is_blocked,payment.payment);
+user_route.post('/payOnline',auth.isLogin,auth.is_blocked,paymentController.payOnline);
+user_route.post('/update-quantity',auth.isLogin,auth.is_blocked,userCartController.updateQuantity)
+user_route.get('/order-successfull',auth.isLogin, auth.is_blocked,(req, res) => {
     res.render('ordersuccess');
 });
-user_route.post('/order-successfull',auth.isLogin,userOrderController.offlinepayment);
-user_route.get('/order',auth.isLogin,userOrderController.order);
-user_route.get('/order-view',auth.isLogin,userOrderController.orderview);
-user_route.post('/add-checkoutaddress/',auth.isLogin,addressController.checkaddressinsert);
-user_route.get("/search", auth.isLogin, homepage.searchProduct);
+user_route.post('/order-successfull',auth.isLogin,auth.is_blocked,userOrderController.offlinepayment);
+user_route.get('/order',auth.isLogin,auth.is_blocked,userOrderController.order);
+user_route.get('/order-view',auth.isLogin,auth.is_blocked,userOrderController.orderview);
+user_route.post('/add-checkoutaddress/',auth.isLogin,auth.is_blocked,addressController.checkaddressinsert);
+user_route.get("/search", auth.isLogin,auth.is_blocked, homepage.searchProduct);
 
-user_route.post("/search",auth.isLogin,homepage.searchProduct);
-user_route.post('/order/cancel/:orderId', auth.isLogin,userOrderController.cancelOrder);
-user_route.post('/wishlist',auth.isLogin,wishListController.wishlist)
-user_route.get('/wishlistpage',auth.isLogin,wishListController.wishlistpage)
-user_route.get('/delete-wishlist/:id',auth.isLogin,wishListController.deleteWish);
-user_route.get('/online-payment',auth.isLogin,userOrderController.ordersuccess);
-user_route.patch('/submitReturn',auth.isLogin,userOrderController.orderReturn);
-user_route.get("/wallet",auth.isLogin,wallet.wallet1);
-user_route.post('/applyCoupon',auth.isLogin,userCouponController.applycoupon);
-user_route.post('/removeCoupon',auth.isLogin,userCouponController.removecoupon);
-user_route.get('/failed-payment',auth.isLogin,userOrderController.orderfailure);
-user_route.post('/payOnline1',auth.isLogin,paymentController.payOnline1);
-user_route.get('/order1',auth.isLogin,userOrderController.order);
-user_route.post('/wallet-payment',auth.isLogin,userOrderController.walletpayment);
+user_route.post("/search",auth.isLogin,auth.is_blocked,homepage.searchProduct);
+user_route.post('/order/cancel/:orderId', auth.isLogin,auth.is_blocked,userOrderController.cancelOrder);
+user_route.post('/wishlist',auth.isLogin,auth.is_blocked,wishListController.wishlist)
+user_route.get('/wishlistpage',auth.isLogin,auth.is_blocked,wishListController.wishlistpage)
+user_route.get('/delete-wishlist/:id',auth.isLogin,auth.is_blocked,wishListController.deleteWish);
+user_route.get('/online-payment',auth.isLogin,auth.is_blocked,userOrderController.ordersuccess);
+user_route.patch('/submitReturn',auth.isLogin,auth.is_blocked,userOrderController.orderReturn);
+user_route.get("/wallet",auth.isLogin,auth.is_blocked,wallet.wallet1);
+user_route.post('/applyCoupon',auth.isLogin,auth.is_blocked,userCouponController.applycoupon);
+user_route.post('/removeCoupon',auth.isLogin,auth.is_blocked,userCouponController.removecoupon);
+user_route.get('/failed-payment',auth.isLogin,auth.is_blocked,userOrderController.orderfailure);
+user_route.post('/payOnline1',auth.isLogin,auth.is_blocked,paymentController.payOnline1);
+user_route.get('/order1',auth.isLogin,auth.is_blocked,userOrderController.order);
+user_route.post('/wallet-payment',auth.isLogin,auth.is_blocked,userOrderController.walletpayment);
 // user_route.get("*", function (req, res) {
 //     res.redirect("/login");
 //   });

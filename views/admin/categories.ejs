@@ -212,11 +212,11 @@
                                                     </td>
                                                     <td>
                                                         <% if (categories[i].list) { %>
-                                                            <button class="btn btn-danger" style="display: none;">List</button>
-                                                            <button class="btn btn-success" onclick="unblockUser('<%= categories[i]._id %>')">Unlist</button>
+                                                            <button class="btn btn-danger" style="display: none;" id="listButton-<%= categories[i]._id %>">List</button>
+                                                            <button class="btn btn-success" onclick="toggleCategoryStatus('<%= categories[i]._id %>', false)" id="unlistButton-<%= categories[i]._id %>">Unlist</button>
                                                         <% } else { %>
-                                                            <button class="btn btn-danger" onclick="blockUser('<%= categories[i]._id %>')">List</button>
-                                                            <button class="btn btn-success" style="display: none;">Unblocked</button>
+                                                            <button class="btn btn-danger" onclick="toggleCategoryStatus('<%= categories[i]._id %>', true)" id="listButton-<%= categories[i]._id %>">List</button>
+                                                            <button class="btn btn-success" style="display: none;" id="unlistButton-<%= categories[i]._id %>">Unlist</button>
                                                         <% } %>
                                                     </td>
                                                 </tr>
@@ -315,66 +315,59 @@
         }
     </script>
     <script>
-        function blockUser(userId) {
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: 'This category will be listed!',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, list it!',
-                    cancelButtonText: 'Cancel',
-                  }).then((result) => {
-                    if (result.isConfirmed) {
-                        let request = {method : 'PATCH'}
-                        // Send AJAX request to block user
-                        fetch(`/admin/list-category/${userId}`,request)
-                            .then(response => {
-                                if (response.ok) {
-                                    Swal.fire('List!', `The category has been list${userId}.`, "success");
-                                    // Reload the page after blocking
-                                    location.reload();
-                                } else {
-                                    throw new Error('Failed to block user.');
-                                }
-                            })
-                            .catch(error => {
-                                console.log("Adfdssf")
-                                console.error(error);
-                                Swal.fire('Error!', 'Failed to block user.', 'error');
-                            });
-                    }
-                });
+        function toggleCategoryStatus(categoryId, isList) {
+            const action = isList ? 'list' : 'unlist';
+            const request = { method: 'PATCH' };
+    
+            Swal.fire({
+                title: `Are you sure?`,
+                text: `This category will be ${action}ed!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: `Yes, ${action} it!`,
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/${action}-category/${categoryId}`, request)
+                        .then((response) => {
+                            if (response.ok) {
+                                Swal.fire(
+                                    `${action.charAt(0).toUpperCase() + action.slice(1)}ed!`,
+                                    `The category has been ${action}ed.`,
+                                    'success'
+                                );
+    
+                                // Dynamically update the button visibility
+                                updateCategoryButtons(categoryId, isList);
+                            } else {
+                                throw new Error(`Failed to ${action} category.`);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error(error);
+                            Swal.fire('Error!', `Failed to ${action} category.`, 'error');
+                        });
+                }
+            });
+        }
+    
+        function updateCategoryButtons(categoryId, isList) {
+            const listButton = document.querySelector(`#listButton-${categoryId}`);
+            const unlistButton = document.querySelector(`#unlistButton-${categoryId}`);
+    
+            if (isList) {
+                // Hide "List" button and show "Unlist" button
+                listButton.style.display = 'none';
+                unlistButton.style.display = 'inline-block';
+                unlistButton.setAttribute('onclick', `toggleCategoryStatus('${categoryId}', false)`);
+            } else {
+                // Hide "Unlist" button and show "List" button
+                unlistButton.style.display = 'none';
+                listButton.style.display = 'inline-block';
+                listButton.setAttribute('onclick', `toggleCategoryStatus('${categoryId}', true)`);
             }
-    function unblockUser(userId) {
-    Swal.fire({
-                   title: 'Are you sure?',
-                    text: 'This category will be unlisted!',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, unlist it!',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        let request = {method : 'PATCH'}
-                        // Send AJAX request to unblock user
-                        fetch(`/admin/unlist-category/${userId}`,request)
-                            .then(response => {
-                                if (response.ok) {
-                                    Swal.fire('Unlisted!', 'The category has been unlisted.', 'success');
-                                    // Reload the page after unblocking
-                                    location.reload();
-                                } else {
-                                    throw new Error('Failed to unblock user.');
-                                }
-                            })
-                            .catch(error => {
-                                console.error(error);
-                                Swal.fire('Error!', 'Failed to unblock user.', 'error');
-                            });
-                    }
-                });
-            }
-        </script>
+        }
+    </script>
         
 </body>
 

@@ -15,14 +15,7 @@ const { default: mongoose } = require('mongoose');
 const cart = require('../../models/cart');
 
 const addaddress = async (req, res) => {
-    try {if (req.session.user_id) {
-        const userData = await User.findById(req.session.user_id);
-        if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-        }
-    } else {
-        return res.redirect('/login');
-    }
+    try {
         res.render('add-address'); 
         } catch (error) {
             console.log(error.message);
@@ -31,14 +24,7 @@ const addaddress = async (req, res) => {
     };
     
     const insertaddress = async(req, res) => {
-        try {if (req.session.user_id) {
-            const userData = await User.findById(req.session.user_id);
-            if (userData && userData.is_blocked) {
-                return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-            }
-        } else {
-            return res.redirect('/login');
-        }
+        try {
         const { fullName, addressLine1, city, state, postalCode, phoneNumber } = req.body;
         const userId = req.session.user_id;
         
@@ -60,14 +46,7 @@ const addaddress = async (req, res) => {
       };
     
     const addresslist = async(req, res) => {
-            try {  if (req.session.user_id) {
-                const userData = await User.findById(req.session.user_id);
-                if (userData && userData.is_blocked) {
-                    return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
-                }
-            } else {
-                return res.redirect('/login');
-            } const userid = req.session.user_id;
+            try {   const userid = req.session.user_id;
             
                 const Address = await address.find({userId:userid});
           
@@ -91,14 +70,7 @@ const addaddress = async (req, res) => {
         };
     
     const addressedit = async(req,res)=>
-    {try{if (req.session.user_id) {
-        const userData = await User.findById(req.session.user_id);
-        if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-        }
-    } else {
-        return res.redirect('/login');
-    }
+    {try{
     const id = req.params.id
     const address12 = await address.findById(id)
     res.render('edit-address',{address:address12});
@@ -109,14 +81,7 @@ const addaddress = async (req, res) => {
     }}
     
     const updateaddress = async(req,res)=>{
-    try{if (req.session.user_id) {
-        const userData = await User.findById(req.session.user_id);
-        if (userData && userData.is_blocked) {
-            return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-        }
-    } else {
-        return res.redirect('/login');
-    }
+    try{
         const id = req.params.id
       
         const catte = await address.findByIdAndUpdate(id,{$set:{fullName:req.body.fullName,phoneNumber:req.body.phoneNumber,addressLine1:req.body.addressLine1,city:req.body.city,state:req.body.state,postalCode:req.body.postalCode}})
@@ -129,14 +94,7 @@ const addaddress = async (req, res) => {
         }}
 
         const checkaddressedit = async(req, res) => {
-            try{if (req.session.user_id) {
-                const userData = await User.findById(req.session.user_id);
-                if (userData && userData.is_blocked) {
-                    return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-                }
-            } else {
-                return res.redirect('/login');
-            }
+            try{
             const id = req.params.id
             const address12 = await address.findById(id)
             res.render('edit-checkoutadress',{address:address12});
@@ -147,14 +105,7 @@ const addaddress = async (req, res) => {
         };
 
 const updatecheckedaddress = async(req,res)=>{
-            try{if (req.session.user_id) {
-                const userData = await User.findById(req.session.user_id);
-                if (userData && userData.is_blocked) {
-                    return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-                }
-            } else {
-                return res.redirect('/login');
-            }
+            try{
                 const id = req.params.id
                 
                 const catte = await address.findByIdAndUpdate(id,{$set:{fullName:req.body.fullName,phoneNumber:req.body.phoneNumber,addressLine1:req.body.addressLine1,city:req.body.city,state:req.body.state,postalCode:req.body.postalCode}},{new:true})
@@ -166,14 +117,7 @@ const updatecheckedaddress = async(req,res)=>{
             
             }  
 const checkedaddaddress = async (req, res) => {
-                try {if (req.session.user_id) {
-                    const userData = await User.findById(req.session.user_id);
-                    if (userData && userData.is_blocked) {
-                        return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED});
-                    }
-                } else {
-                    return res.redirect('/login');
-                }
+                try {
                     res.render('add-checkoutadress'); 
                     } catch (error) {
                         console.log(error.message);
@@ -182,14 +126,7 @@ const checkedaddaddress = async (req, res) => {
                 };
 
 const checkaddressinsert = async(req, res) => {
-                try{if (req.session.user_id) {
-                    const userData = await User.findById(req.session.user_id);
-                    if (userData && userData.is_blocked) {
-                        return res.render('logine1', { message: MESSAGES.ACCOUNT_BLOCKED });
-                    }
-                } else {
-                    return res.redirect('/login');
-                }
+                try{
                     const { fullName, addressLine1, city, state, postalCode, phoneNumber } = req.body;
                    console.log("Request Body:", req.body); 
                    const address2 = new address({
