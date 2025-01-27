@@ -64,26 +64,26 @@ user_route.post('/registerOtp',otp.verifyRegister)
 user_route.post('/Resendotp', otp.resendOtp);
 user_route.get('/logout',auth.isLogin,auth.is_blocked,userController.logout)
 user_route.post('/logout',auth.isLogin,auth.is_blocked,userController.logout)
-user_route.get('/user',auth.isLogin,auth.is_blocked,profiledetails.userdetails)
-user_route.get('/user-edit/:id',auth.isLogin,auth.is_blocked,profiledetails.useredit)
+user_route.get('/user',auth.isLogin,auth.is_blocked,profiledetails.userDetails)
+user_route.get('/user-edit/:id',auth.isLogin,auth.is_blocked,profiledetails.userEdit)
 user_route.post('/user-edit/:id',auth.isLogin,auth.is_blocked,profiledetails.updateUsers)
 // address
-user_route.get('/address',auth.isLogin,auth.is_blocked,addressController.addresslist)
-user_route.get('/add-address',auth.isLogin,auth.is_blocked,addressController.addaddress)
-user_route.post('/add-address',auth.isLogin,auth.is_blocked,addressController.insertaddress)
+user_route.get('/address',auth.isLogin,auth.is_blocked,addressController.addressList)
+user_route.get('/add-address',auth.isLogin,auth.is_blocked,addressController.addAddress)
+user_route.post('/add-address',auth.isLogin,auth.is_blocked,addressController.insertAddress)
 //delete address
 user_route.get('/delete-address/:id',auth.isLogin,auth.is_blocked,addressController.deleteAddress);
 //edit address
-user_route.get('/edit-address/:id',auth.isLogin,auth.is_blocked,addressController.addressedit);
-user_route.post('/edit-address/:id',auth.isLogin,auth.is_blocked,addressController.updateaddress);
+user_route.get('/edit-address/:id',auth.isLogin,auth.is_blocked,addressController.addressEdit);
+user_route.post('/edit-address/:id',auth.isLogin,auth.is_blocked,addressController.updateAddress);
 user_route.get('/product/:productId',auth.isLogin,auth.is_blocked,userCartController.productdetails)
 user_route.get('/cart',auth.isLogin,auth.is_blocked,userCartController.getCartItems)
 user_route.post('/addToCart',auth.isLogin, auth.is_blocked,userCartController.addToCart); 
 user_route.delete("/delete-cart/:itemId",auth.isLogin,auth.is_blocked,userCartController.deleteCart)
 user_route.get('/checkout',auth.isLogin,auth.is_blocked,userCouponController.checkout);
-user_route.get('/edit-checkoutaddress/:id',auth.isLogin,auth.is_blocked,addressController.checkaddressedit);
-user_route.post('/edit-checkoutaddress/:id',auth.isLogin,auth.is_blocked,addressController.updatecheckedaddress);
-user_route.get('/add-checkoutaddress/',auth.isLogin,auth.is_blocked,addressController.checkedaddaddress);
+user_route.get('/edit-checkoutaddress/:id',auth.isLogin,auth.is_blocked,addressController.checkAddressEdit);
+user_route.post('/edit-checkoutaddress/:id',auth.isLogin,auth.is_blocked,addressController.updateCheckedAddress);
+user_route.get('/add-checkoutaddress/',auth.isLogin,auth.is_blocked,addressController.checkedAddAddress);
 user_route.get('/payment',auth.isLogin,auth.is_blocked,payment.payment);
 user_route.post('/payOnline',auth.isLogin,auth.is_blocked,paymentController.payOnline);
 user_route.post('/update-quantity',auth.isLogin,auth.is_blocked,userCartController.updateQuantity)
@@ -93,7 +93,7 @@ user_route.get('/order-successfull',auth.isLogin, auth.is_blocked,(req, res) => 
 user_route.post('/order-successfull',auth.isLogin,auth.is_blocked,userOrderController.offlinepayment);
 user_route.get('/order',auth.isLogin,auth.is_blocked,userOrderController.order);
 user_route.get('/order-view',auth.isLogin,auth.is_blocked,userOrderController.orderview);
-user_route.post('/add-checkoutaddress/',auth.isLogin,auth.is_blocked,addressController.checkaddressinsert);
+user_route.post('/add-checkoutaddress/',auth.isLogin,auth.is_blocked,addressController.checkAddressInsert);
 user_route.get("/search", auth.isLogin,auth.is_blocked, homepage.searchProduct);
 
 user_route.post("/search",auth.isLogin,auth.is_blocked,homepage.searchProduct);

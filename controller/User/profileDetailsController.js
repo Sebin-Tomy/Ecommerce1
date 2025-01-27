@@ -17,7 +17,7 @@ const wallet = require('../../models/Wallet')
 
 
 
-const userdetails = async(req,res)=>{
+const userDetails = async(req,res)=>{
     try{   
  const userData = await User.findById({_id:req.session.user_id});
             res.render('userdetails',{user:userData});
@@ -27,7 +27,7 @@ const userdetails = async(req,res)=>{
      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR); 
      }}
     
-    const useredit = async(req,res)=>   
+    const userEdit = async(req,res)=>   
     {try{
     const id = req.params.id;
     const user = await User.findById(id);
@@ -58,4 +58,4 @@ const userdetails = async(req,res)=>{
         res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
     }}
 
-    module.exports={userdetails,useredit,updateUsers};
+    module.exports={userDetails,userEdit,updateUsers};

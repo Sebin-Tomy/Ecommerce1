@@ -1,20 +1,18 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const User = require('../../models/userModel');
-const nodemailer = require('nodemailer');
+const user = require('../../models/userModel');
+const nodeMailer = require('nodemailer');
 const { STATUS_CODES ,MESSAGES} = require('../../constants/constants');
-const Products = require('../../models/productdata');
 const address = require('../../models/address');
-const Category = require('../../models/categories');
+const category = require('../../models/categories');
 const {orderModel} = require('../../models/order');
-const Cart  = require('../../models/cart');
-const wishlist1  = require('../../models/wishlist');
-const Coupon = require('../../models/coupon');
+const wishList1  = require('../../models/wishlist');
+const coupon = require('../../models/coupon');
 const products = require('../../models/productdata');
 const { default: mongoose } = require('mongoose');
 const cart = require('../../models/cart');
 
-const addaddress = async (req, res) => {
+const addAddress = async (req, res) => {
     try {
         res.render('add-address'); 
         } catch (error) {
@@ -23,7 +21,7 @@ const addaddress = async (req, res) => {
         }
     };
     
-    const insertaddress = async(req, res) => {
+const insertAddress = async(req, res) => {
         try {
         const { fullName, addressLine1, city, state, postalCode, phoneNumber } = req.body;
         const userId = req.session.user_id;
@@ -45,7 +43,7 @@ const addaddress = async (req, res) => {
           res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR); }
       };
     
-    const addresslist = async(req, res) => {
+    const addressList = async(req, res) => {
             try {   const userid = req.session.user_id;
             
                 const Address = await address.find({userId:userid});
@@ -69,7 +67,7 @@ const addaddress = async (req, res) => {
             }
         };
     
-    const addressedit = async(req,res)=>
+    const addressEdit = async(req,res)=>
     {try{
     const id = req.params.id
     const address12 = await address.findById(id)
@@ -80,7 +78,7 @@ const addaddress = async (req, res) => {
         res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
     }}
     
-    const updateaddress = async(req,res)=>{
+    const updateAddress = async(req,res)=>{
     try{
         const id = req.params.id
       
@@ -93,7 +91,7 @@ const addaddress = async (req, res) => {
             res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render('error').send(MESSAGES.INTERNAL_SERVER_ERROR);
         }}
 
-        const checkaddressedit = async(req, res) => {
+        const checkAddressEdit = async(req, res) => {
             try{
             const id = req.params.id
             const address12 = await address.findById(id)
@@ -104,7 +102,7 @@ const addaddress = async (req, res) => {
             }
         };
 
-const updatecheckedaddress = async(req,res)=>{
+const updateCheckedAddress = async(req,res)=>{
             try{
                 const id = req.params.id
                 
@@ -116,7 +114,7 @@ const updatecheckedaddress = async(req,res)=>{
                 {console.log(error.message)}
             
             }  
-const checkedaddaddress = async (req, res) => {
+const checkedAddAddress = async (req, res) => {
                 try {
                     res.render('add-checkoutadress'); 
                     } catch (error) {
@@ -125,7 +123,7 @@ const checkedaddaddress = async (req, res) => {
                     }
                 };
 
-const checkaddressinsert = async(req, res) => {
+const checkAddressInsert = async(req, res) => {
                 try{
                     const { fullName, addressLine1, city, state, postalCode, phoneNumber } = req.body;
                    console.log("Request Body:", req.body); 
@@ -148,4 +146,4 @@ const checkaddressinsert = async(req, res) => {
                 }
             };
 
-module.exports={insertaddress,addresslist,addresslist,insertaddress,addaddress,deleteAddress,addressedit,updateaddress,checkaddressedit,updatecheckedaddress,checkedaddaddress,checkaddressinsert};
+module.exports={insertAddress,addressList,addAddress,deleteAddress,addressEdit,updateAddress,checkAddressEdit,updateCheckedAddress,checkedAddAddress,checkAddressInsert};

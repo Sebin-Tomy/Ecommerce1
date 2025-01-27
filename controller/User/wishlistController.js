@@ -36,15 +36,19 @@ const wishlist = async(req,res) => {
         console.log(error.message);
         res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(MESSAGES.INTERNAL_SERVER_ERROR);
     }}
-
-const wishlistpage = async(req,res) => {
-
-
-const userId = req.session.user_id;
-const wish12 = await wishlist1.find({ userId }).populate('productId');
-res.render('wishlist', { wish12 });
-} 
-
+    const wishlistpage = async (req, res) => {
+        try {
+            const userId = req.session.user_id;
+            const wish12 = await wishlist1.find({ userId }).populate('productId');
+  
+            const filteredWishlist = wish12.filter(item => item.productId.list === false);
+    
+            res.render('wishlist', { wish12: filteredWishlist });
+        } catch (error) {
+            console.error("Error fetching wishlist:", error);
+            res.status(500).send("Internal Server Error");
+        }
+    };
 const deleteWish = async (req, res) => {
     try {
         const id = req.params.id;

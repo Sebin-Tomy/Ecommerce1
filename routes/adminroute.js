@@ -54,12 +54,12 @@ admin_route.patch(
   auth.isLogin,
   userDetails.unblockUser
 );
-admin_route.get("/categories", auth.isLogin, categoryController.categorylist);
+admin_route.get("/categories", auth.isLogin, categoryController.categoryList);
 admin_route.post("/categories", auth.isLogin, categoryController.insertCategory);
 admin_route.get(
   "/categories-edit/:id",
   auth.isLogin,
-  categoryController.categoriesedit
+  categoryController.categoriesEdit
 );
 admin_route.post(
   "/categories-edit/:id",
@@ -97,7 +97,7 @@ admin_route.delete(
   productController.deleteProduct
 );
 admin_route.get("/order", auth.isLogin, adminOrder.order);
-admin_route.get("/order-view", auth.isLogin, adminOrder.orderview1);
+admin_route.get("/order-view", auth.isLogin, adminOrder.orderView1);
 admin_route.post(
   "/update-order-status/:orderId",
   adminOrder.updateOrderStatus

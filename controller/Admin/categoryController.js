@@ -1,16 +1,16 @@
 const bycrypt = require('bcrypt');
 const { STATUS_CODES,MESSAGES } = require('../../constants/constants');
-const User = require('../../models/userModel');
+const user = require('../../models/userModel');
 const Category = require('../../models/categories');
-const Products = require('../../models/productdata');
-const { MongoError } = require('mongodb');
+const products = require('../../models/productdata');
+const { mongoError } = require('mongodb');
 const {orderModel} = require('../../models/order')
 const address = require('../../models/address');
 const coupon1 = require('../../models/coupon');
 const wallet = require('../../models/Wallet')
 const offer12 = require('../../models/offer')
-const Cart  = require('../../models/cart');
-const wishlist1  = require('../../models/wishlist');
+const cart  = require('../../models/cart');
+const wishList1  = require('../../models/wishlist');
 const moment = require('moment');
 
 
@@ -84,7 +84,7 @@ const insertCategory = async (req, res) => {
 
 
 
-const categorylist = async (req, res) => {
+const categoryList = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1; 
         const limit = parseInt(req.query.limit) || 5; 
@@ -109,7 +109,7 @@ const categorylist = async (req, res) => {
 };
 
 
-const categoriesedit = async(req,res)=>
+const categoriesEdit = async(req,res)=>
 {
 try{
     const id = req.params.id
@@ -192,4 +192,4 @@ const unlistCategory = async (req, res) => {
     }
 };
 
-module.exports = {categorylist,insertCategory,categorylist,categoriesedit,updateUsers,deleteCategory,listCategory,unlistCategory}
+module.exports = {categoryList,insertCategory,categoriesEdit,updateUsers,deleteCategory,listCategory,unlistCategory}

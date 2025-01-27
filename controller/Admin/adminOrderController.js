@@ -1,16 +1,16 @@
 const bycrypt = require('bcrypt');
 const { STATUS_CODES,MESSAGES } = require('../../constants/constants');
-const User = require('../../models/userModel');
-const Category = require('../../models/categories');
-const Products = require('../../models/productdata');
-const { MongoError } = require('mongodb');
+const users = require('../../models/userModel');
+const category = require('../../models/categories');
+const products = require('../../models/productdata');
+const { mongoError } = require('mongodb');
 const {orderModel} = require('../../models/order')
 const address = require('../../models/address');
 const coupon1 = require('../../models/coupon');
 const wallet = require('../../models/Wallet')
 const offer12 = require('../../models/offer')
-const Cart  = require('../../models/cart');
-const wishlist1  = require('../../models/wishlist');
+const cart  = require('../../models/cart');
+const wishList1  = require('../../models/wishlist');
 const moment = require('moment');
 
 
@@ -73,12 +73,12 @@ const order = async (req, res) => {
     }
 };
 
-const orderview1 = async (req, res) => {
+const orderView1 = async (req, res) => {
     try {
         const orderId = req.query.orderId;
     
         const order = await orderModel.findById(orderId).populate('products.productId').populate('userId').populate('addressid'); 
-        const user = await User.findById(order.userId)
+        const user = await users.findById(order.userId)
         const Address = await address.findById(order.addressid)
         let discountAmount = 0;
         if (order.couponId) {
@@ -136,4 +136,4 @@ const orderReturn1 = async (req, res) => {
     }
 };
 
-module.exports = {order,orderview1,updateOrderStatus,orderReturn1}
+module.exports = {order,orderView1,updateOrderStatus,orderReturn1}

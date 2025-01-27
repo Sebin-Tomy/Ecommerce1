@@ -1,16 +1,16 @@
 const bycrypt = require('bcrypt');
 const { STATUS_CODES,MESSAGES } = require('../../constants/constants');
-const User = require('../../models/userModel');
-const Category = require('../../models/categories');
+const user = require('../../models/userModel');
+const category = require('../../models/categories');
 const Products = require('../../models/productdata');
-const { MongoError } = require('mongodb');
+const { mongoError } = require('mongodb');
 const {orderModel} = require('../../models/order')
 const address = require('../../models/address');
 const coupon1 = require('../../models/coupon');
 const wallet = require('../../models/Wallet')
 const offer12 = require('../../models/offer')
-const Cart  = require('../../models/cart');
-const wishlist1  = require('../../models/wishlist');
+const cart  = require('../../models/cart');
+const wishList1  = require('../../models/wishlist');
 const moment = require('moment');
 
 const securePasword = async(password)=>{
@@ -38,8 +38,8 @@ const verifyLogin = async (req, res) => {
     try {
         const email = req.body.email;
         const password = req.body.password;
-        const userData = await User.findOne({ email: email });
-        console.log(email, password, userData);
+        const userData = await user.findOne({ email: email });
+        // console.log(email, password, userData);
         if (!email || !password) {
             let message = "Both email and password are required";
             if (!email) message = "Email is required";
@@ -76,7 +76,7 @@ const verifyLogin = async (req, res) => {
 
 const loadDashboard = async (req, res) => {
     try {
-        const userData = await User.findById({ _id: req.session.admin_id });
+        const userData = await user.findById({ _id: req.session.admin_id });
 
         
         const topProducts = await orderModel.aggregate([
